@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "one-piece-tcg-manager",
   "version": "1.0.0",
   "description": "One Piece TCG Collection and Deck Builder",
@@ -16,34 +17,35 @@
     "dist": "npm run build && electron-builder --publish=never"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "lucide-react": "^0.263.1"
+    "@tailwindcss/postcss": "^4.1.11",
+    "lucide-react": "^0.525.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^2.0.0",
-    "@electron-toolkit/preload": "^2.0.0",
-    "@electron-toolkit/utils": "^2.0.0",
-    "@types/node": "^20.8.0",
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.0.3",
-    "autoprefixer": "^10.4.14",
-    "concurrently": "^8.2.2",
-    "electron": "^27.1.0",
-    "electron-builder": "^24.6.4",
-    "eslint": "^9.0.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.3",
-    "postcss": "^8.4.27",
-    "tailwindcss": "^3.3.3",
-    "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "vite-plugin-electron": "^0.15.5",
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "@types/node": "^24.0.7",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.2.0",
+    "electron": "^37.1.0",
+    "electron-builder": "^26.0.12",
+    "eslint": "^9.30.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.7.2",
+    "vite": "^6.3.5",
+    "vite-plugin-electron": "^0.29.0",
     "vite-plugin-electron-renderer": "^0.14.5",
-    "wait-on": "^7.0.1"
+    "wait-on": "^8.0.3"
   },
   "build": {
     "appId": "com.onepiece.tcg.manager",
@@ -66,4 +68,4 @@
       "target": "AppImage"
     }
   }
-} 
+}

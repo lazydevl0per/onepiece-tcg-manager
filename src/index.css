@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* One Piece TCG Color Palette - CSS Custom Properties */
 :root {
@@ -47,4 +45,33 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-} 
+}
+
+/* Global app background and text color */
+body {
+  background: var(--op-blue-deep-navy);
+  color: var(--op-white-pure);
+}
+
+/* One Piece Card Back Utility Class */
+.onepiece-card-back {
+  background: var(--op-blue-deep-navy);
+  border-radius: 0.75rem;
+  border: 2px solid var(--op-blue-deep-navy-alt);
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gold compass details (for SVG or elements) */
+.op-gold {
+  color: var(--op-gold-primary);
+  fill: var(--op-gold-primary);
+}
+
+/* Card text white/cream */
+.op-card-text {
+  color: var(--op-white-cream);
+}
+
+/* Example: Use .onepiece-card-back and .op-gold in your components */ 

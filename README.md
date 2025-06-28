@@ -7,13 +7,16 @@ A modern desktop application for managing your One Piece Trading Card Game colle
 - **Collection Management**: Add, view, and organize your One Piece TCG cards
 - **Advanced Filtering**: Filter cards by color, type, rarity, and search by name or effect
 - **Deck Builder**: Create and manage multiple decks with up to 50 cards
-- **Modern UI**: Beautiful, responsive design with Tailwind CSS
+- **Deck Statistics**: View detailed statistics including cost analysis and color breakdown
+- **Deck Import/Export**: Share decks with other players via JSON files
 - **Real-time Search**: Instant search functionality across your collection
+- **Modern UI**: Beautiful, responsive design with Tailwind CSS
 - **Desktop App**: Native desktop application built with Electron
+- **Performance Optimized**: Lazy loading and code splitting for fast startup
 
 ## Tech Stack
 
-- **React 18** with TypeScript
+- **React 19** with TypeScript
 - **Electron** for cross-platform desktop app
 - **Vite** for fast development and building
 - **Tailwind CSS** for styling
@@ -78,7 +81,15 @@ onepiece-tcg-online/
 ├── src/
 │   ├── main.tsx             # Application entry point
 │   ├── OnePieceTCGApp.tsx   # Main React component
+│   ├── services/
+│   │   └── cardDataService.ts # Card data management
+│   ├── utils/
+│   │   └── constants.ts     # Application constants
 │   └── index.css            # Global styles with Tailwind
+├── data/
+│   ├── cards/en/            # Card data by set
+│   ├── sets/en/             # Set information
+│   └── README.md            # Data documentation
 ├── resources/
 │   └── icon.png             # App icon
 ├── public/                  # Static assets
@@ -87,6 +98,7 @@ onepiece-tcg-online/
 ├── tsconfig.json           # TypeScript configuration
 ├── vite.config.ts          # Vite configuration
 ├── tailwind.config.js      # Tailwind CSS configuration
+├── COLOR_PALETTE.md        # Design system documentation
 └── README.md              # This file
 ```
 
@@ -94,16 +106,28 @@ onepiece-tcg-online/
 
 ### Collection Management
 - Add custom cards with full details (name, cost, power, effect, etc.)
-- View cards in a responsive grid layout
+- View cards in a responsive grid layout with smooth image loading
 - Filter by multiple criteria simultaneously
 - Track how many copies of each card you own
+- Collection statistics and progress tracking
 
 ### Deck Builder
-- Create multiple decks
-- Add cards from your collection to decks
-- Remove cards from decks
-- View deck statistics (total cards, leader info)
+- Create multiple decks with custom names
+- Add cards from your collection to decks with quantity controls
+- Remove cards from decks or adjust quantities
+- View comprehensive deck statistics including:
+  - Total cards and deck size
+  - Average cost analysis
+  - Card type breakdown (Characters, Events, Stages)
+  - Color distribution
 - Support for up to 50 cards per deck (standard TCG limit)
+- Maximum 4 copies per card (standard TCG rule)
+- One leader card per deck
+
+### Deck Import/Export
+- Export decks as JSON files for sharing
+- Import decks from JSON files
+- Preserve deck metadata and card quantities
 
 ### Card Information
 Each card includes:
@@ -112,13 +136,22 @@ Each card includes:
 - Color and rarity indicators
 - Full effect text
 - Card type (Leader, Character, Event, Stage)
+- High-quality card images with fallback handling
 
 ### Desktop Features
 - Native desktop application
 - Cross-platform support (Windows, macOS, Linux)
 - Offline functionality
 - Native window controls
-- System tray integration (future)
+- Optimized performance with lazy loading
+
+## Performance Optimizations
+
+- **Code Splitting**: Card data is split into separate chunks for faster loading
+- **Lazy Loading**: Card data is loaded on-demand to reduce initial bundle size
+- **Image Optimization**: Progressive image loading with fallback handling
+- **Caching**: Metadata is cached for faster subsequent loads
+- **Bundle Optimization**: Vendor libraries are separated for better caching
 
 ## Building for Distribution
 
@@ -140,6 +173,14 @@ This will create platform-specific installers in the `release` directory:
 3. Make your changes
 4. Add tests if applicable
 5. Submit a pull request
+
+### Development Guidelines
+
+- Follow the existing code style and TypeScript patterns
+- Use the established color palette from `COLOR_PALETTE.md`
+- Ensure all new features work in both web and Electron environments
+- Test performance with large card collections
+- Update documentation for new features
 
 ## License
 
