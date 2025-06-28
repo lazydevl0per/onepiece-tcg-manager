@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* One Piece TCG Color Palette - CSS Custom Properties */
+:root {
+  /* Standard Blue Back Palette */
+  --op-blue-deep-navy: #1B3A57;
+  --op-blue-deep-navy-alt: #2C4A6B;
+  --op-blue-medium: #4A6FA5;
+  --op-blue-medium-alt: #5B7BB8;
+  --op-blue-light: #7BA7D9;
+  --op-blue-light-alt: #A8C8E8;
+
+  /* Leader Red Back Palette */
+  --op-red-deep-crimson: #8B1538;
+  --op-red-deep-crimson-alt: #A91E47;
+  --op-red-medium: #C73E1D;
+  --op-red-medium-alt: #D4462A;
+  --op-red-bright: #FF4444;
+  --op-red-bright-alt: #E55B5B;
+
+  /* Gold/Yellow Details */
+  --op-gold-primary: #FFD700;
+  --op-gold-secondary: #F4C842;
+  --op-gold-metallic: #B8860B;
+  --op-gold-metallic-alt: #CD853F;
+  --op-gold-dark: #DAA520;
+
+  /* White/Cream */
+  --op-white-pure: #FFFFFF;
+  --op-white-cream: #FFFEF7;
+  --op-white-cream-alt: #F8F5E4;
+
+  /* Common Design Elements */
+  --op-neutral-black: #000000;
+  --op-neutral-black-alt: #1A1A1A;
+  --op-neutral-dark-gray: #333333;
+  --op-neutral-dark-gray-alt: #4A4A4A;
+  --op-neutral-silver: #C0C0C0;
+  --op-neutral-silver-alt: #D3D3D3;
+}
+
+/* Custom styles for the One Piece TCG app */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+} 
