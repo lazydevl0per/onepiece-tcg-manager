@@ -6,6 +6,7 @@ import { dirname } from 'path'
 import { createServer } from 'http'
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
+import fs from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -15,6 +16,10 @@ let dataServer: any = null
 
 function startDataServer(): void {
   const port = 3001
+  
+  console.log('🚀 Starting data server...');
+  console.log(`📁 Resources path: ${process.resourcesPath}`);
+  console.log(`🔧 Is dev: ${is.dev}`);
   
   dataServer = createServer(async (req, res) => {
     try {
@@ -39,6 +44,26 @@ function startDataServer(): void {
       const isDev = is.dev
       const basePath = isDev ? join(__dirname, '..') : process.resourcesPath
       const fullPath = join(basePath, filePath)
+      
+      // Debug logging
+      console.log(`Data server request: ${req.url}`)
+      console.log(`Is dev: ${isDev}`)
+      console.log(`Base path: ${basePath}`)
+      console.log(`Full path: ${fullPath}`)
+      console.log(`File exists: ${existsSync(fullPath)}`)
+      
+      // List contents of basePath for debugging
+      if (isDev) {
+        console.log(`Dev mode - __dirname: ${__dirname}`)
+      } else {
+        console.log(`Production mode - resourcesPath: ${process.resourcesPath}`)
+        try {
+          const baseContents = fs.readdirSync(basePath);
+          console.log(`Base path contents: ${baseContents.join(', ')}`);
+        } catch (error) {
+          console.log(`Error reading base path: ${(error as Error).message}`);
+        }
+      }
       
       if (!existsSync(fullPath)) {
         res.writeHead(404)

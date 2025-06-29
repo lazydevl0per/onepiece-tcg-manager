@@ -159,14 +159,17 @@ const importCardData = async (packId: string): Promise<VegapullCard[]> => {
     
     const url = `${baseUrl}/data/data/english/json/cards_${packId}.json`;
     
+    console.log(`Loading card data from: ${url}`);
+    
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status} for ${url}`);
     }
     const data = await response.json();
+    console.log(`Successfully loaded ${data.length} cards from pack ${packId}`);
     return data;
   } catch (error) {
-    console.warn(`Failed to load card data for pack ${packId}:`, error);
+    console.error(`Failed to load card data for pack ${packId}:`, error);
     return [];
   }
 };
@@ -180,14 +183,17 @@ const importPackData = async (): Promise<PackData[]> => {
     
     const url = `${baseUrl}/data/data/english/json/packs.json`;
     
+    console.log(`Loading pack data from: ${url}`);
+    
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status} for ${url}`);
     }
     const data = await response.json();
+    console.log(`Successfully loaded ${data.length} packs`);
     return data;
   } catch (error) {
-    console.warn('Failed to load pack data:', error);
+    console.error('Failed to load pack data:', error);
     return [];
   }
 };
@@ -196,9 +202,18 @@ const importPackData = async (): Promise<PackData[]> => {
 const getAllCardData = async (): Promise<CardData[]> => {
   if (!allCardDataCache) {
     try {
+      console.log('Starting to load all card data...');
+      
       // Load pack data first
       const packsData = await importPackData();
+      if (packsData.length === 0) {
+        console.error('No pack data loaded, cannot proceed');
+        allCardDataCache = [];
+        return allCardDataCache;
+      }
+      
       const packMap = new Map(packsData.map(pack => [pack.id, pack]));
+      console.log(`Loaded ${packsData.length} packs`);
 
       // Define all pack IDs
       const packIds = [
@@ -216,6 +231,8 @@ const getAllCardData = async (): Promise<CardData[]> => {
         const cards = await importCardData(packId);
         allVegapullCards.push(...cards);
       }
+
+      console.log(`Total cards loaded: ${allVegapullCards.length}`);
 
       // Transform all cards
       allCardDataCache = allVegapullCards.map(card => {
@@ -237,7 +254,7 @@ const getAllCardData = async (): Promise<CardData[]> => {
         return transformVegapullCard(card, packData);
       });
 
-      console.log(`Loaded ${allCardDataCache.length} cards from ${packIds.length} packs`);
+      console.log(`Successfully loaded ${allCardDataCache.length} cards from ${packIds.length} packs`);
     } catch (error) {
       console.error('Failed to load card data:', error);
       allCardDataCache = [];

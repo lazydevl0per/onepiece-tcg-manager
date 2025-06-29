@@ -26,6 +26,8 @@
     "release": "npm run build && electron-builder --publish=always",
     "release:prepare": "node scripts/release.js",
     "test-build": "node scripts/test-build.js",
+    "test-data": "node scripts/test-data-loading.js",
+    "test-data-server": "node scripts/test-data-server.js",
     "deploy": "node scripts/deploy.js"
   },
   "dependencies": {
@@ -73,7 +75,7 @@
     ],
     "extraResources": [
       {
-        "from": "data",
+        "from": "dist/data",
         "to": "data",
         "filter": ["**/*"]
       }

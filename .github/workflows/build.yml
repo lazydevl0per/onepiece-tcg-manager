@@ -39,8 +39,32 @@ jobs:
     - name: Build application
       run: npm run build
 
+    - name: Test data loading
+      run: npm run test-data
+
+    - name: Verify data files are present
+      shell: powershell
+      run: |
+        echo "Checking dist/data directory structure..."
+        if (Test-Path "dist/data/data/english/json") {
+          $jsonFiles = Get-ChildItem "dist/data/data/english/json" -Filter "*.json"
+          echo "Found $($jsonFiles.Count) JSON files in dist/data/data/english/json"
+          $jsonFiles | ForEach-Object { echo "  - $($_.Name)" }
+        } else {
+          echo "ERROR: dist/data/data/english/json directory not found!"
+          exit 1
+        }
+        
+        if (Test-Path "dist/data/data/english/images") {
+          $imageFiles = Get-ChildItem "dist/data/data/english/images" -Filter "*.png"
+          echo "Found $($imageFiles.Count) PNG files in dist/data/data/english/images"
+        } else {
+          echo "ERROR: dist/data/data/english/images directory not found!"
+          exit 1
+        }
+
     - name: Build Electron app
-      run: npm run dist
+      run: electron-builder --publish=never
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
