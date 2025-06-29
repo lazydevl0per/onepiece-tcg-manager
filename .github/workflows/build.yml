@@ -45,7 +45,12 @@ jobs:
         } else {
           echo "Release directory not found"
         }
-        Get-ChildItem -Recurse -Include "*.exe", "*.dmg", "*.AppImage", "*.deb" | ForEach-Object { $_.FullName } || echo "No executables found"
+        $executables = Get-ChildItem -Recurse -Include "*.exe", "*.dmg", "*.AppImage", "*.deb" -ErrorAction SilentlyContinue
+        if ($executables) {
+          $executables | ForEach-Object { $_.FullName }
+        } else {
+          echo "No executables found"
+        }
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
