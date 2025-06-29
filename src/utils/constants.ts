@@ -43,6 +43,19 @@ export const typeColors: Record<string, string> = {
   'STAGE': 'bg-op-neutral-dark-gray/20 text-op-neutral-silver border-op-neutral-dark-gray/30'
 };
 
+// Utility functions for converting values to CSS classes
+export const getCardColorClass = (color: string): string => {
+  return colorMap[color] || 'bg-op-neutral-silver';
+};
+
+export const getRarityColorClass = (rarity: string): string => {
+  return rarityColors[rarity] || 'text-op-neutral-silver';
+};
+
+export const getTypeColorClass = (type: string): string => {
+  return typeColors[type] || 'bg-op-neutral-dark-gray/20 text-op-neutral-silver border-op-neutral-dark-gray/30';
+};
+
 // Set abbreviations and full names
 export const setNames: Record<string, string> = {
   'OP01': 'Romance Dawn',
