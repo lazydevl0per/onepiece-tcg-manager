@@ -112,16 +112,6 @@ function main() {
     process.exit(1);
   }
 
-  // Generate icons first
-  console.log('\n🎨 Generating application icons...');
-  try {
-    execSync('npm run generate-icons', { stdio: 'inherit' });
-    console.log('✅ Icons generated');
-  } catch (error) {
-    console.error('❌ Icon generation failed:', error.message);
-    process.exit(1);
-  }
-
   let allBuildsSuccessful = true;
   
   for (const platform of platforms) {

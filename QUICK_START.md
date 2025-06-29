@@ -9,21 +9,12 @@ Get your One Piece TCG Manager application built and deployed quickly!
 npm install
 ```
 
-### 2. Generate Icons (requires ImageMagick)
-```bash
-# Windows: Download from https://imagemagick.org/script/download.php#windows
-# macOS: brew install imagemagick
-# Linux: sudo apt-get install imagemagick
-
-npm run generate-icons
-```
-
-### 3. Test Build Locally
+### 2. Test Build Locally
 ```bash
 npm run test-build
 ```
 
-### 4. Build for Your Platform
+### 3. Build for Your Platform
 ```bash
 # Windows
 npm run build:win
@@ -75,13 +66,6 @@ ls release/
 ## 🔧 Troubleshooting
 
 ### Common Issues
-
-**Icon generation fails:**
-```bash
-# Install ImageMagick first
-# Then run:
-npm run generate-icons
-```
 
 **Build fails:**
 ```bash

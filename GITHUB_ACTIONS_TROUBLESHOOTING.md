@@ -4,23 +4,7 @@ This guide helps you resolve common GitHub Actions build failures for the One Pi
 
 ## 🔍 Common Issues and Solutions
 
-### 1. Icon Generation Failures
-
-**Problem:** Build fails because ImageMagick is not available or icon generation fails.
-
-**Solution:** The workflow now uses a simple icon generation that doesn't require ImageMagick.
-
-```yaml
-# The workflow now runs:
-- name: Generate simple icons
-  run: npm run generate-icons-simple
-
-- name: Try to generate full icons (optional)
-  run: npm run generate-icons
-  continue-on-error: true
-```
-
-### 2. Node.js Version Issues
+### 1. Node.js Version Issues
 
 **Problem:** Build fails due to Node.js version incompatibility.
 
@@ -34,7 +18,7 @@ This guide helps you resolve common GitHub Actions build failures for the One Pi
     cache: 'npm'
 ```
 
-### 3. Dependencies Installation Failures
+### 2. Dependencies Installation Failures
 
 **Problem:** `npm ci` fails to install dependencies.
 
@@ -43,7 +27,7 @@ This guide helps you resolve common GitHub Actions build failures for the One Pi
 - Delete node_modules and package-lock.json, then reinstall
 - Check for network issues in GitHub Actions
 
-### 4. Electron Builder Failures
+### 3. Electron Builder Failures
 
 **Problem:** Electron app build fails.
 
@@ -64,7 +48,7 @@ npm run dist
 free -h
 ```
 
-### 5. Artifact Upload Failures
+### 4. Artifact Upload Failures
 
 **Problem:** Build artifacts are not uploaded or found.
 
@@ -115,9 +99,6 @@ Before pushing to GitHub, test the build locally:
 # Install dependencies
 npm install
 
-# Generate icons
-npm run generate-icons-simple
-
 # Test build
 npm run test-build
 
@@ -148,7 +129,7 @@ npm run build:win  # or mac, linux
 **Common problems:**
 - Xcode Command Line Tools missing
 - Code signing issues
-- Icon generation failures
+- Missing system dependencies
 
 **Solutions:**
 ```yaml
@@ -201,9 +182,9 @@ strategy:
 Some steps only run when needed:
 
 ```yaml
-- name: Try to generate full icons (optional)
-  run: npm run generate-icons
-  continue-on-error: true
+- name: Build application
+  run: npm run build
+  continue-on-error: false
 ```
 
 ## 🚨 Emergency Fixes

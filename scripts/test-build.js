@@ -45,10 +45,6 @@ function main() {
       description: 'Installing dependencies'
     },
     {
-      command: 'npm run generate-icons',
-      description: 'Generating application icons'
-    },
-    {
       command: 'npm run build',
       description: 'Building web application'
     },
