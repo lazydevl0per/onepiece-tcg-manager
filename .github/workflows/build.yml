@@ -13,11 +13,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        node-version: [18]
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
@@ -26,7 +22,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 18
         cache: 'npm'
 
     - name: Install dependencies
@@ -40,19 +36,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: List release directory (Unix)
-      if: matrix.os != 'windows-latest'
-      run: |
-        echo "Release directory contents:"
-        if [ -d "release/" ]; then
-          ls -la release/
-        else
-          echo "Release directory not found"
-        fi
-        find . -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" || echo "No executables found"
-
     - name: List release directory (Windows)
-      if: matrix.os == 'windows-latest'
       shell: powershell
       run: |
         echo "Release directory contents:"
@@ -66,7 +50,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: one-piece-tcg-manager-${{ matrix.os }}
+        name: one-piece-tcg-manager-windows
         path: |
           release/
         retention-days: 30
@@ -95,9 +79,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          artifacts/one-piece-tcg-manager-windows-latest/**/*
-          artifacts/one-piece-tcg-manager-macos-latest/**/*
-          artifacts/one-piece-tcg-manager-ubuntu-latest/**/*
+          artifacts/one-piece-tcg-manager-windows/**/*
         draft: false
         prerelease: false
         generate_release_notes: true
