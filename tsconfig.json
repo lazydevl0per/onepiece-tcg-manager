@@ -20,8 +20,15 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+
+    /* Path resolution */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/data/*": ["data/*"]
+    }
   },
-  "include": ["src", "electron"],
+  "include": ["src", "electron", "data"],
   "references": [{ "path": "./tsconfig.node.json" }]
 } 

@@ -1,0 +1,3 @@
+# One Piece TCG Manager Icon
+# This is a placeholder icon file
+# Replace with actual icon.png for better appearance

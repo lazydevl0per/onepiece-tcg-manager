@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   getAllCards, 
-  filterCards, 
   getSets, 
   getColors, 
   getTypes, 
@@ -29,14 +28,21 @@ export function useCollection() {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const allCards = getAllCards();
+        const [allCards, allSets, allColors, allTypes, allRarities] = await Promise.all([
+          getAllCards(),
+          getSets(),
+          getColors(),
+          getTypes(),
+          getRarities()
+        ]);
+        
         setCards(allCards);
-        setSets(getSets());
-        setColors(getColors());
-        setTypes(getTypes());
-        setRarities(getRarities());
-      } catch {
-        // Error intentionally ignored
+        setSets(allSets);
+        setColors(allColors);
+        setTypes(allTypes);
+        setRarities(allRarities);
+      } catch (error) {
+        console.error('Failed to load card data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -47,14 +53,21 @@ export function useCollection() {
 
   // Memoize filtered cards to prevent recalculation on every render
   const filteredCards = useMemo(() => {
-    const filtered = filterCards(
-      cards,
-      searchTerm,
-      colorFilter,
-      typeFilter,
-      rarityFilter,
-      setFilter
-    );
+    // For now, filter synchronously since we have all cards in memory
+    // In the future, we could make this async if needed
+    const filtered = cards.filter(card => {
+      const matchesSearch = !searchTerm || 
+        card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.id.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesColor = colorFilter === 'all' || card.color === colorFilter;
+      const matchesType = typeFilter === 'all' || card.type === typeFilter;
+      const matchesRarity = rarityFilter === 'all' || card.rarity === rarityFilter;
+      const matchesSet = setFilter === 'all' || card.set.name === setFilter;
+      
+      return matchesSearch && matchesColor && matchesType && matchesRarity && matchesSet;
+    });
+    
     return filtered.filter(card => !showOwnedOnly || card.owned > 0);
   }, [cards, searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
 
