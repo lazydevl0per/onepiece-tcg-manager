@@ -57,12 +57,16 @@ jobs:
           echo "No executables found"
         }
 
-    - name: Upload artifacts
+    - name: Upload installer artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: one-piece-tcg-manager-windows
+        name: one-piece-tcg-manager-installers
         path: |
-          release/
+          release/*.exe
+          release/*.dmg
+          release/*.AppImage
+          release/*.deb
+          release/*.zip
         retention-days: 30
         if-no-files-found: error
 
@@ -80,21 +84,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Download all artifacts
+    - name: Download installer artifacts
       uses: actions/download-artifact@v4
       with:
-        path: artifacts
+        name: one-piece-tcg-manager-installers
+        path: installers
 
-    - name: List downloaded artifacts
+    - name: List downloaded installers
       run: |
-        echo "Downloaded artifacts:"
-        find artifacts -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.zip" || echo "No artifacts found"
+        echo "Downloaded installers:"
+        find installers -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.zip" || echo "No installers found"
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        files: |
-          artifacts/one-piece-tcg-manager-windows/**/*
+        files: installers/*
         draft: false
         prerelease: false
         generate_release_notes: true
