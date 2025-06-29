@@ -1,24 +1,71 @@
-// Import all card data from the data submodule
-import op01Data from '../../data/cards/en/op01.json';
-import op02Data from '../../data/cards/en/op02.json';
-import op03Data from '../../data/cards/en/op03.json';
-import op04Data from '../../data/cards/en/op04.json';
-import op05Data from '../../data/cards/en/op05.json';
-import op06Data from '../../data/cards/en/op06.json';
-import op07Data from '../../data/cards/en/op07.json';
-import op08Data from '../../data/cards/en/op08.json';
-import op09Data from '../../data/cards/en/op09.json';
-import eb01Data from '../../data/cards/en/eb01.json';
-import generalData from '../../data/cards/en/general.json';
-import st13Data from '../../data/cards/en/st13.json';
-import st14Data from '../../data/cards/en/st14.json';
-import st15Data from '../../data/cards/en/st15.json';
-import st16Data from '../../data/cards/en/st16.json';
-import st17Data from '../../data/cards/en/st17.json';
-import st18Data from '../../data/cards/en/st18.json';
-import st19Data from '../../data/cards/en/st19.json';
-import st20Data from '../../data/cards/en/st20.json';
-import prb01Data from '../../data/cards/en/prb01.json';
+// Import all card data from the vegapull-records submodule
+import packsData from '../../data/data/english/packs.json';
+import cards569001 from '../../data/data/english/cards_569001.json';
+import cards569002 from '../../data/data/english/cards_569002.json';
+import cards569003 from '../../data/data/english/cards_569003.json';
+import cards569004 from '../../data/data/english/cards_569004.json';
+import cards569005 from '../../data/data/english/cards_569005.json';
+import cards569006 from '../../data/data/english/cards_569006.json';
+import cards569007 from '../../data/data/english/cards_569007.json';
+import cards569008 from '../../data/data/english/cards_569008.json';
+import cards569009 from '../../data/data/english/cards_569009.json';
+import cards569010 from '../../data/data/english/cards_569010.json';
+import cards569011 from '../../data/data/english/cards_569011.json';
+import cards569012 from '../../data/data/english/cards_569012.json';
+import cards569013 from '../../data/data/english/cards_569013.json';
+import cards569014 from '../../data/data/english/cards_569014.json';
+import cards569015 from '../../data/data/english/cards_569015.json';
+import cards569016 from '../../data/data/english/cards_569016.json';
+import cards569017 from '../../data/data/english/cards_569017.json';
+import cards569018 from '../../data/data/english/cards_569018.json';
+import cards569019 from '../../data/data/english/cards_569019.json';
+import cards569020 from '../../data/data/english/cards_569020.json';
+import cards569021 from '../../data/data/english/cards_569021.json';
+import cards569101 from '../../data/data/english/cards_569101.json';
+import cards569102 from '../../data/data/english/cards_569102.json';
+import cards569103 from '../../data/data/english/cards_569103.json';
+import cards569104 from '../../data/data/english/cards_569104.json';
+import cards569105 from '../../data/data/english/cards_569105.json';
+import cards569106 from '../../data/data/english/cards_569106.json';
+import cards569107 from '../../data/data/english/cards_569107.json';
+import cards569108 from '../../data/data/english/cards_569108.json';
+import cards569109 from '../../data/data/english/cards_569109.json';
+import cards569110 from '../../data/data/english/cards_569110.json';
+import cards569201 from '../../data/data/english/cards_569201.json';
+import cards569202 from '../../data/data/english/cards_569202.json';
+import cards569301 from '../../data/data/english/cards_569301.json';
+import cards569801 from '../../data/data/english/cards_569801.json';
+import cards569901 from '../../data/data/english/cards_569901.json';
+
+// Vegapull card data interface
+interface VegapullCard {
+  id: string;
+  pack_id: string;
+  name: string;
+  rarity: string;
+  category: string;
+  img_url: string;
+  img_full_url: string;
+  colors: string[];
+  cost: number;
+  attributes: string[];
+  power: number | null;
+  counter: number | null;
+  types: string[];
+  effect: string;
+  trigger: string | null;
+}
+
+// Pack data interface
+interface PackData {
+  id: string;
+  raw_title: string;
+  title_parts: {
+    prefix: string | null;
+    title: string;
+    label: string | null;
+  };
+}
 
 // Updated Card interface to match the actual data structure
 export interface CardData {
@@ -70,31 +117,115 @@ let colorsCache: string[] | null = null;
 let typesCache: string[] | null = null;
 let raritiesCache: string[] | null = null;
 
+// Helper function to get attribute image code
+const getAttributeImageCode = (attribute: string): string => {
+  const attributeMap: Record<string, string> = {
+    'Strike': '01',
+    'Slash': '02',
+    'Ranged': '04',
+    'Special': '03',
+    'Wisdom': '05'
+  };
+  return attributeMap[attribute] || '01';
+};
+
+// Transform vegapull card to application card format
+const transformVegapullCard = (vegapullCard: VegapullCard, packData: PackData): CardData => {
+  return {
+    id: vegapullCard.id,
+    code: vegapullCard.id,
+    rarity: vegapullCard.rarity,
+    type: vegapullCard.category.toUpperCase(),
+    name: vegapullCard.name,
+    images: {
+      small: vegapullCard.img_full_url,
+      large: vegapullCard.img_full_url
+    },
+    cost: vegapullCard.cost,
+    attribute: vegapullCard.attributes.length > 0 ? {
+      name: vegapullCard.attributes[0],
+      image: `https://en.onepiece-cardgame.com/images/cardlist/attribute/ico_type${getAttributeImageCode(vegapullCard.attributes[0])}.png`
+    } : undefined,
+    power: vegapullCard.power,
+    counter: vegapullCard.counter ? vegapullCard.counter.toString() : null,
+    color: vegapullCard.colors.join('/'),
+    family: vegapullCard.types.join('/'),
+    ability: vegapullCard.effect === '-' ? '' : vegapullCard.effect,
+    trigger: vegapullCard.trigger || '',
+    set: {
+      name: packData.raw_title
+    },
+    notes: []
+  };
+};
+
 // All card data combined - loaded lazily
 const getAllCardData = (): CardData[] => {
   if (!allCardDataCache) {
-    allCardDataCache = [
-      ...op01Data,
-      ...op02Data,
-      ...op03Data,
-      ...op04Data,
-      ...op05Data,
-      ...op06Data,
-      ...op07Data,
-      ...op08Data,
-      ...op09Data,
-      ...eb01Data,
-      ...generalData,
-      ...st13Data,
-      ...st14Data,
-      ...st15Data,
-      ...st16Data,
-      ...st17Data,
-      ...st18Data,
-      ...st19Data,
-      ...st20Data,
-      ...prb01Data,
-    ] as CardData[];
+    const allVegapullCards: VegapullCard[] = [
+      ...cards569001,
+      ...cards569002,
+      ...cards569003,
+      ...cards569004,
+      ...cards569005,
+      ...cards569006,
+      ...cards569007,
+      ...cards569008,
+      ...cards569009,
+      ...cards569010,
+      ...cards569011,
+      ...cards569012,
+      ...cards569013,
+      ...cards569014,
+      ...cards569015,
+      ...cards569016,
+      ...cards569017,
+      ...cards569018,
+      ...cards569019,
+      ...cards569020,
+      ...cards569021,
+      ...cards569101,
+      ...cards569102,
+      ...cards569103,
+      ...cards569104,
+      ...cards569105,
+      ...cards569106,
+      ...cards569107,
+      ...cards569108,
+      ...cards569109,
+      ...cards569110,
+      ...cards569201,
+      ...cards569202,
+      ...cards569301,
+      ...cards569801,
+      ...cards569901,
+    ] as VegapullCard[];
+
+    // Create a map of pack data for quick lookup
+    const packDataMap = new Map<string, PackData>();
+    (packsData as PackData[]).forEach(pack => {
+      packDataMap.set(pack.id, pack);
+    });
+
+    // Transform all cards
+    allCardDataCache = allVegapullCards.map(card => {
+      const packData = packDataMap.get(card.pack_id);
+      if (!packData) {
+        // console.warn(`No pack data found for pack_id: ${card.pack_id}`); // Removed to fix linter warning
+        // Create a fallback pack data
+        const fallbackPack: PackData = {
+          id: card.pack_id,
+          raw_title: `Unknown Pack ${card.pack_id}`,
+          title_parts: {
+            prefix: null,
+            title: `Unknown Pack ${card.pack_id}`,
+            label: null
+          }
+        };
+        return transformVegapullCard(card, fallbackPack);
+      }
+      return transformVegapullCard(card, packData);
+    });
   }
   return allCardDataCache;
 };
@@ -122,7 +253,10 @@ const getUniqueColors = (): string[] => {
   const colors = new Set<string>();
   getAllCardData().forEach(card => {
     if (card.color) {
-      colors.add(card.color);
+      // Split multi-color cards and add each color
+      card.color.split('/').forEach(color => {
+        colors.add(color.trim());
+      });
     }
   });
   return Array.from(colors).sort();
@@ -171,7 +305,7 @@ export const filterCards = (
       card.ability?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       card.code.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesColor = colorFilter === 'all' || card.color === colorFilter;
+    const matchesColor = colorFilter === 'all' || card.color.includes(colorFilter);
     const matchesType = typeFilter === 'all' || card.type === typeFilter;
     const matchesRarity = rarityFilter === 'all' || card.rarity === rarityFilter;
     const matchesSet = setFilter === 'all' || card.code.startsWith(setFilter);
