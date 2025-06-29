@@ -40,7 +40,20 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: List release directory
+    - name: List release directory (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        echo "Release directory contents:"
+        if [ -d "release/" ]; then
+          ls -la release/
+        else
+          echo "Release directory not found"
+        fi
+        find . -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" || echo "No executables found"
+
+    - name: List release directory (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: powershell
       run: |
         echo "Release directory contents:"
         if (Test-Path "release/") {
@@ -76,7 +89,7 @@ jobs:
     - name: List downloaded artifacts
       run: |
         echo "Downloaded artifacts:"
-        Get-ChildItem -Recurse -Include "*.exe", "*.dmg", "*.AppImage", "*.deb", "*.zip" | ForEach-Object { $_.FullName } || echo "No artifacts found"
+        find artifacts -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.zip" || echo "No artifacts found"
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
