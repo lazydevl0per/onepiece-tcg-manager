@@ -57,6 +57,11 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
+  server: {
+    port: 5173
+  },
+  publicDir: 'public',
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg'],
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -68,8 +73,5 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 1000, // Increase warning limit
-  },
-  server: {
-    port: 5173
   }
 }) 

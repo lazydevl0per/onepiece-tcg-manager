@@ -1,41 +1,48 @@
 // Import all card data from the vegapull-records submodule
-import packsData from '../../data/data/english/packs.json';
-import cards569001 from '../../data/data/english/cards_569001.json';
-import cards569002 from '../../data/data/english/cards_569002.json';
-import cards569003 from '../../data/data/english/cards_569003.json';
-import cards569004 from '../../data/data/english/cards_569004.json';
-import cards569005 from '../../data/data/english/cards_569005.json';
-import cards569006 from '../../data/data/english/cards_569006.json';
-import cards569007 from '../../data/data/english/cards_569007.json';
-import cards569008 from '../../data/data/english/cards_569008.json';
-import cards569009 from '../../data/data/english/cards_569009.json';
-import cards569010 from '../../data/data/english/cards_569010.json';
-import cards569011 from '../../data/data/english/cards_569011.json';
-import cards569012 from '../../data/data/english/cards_569012.json';
-import cards569013 from '../../data/data/english/cards_569013.json';
-import cards569014 from '../../data/data/english/cards_569014.json';
-import cards569015 from '../../data/data/english/cards_569015.json';
-import cards569016 from '../../data/data/english/cards_569016.json';
-import cards569017 from '../../data/data/english/cards_569017.json';
-import cards569018 from '../../data/data/english/cards_569018.json';
-import cards569019 from '../../data/data/english/cards_569019.json';
-import cards569020 from '../../data/data/english/cards_569020.json';
-import cards569021 from '../../data/data/english/cards_569021.json';
-import cards569101 from '../../data/data/english/cards_569101.json';
-import cards569102 from '../../data/data/english/cards_569102.json';
-import cards569103 from '../../data/data/english/cards_569103.json';
-import cards569104 from '../../data/data/english/cards_569104.json';
-import cards569105 from '../../data/data/english/cards_569105.json';
-import cards569106 from '../../data/data/english/cards_569106.json';
-import cards569107 from '../../data/data/english/cards_569107.json';
-import cards569108 from '../../data/data/english/cards_569108.json';
-import cards569109 from '../../data/data/english/cards_569109.json';
-import cards569110 from '../../data/data/english/cards_569110.json';
-import cards569201 from '../../data/data/english/cards_569201.json';
-import cards569202 from '../../data/data/english/cards_569202.json';
-import cards569301 from '../../data/data/english/cards_569301.json';
-import cards569801 from '../../data/data/english/cards_569801.json';
-import cards569901 from '../../data/data/english/cards_569901.json';
+import packsData from '../../data/data/english/json/packs.json';
+import cards569001 from '../../data/data/english/json/cards_569001.json';
+import cards569002 from '../../data/data/english/json/cards_569002.json';
+import cards569003 from '../../data/data/english/json/cards_569003.json';
+import cards569004 from '../../data/data/english/json/cards_569004.json';
+import cards569005 from '../../data/data/english/json/cards_569005.json';
+import cards569006 from '../../data/data/english/json/cards_569006.json';
+import cards569007 from '../../data/data/english/json/cards_569007.json';
+import cards569008 from '../../data/data/english/json/cards_569008.json';
+import cards569009 from '../../data/data/english/json/cards_569009.json';
+import cards569010 from '../../data/data/english/json/cards_569010.json';
+import cards569011 from '../../data/data/english/json/cards_569011.json';
+import cards569012 from '../../data/data/english/json/cards_569012.json';
+import cards569013 from '../../data/data/english/json/cards_569013.json';
+import cards569014 from '../../data/data/english/json/cards_569014.json';
+import cards569015 from '../../data/data/english/json/cards_569015.json';
+import cards569016 from '../../data/data/english/json/cards_569016.json';
+import cards569017 from '../../data/data/english/json/cards_569017.json';
+import cards569018 from '../../data/data/english/json/cards_569018.json';
+import cards569019 from '../../data/data/english/json/cards_569019.json';
+import cards569020 from '../../data/data/english/json/cards_569020.json';
+import cards569021 from '../../data/data/english/json/cards_569021.json';
+import cards569023 from '../../data/data/english/json/cards_569023.json';
+import cards569024 from '../../data/data/english/json/cards_569024.json';
+import cards569025 from '../../data/data/english/json/cards_569025.json';
+import cards569026 from '../../data/data/english/json/cards_569026.json';
+import cards569027 from '../../data/data/english/json/cards_569027.json';
+import cards569028 from '../../data/data/english/json/cards_569028.json';
+import cards569101 from '../../data/data/english/json/cards_569101.json';
+import cards569102 from '../../data/data/english/json/cards_569102.json';
+import cards569103 from '../../data/data/english/json/cards_569103.json';
+import cards569104 from '../../data/data/english/json/cards_569104.json';
+import cards569105 from '../../data/data/english/json/cards_569105.json';
+import cards569106 from '../../data/data/english/json/cards_569106.json';
+import cards569107 from '../../data/data/english/json/cards_569107.json';
+import cards569108 from '../../data/data/english/json/cards_569108.json';
+import cards569109 from '../../data/data/english/json/cards_569109.json';
+import cards569110 from '../../data/data/english/json/cards_569110.json';
+import cards569111 from '../../data/data/english/json/cards_569111.json';
+import cards569201 from '../../data/data/english/json/cards_569201.json';
+import cards569202 from '../../data/data/english/json/cards_569202.json';
+import cards569301 from '../../data/data/english/json/cards_569301.json';
+import cards569801 from '../../data/data/english/json/cards_569801.json';
+import cards569901 from '../../data/data/english/json/cards_569901.json';
 
 // Vegapull card data interface
 interface VegapullCard {
@@ -96,6 +103,7 @@ export interface CardData {
     name: string;
     url?: string;
   }>;
+  externalImageUrl?: string;
 }
 
 // Application Card interface (with owned quantity)
@@ -129,8 +137,20 @@ const getAttributeImageCode = (attribute: string): string => {
   return attributeMap[attribute] || '01';
 };
 
+// Helper function to construct local image path
+const getLocalImagePath = (imgUrl: string): string => {
+  // Remove any query parameters from the URL
+  const cleanUrl = imgUrl.split('?')[0];
+  // Extract the filename from the path (e.g., "../images/cardlist/card/ST01-001.png" -> "ST01-001.png")
+  const filename = cleanUrl.split('/').pop();
+  // Construct the path to the local image
+  return `/data/data/english/images/${filename}`;
+};
+
 // Transform vegapull card to application card format
 const transformVegapullCard = (vegapullCard: VegapullCard, packData: PackData): CardData => {
+  const localImagePath = getLocalImagePath(vegapullCard.img_url);
+  
   return {
     id: vegapullCard.id,
     code: vegapullCard.id,
@@ -138,8 +158,8 @@ const transformVegapullCard = (vegapullCard: VegapullCard, packData: PackData): 
     type: vegapullCard.category.toUpperCase(),
     name: vegapullCard.name,
     images: {
-      small: vegapullCard.img_full_url,
-      large: vegapullCard.img_full_url
+      small: localImagePath,
+      large: localImagePath
     },
     cost: vegapullCard.cost,
     attribute: vegapullCard.attributes.length > 0 ? {
@@ -155,7 +175,8 @@ const transformVegapullCard = (vegapullCard: VegapullCard, packData: PackData): 
     set: {
       name: packData.raw_title
     },
-    notes: []
+    notes: [],
+    externalImageUrl: vegapullCard.img_full_url
   };
 };
 
@@ -184,6 +205,12 @@ const getAllCardData = (): CardData[] => {
       ...cards569019,
       ...cards569020,
       ...cards569021,
+      ...cards569023,
+      ...cards569024,
+      ...cards569025,
+      ...cards569026,
+      ...cards569027,
+      ...cards569028,
       ...cards569101,
       ...cards569102,
       ...cards569103,
@@ -194,6 +221,7 @@ const getAllCardData = (): CardData[] => {
       ...cards569108,
       ...cards569109,
       ...cards569110,
+      ...cards569111,
       ...cards569201,
       ...cards569202,
       ...cards569301,

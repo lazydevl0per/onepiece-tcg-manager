@@ -46,8 +46,14 @@ const Card = memo(function Card({
   }, [onAddToDeck, card]);
 
   const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.style.display = 'none';
-  }, []);
+    // Try to use external image URL as fallback
+    if (card.externalImageUrl && e.currentTarget.src !== card.externalImageUrl) {
+      e.currentTarget.src = card.externalImageUrl;
+    } else {
+      // If no external URL or already tried, hide the image
+      e.currentTarget.style.display = 'none';
+    }
+  }, [card.externalImageUrl]);
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.style.opacity = '1';
