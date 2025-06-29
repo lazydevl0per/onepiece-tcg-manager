@@ -43,8 +43,12 @@ jobs:
     - name: List release directory
       run: |
         echo "Release directory contents:"
-        ls -la release/ || echo "Release directory not found"
-        find . -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" || echo "No executables found"
+        if (Test-Path "release/") {
+          Get-ChildItem -Path "release/" -Force
+        } else {
+          echo "Release directory not found"
+        }
+        Get-ChildItem -Recurse -Include "*.exe", "*.dmg", "*.AppImage", "*.deb" | ForEach-Object { $_.FullName } || echo "No executables found"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -72,7 +76,7 @@ jobs:
     - name: List downloaded artifacts
       run: |
         echo "Downloaded artifacts:"
-        find artifacts -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.zip" || echo "No artifacts found"
+        Get-ChildItem -Recurse -Include "*.exe", "*.dmg", "*.AppImage", "*.deb", "*.zip" | ForEach-Object { $_.FullName } || echo "No artifacts found"
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
