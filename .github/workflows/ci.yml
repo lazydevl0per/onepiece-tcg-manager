@@ -27,6 +27,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Generate simple icons
+      run: npm run generate-icons-simple
+
     - name: Run linter
       run: npm run lint
 
@@ -67,8 +70,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Generate simple icons
+      run: npm run generate-icons-simple
+
     - name: Build application
       run: npm run build
 
     - name: Test Electron build (without publishing)
-      run: npm run dist 
+      run: npm run dist
+
+    - name: List build artifacts
+      run: |
+        echo "Build artifacts:"
+        ls -la release/ || echo "No release directory found" 
