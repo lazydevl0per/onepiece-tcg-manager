@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { existsSync, readdirSync, copyFileSync, mkdirSync } from 'fs';
+import { existsSync, readdirSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 function checkPrerequisites() {

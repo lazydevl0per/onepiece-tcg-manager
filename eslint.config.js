@@ -24,6 +24,8 @@ export default [
         Blob: 'readonly',
         URL: 'readonly',
         FileReader: 'readonly',
+        navigator: 'readonly',
+        fetch: 'readonly',
         // React globals
         React: 'readonly',
         // TypeScript globals
@@ -56,7 +58,11 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }],
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': 'warn',
       'no-constant-binary-expression': 'off', // Allow for better readability in some cases
@@ -69,21 +75,41 @@ export default [
       'electron/**/*.ts',
       'electron/**/*.js',
       'eslint.config.js',
+      'scripts/**/*.js',
+      'scripts/**/*.ts',
     ],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
+        // Node.js globals
         process: 'readonly',
         __dirname: 'readonly',
+        __filename: 'readonly',
         module: 'readonly',
         require: 'readonly',
         console: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        // Browser globals for scripts that might run in browser context
         window: 'readonly',
+        document: 'readonly',
+        fetch: 'readonly',
+        navigator: 'readonly',
+        // File system globals
+        Buffer: 'readonly',
+        // URL and path globals
+        URL: 'readonly',
+        // Global object
+        global: 'readonly',
+        globalThis: 'readonly',
       },
     },
     rules: {
       'no-undef': 'off',
+      'no-console': 'off', // Allow console in scripts
     },
   },
   {

@@ -41,8 +41,9 @@ export function useCollection() {
         setColors(allColors);
         setTypes(allTypes);
         setRarities(allRarities);
-      } catch (error) {
-        console.error('Failed to load card data:', error);
+      } catch (_error) {
+        // Handle error silently or implement proper error state management
+        // console.error('Failed to load card data:', error);
       } finally {
         setIsLoading(false);
       }

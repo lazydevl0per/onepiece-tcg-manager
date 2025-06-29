@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
-import { createServer } from 'http'
+import { createServer, Server } from 'http'
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import fs from 'fs'
@@ -12,14 +12,14 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 // Create a simple HTTP server to serve data files
-let dataServer: any = null
+let dataServer: Server | null = null
 
 function startDataServer(): void {
   const port = 3001
   
-  console.log('🚀 Starting data server...');
-  console.log(`📁 Resources path: ${process.resourcesPath}`);
-  console.log(`🔧 Is dev: ${is.dev}`);
+  // console.log('🚀 Starting data server...');
+  // console.log(`📁 Resources path: ${process.resourcesPath}`);
+  // console.log(`🔧 Is dev: ${is.dev}`);
   
   dataServer = createServer(async (req, res) => {
     try {
@@ -46,22 +46,22 @@ function startDataServer(): void {
       const fullPath = join(basePath, filePath)
       
       // Debug logging
-      console.log(`Data server request: ${req.url}`)
-      console.log(`Is dev: ${isDev}`)
-      console.log(`Base path: ${basePath}`)
-      console.log(`Full path: ${fullPath}`)
-      console.log(`File exists: ${existsSync(fullPath)}`)
+      // console.log(`Data server request: ${req.url}`)
+      // console.log(`Is dev: ${isDev}`)
+      // console.log(`Base path: ${basePath}`)
+      // console.log(`Full path: ${fullPath}`)
+      // console.log(`File exists: ${existsSync(fullPath)}`)
       
       // List contents of basePath for debugging
       if (isDev) {
-        console.log(`Dev mode - __dirname: ${__dirname}`)
+        // console.log(`Dev mode - __dirname: ${__dirname}`)
       } else {
-        console.log(`Production mode - resourcesPath: ${process.resourcesPath}`)
+        // console.log(`Production mode - resourcesPath: ${process.resourcesPath}`)
         try {
-          const baseContents = fs.readdirSync(basePath);
-          console.log(`Base path contents: ${baseContents.join(', ')}`);
-        } catch (error) {
-          console.log(`Error reading base path: ${(error as Error).message}`);
+          const _baseContents = fs.readdirSync(basePath);
+          // console.log(`Base path contents: ${baseContents.join(', ')}`);
+        } catch (_error) {
+          // console.log(`Error reading base path: ${(error as Error).message}`);
         }
       }
       
@@ -84,15 +84,15 @@ function startDataServer(): void {
       
       res.writeHead(200)
       res.end(content)
-    } catch (error) {
-      console.error('Error serving data file:', error)
+    } catch (_error) {
+      // console.error('Error serving data file:', error)
       res.writeHead(500)
       res.end('Internal server error')
     }
   })
 
   dataServer.listen(port, () => {
-    console.log(`Data server running on port ${port}`)
+    // console.log(`Data server running on port ${port}`)
   })
 }
 

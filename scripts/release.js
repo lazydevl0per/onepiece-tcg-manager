@@ -2,7 +2,6 @@
 
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
 
 const packageJsonPath = 'package.json';
 

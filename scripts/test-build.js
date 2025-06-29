@@ -2,7 +2,6 @@
 
 import { execSync } from 'child_process';
 import { existsSync, readdirSync } from 'fs';
-import { join } from 'path';
 
 function runCommand(command, description) {
   console.log(`\n🔧 ${description}...`);
