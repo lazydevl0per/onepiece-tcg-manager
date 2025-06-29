@@ -9,6 +9,20 @@ This guide explains how to build and release the One Piece TCG Manager applicati
 - **npm** (comes with Node.js)
 - **Git** (for version control)
 
+### Platform-Specific Requirements
+
+#### Windows
+- Visual Studio Build Tools (usually pre-installed on GitHub Actions runners)
+- Windows 10 SDK
+
+#### macOS
+- Xcode Command Line Tools
+- Code signing certificates (for distribution)
+
+#### Linux
+- Fuse (for AppImage creation)
+- Build essentials
+
 ## Local Development
 
 ### Setup
@@ -57,11 +71,13 @@ The project includes GitHub Actions workflows for automated builds and releases:
    - Runs on every push to main/develop and pull requests
    - Tests builds on Windows and Linux
    - Runs linting and build verification
+   - Tests Electron build without publishing
 
 2. **Release Workflow** (`.github/workflows/build.yml`)
    - Triggers on version tags (v*)
-   - Builds for Windows, macOS, and Linux
+   - Builds for Windows (optimized for faster releases)
    - Creates GitHub releases with artifacts
+   - Uploads installers to release
 
 ### Creating a Release
 
@@ -153,6 +169,31 @@ The build configuration is in `package.json` under the `build` section:
 - **Architecture**: x64
 - **Icon**: `resources/icon.png`
 
+## Build Process
+
+### 1. Data Preparation
+```bash
+# Copy card data to build directory
+node scripts/copy-data.js
+```
+
+### 2. Application Build
+```bash
+# Build React application
+npm run build
+```
+
+### 3. Electron Build
+```bash
+# Build Electron application
+npm run dist
+```
+
+### 4. Artifact Creation
+- Creates platform-specific installers
+- Generates portable executables
+- Packages all resources and dependencies
+
 ## Troubleshooting
 
 ### Common Issues
@@ -160,15 +201,27 @@ The build configuration is in `package.json` under the `build` section:
 #### Build Fails on macOS
 - Ensure you have Xcode Command Line Tools installed
 - Run `xcode-select --install` if needed
+- Check code signing certificates
 
 #### Build Fails on Windows
 - Ensure you have Visual Studio Build Tools installed
 - Install Windows 10 SDK
+- Check for long file path issues
 
 #### GitHub Actions Fail
 - Check that the repository has the required secrets
 - Ensure the workflow files are in the correct location
 - Verify that the GitHub token has the necessary permissions
+- See [GitHub Actions Troubleshooting](GITHUB_ACTIONS_TROUBLESHOOTING.md)
+
+#### Data Loading Issues
+```bash
+# Ensure data is copied correctly
+node scripts/copy-data.js
+
+# Check data directory structure
+ls -la data/data/english/
+```
 
 ### Debugging Builds
 
@@ -199,64 +252,77 @@ ls -la release/
 ## Distribution
 
 ### GitHub Releases
-- Automated releases are created on GitHub
-- Assets are automatically uploaded
-- Release notes are generated from commits
+- Automated releases via GitHub Actions
+- Artifacts uploaded to GitHub releases
+- Release notes generated automatically
 
 ### Manual Distribution
-- Built artifacts are in the `release/` directory
-- Upload to your preferred distribution platform
-- Consider code signing for better user experience
+```bash
+# Create release package
+npm run deploy
 
-## Code Signing (Optional)
+# Upload artifacts manually to GitHub releases
+# or distribute via other channels
+```
 
-For production releases, consider code signing:
-
-### Windows
-- Purchase a code signing certificate
-- Configure in electron-builder settings
-- Sign during build process
-
-### macOS
-- Join Apple Developer Program
-- Configure code signing certificates
-- Enable notarization
-
-### Linux
-- GPG signing for packages
-- Configure in electron-builder settings
-
-## Security Considerations
-
-- Never commit sensitive information (API keys, certificates)
-- Use GitHub Secrets for sensitive data
-- Regularly update dependencies
-- Consider security scanning in CI/CD pipeline
+### Release Notes
+- Automatically generated from commits
+- Include version information
+- List of changes and improvements
 
 ## Performance Optimization
 
-### Build Optimization
-- Use `npm ci` instead of `npm install` in CI
-- Enable caching in GitHub Actions
-- Optimize bundle size with code splitting
+### Build Performance
+- **Caching**: npm cache for faster dependency installation
+- **Parallel builds**: Multiple platforms built simultaneously
+- **Incremental builds**: Only rebuild changed components
 
-### Runtime Optimization
-- Enable compression in production builds
-- Optimize images and assets
-- Use efficient data loading strategies
+### Application Performance
+- **Code splitting**: Separate chunks for different features
+- **Lazy loading**: Load data on-demand
+- **Image optimization**: Compressed and optimized images
+- **Bundle optimization**: Minimized and tree-shaken bundles
 
-## Support
+## Security Considerations
 
-For issues with the build process:
-1. Check the troubleshooting section
-2. Review GitHub Actions logs
-3. Test builds locally
-4. Create an issue in the repository
+### Code Signing
+- **Windows**: Code signing certificates for installers
+- **macOS**: Developer certificates for app distribution
+- **Linux**: GPG signing for packages
 
-## Contributing
+### Dependencies
+- Regular security audits with `npm audit`
+- Pinned dependency versions
+- Automated vulnerability scanning
 
-When contributing to the build system:
-1. Test builds on your target platform
-2. Update documentation if needed
-3. Ensure CI/CD pipeline passes
-4. Follow semantic versioning for releases 
+## Monitoring and Maintenance
+
+### Build Monitoring
+- Track build times and success rates
+- Monitor artifact sizes
+- Alert on build failures
+
+### Dependency Updates
+- Regular updates of Node.js and npm
+- Security patches for dependencies
+- Compatibility testing for major updates
+
+### Performance Tracking
+- Monitor application startup times
+- Track memory usage patterns
+- Measure user interaction performance
+
+## Future Improvements
+
+### Planned Enhancements
+1. **Multi-platform builds**: Build for all platforms in single workflow
+2. **Automated testing**: Integration tests for built applications
+3. **Delta updates**: Incremental update system
+4. **Auto-updater**: Built-in update mechanism
+5. **Code signing automation**: Automated certificate management
+
+### Infrastructure Improvements
+1. **Build caching**: Persistent cache for faster builds
+2. **Parallel processing**: Concurrent build steps
+3. **Artifact optimization**: Smaller, more efficient packages
+4. **Deployment automation**: Automated deployment to multiple channels 

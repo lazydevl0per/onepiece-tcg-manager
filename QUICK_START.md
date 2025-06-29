@@ -52,15 +52,15 @@ ls release/
 ## 🎯 What You Get
 
 ### Windows
-- `One Piece TCG Manager Setup.exe` - Installer
-- `One Piece TCG Manager.exe` - Portable app
+- `One Piece TCG Manager Setup.exe` - NSIS installer
+- `One Piece TCG Manager.exe` - Portable executable
 
 ### macOS
-- `One Piece TCG Manager.dmg` - Disk image
-- `One Piece TCG Manager.zip` - Archive
+- `One Piece TCG Manager.dmg` - Disk image installer
+- `One Piece TCG Manager.zip` - Compressed archive
 
 ### Linux
-- `One Piece TCG Manager.AppImage` - AppImage
+- `One Piece TCG Manager.AppImage` - AppImage package
 - `One Piece TCG Manager.deb` - Debian package
 
 ## 🔧 Troubleshooting
@@ -79,6 +79,18 @@ npm run test-build
 - Ensure workflow files are in `.github/workflows/`
 - Check repository permissions
 - Verify GitHub token has release permissions
+- See [GitHub Actions Troubleshooting](GITHUB_ACTIONS_TROUBLESHOOTING.md)
+
+**Data loading issues:**
+```bash
+# Ensure data is copied correctly
+node scripts/copy-data.js
+```
+
+### Performance Issues
+- Check [Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md) for resize performance
+- Monitor memory usage during large collection loading
+- Use virtualized grid for collections with 1000+ cards
 
 ## 📋 Next Steps
 
@@ -91,6 +103,7 @@ npm run test-build
 
 - Check the full [Build and Release Guide](BUILD_AND_RELEASE.md)
 - Review [GitHub Actions logs](https://github.com/your-username/onepiece-tcg.online/actions)
+- Check [Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md) for performance issues
 - Create an issue in the repository
 
 ---
