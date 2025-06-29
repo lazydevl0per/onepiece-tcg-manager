@@ -97,8 +97,11 @@ const getLocalImagePath = (imgUrl: string): string => {
   const cleanUrl = imgUrl.split('?')[0];
   // Extract the filename from the path (e.g., "../images/cardlist/card/ST01-001.png" -> "ST01-001.png")
   const filename = cleanUrl.split('/').pop();
+  // Use local server for Electron builds, fallback to static path for web
+  const isElectron = detectElectron();
+  const baseUrl = isElectron ? 'http://localhost:3001' : '';
   // Construct the path to the local image
-  return `/data/data/english/images/${filename}`;
+  return `${baseUrl}/data/data/english/images/${filename}`;
 };
 
 // Transform vegapull card to application card format
@@ -134,14 +137,34 @@ const transformVegapullCard = (vegapullCard: VegapullCard, packData: PackData): 
   };
 };
 
+// Helper function to detect if we're running in Electron
+const detectElectron = (): boolean => {
+  // Check if we're in Electron by looking at user agent or other indicators
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isElectronUA = userAgent.includes('electron');
+  
+  // Also check if window.api or window.electron are available
+  const hasApi = !!(window as any).api;
+  const hasElectron = !!(window as any).electron;
+  
+  return isElectronUA || hasApi || hasElectron;
+};
+
 // Dynamic import function for card data
 const importCardData = async (packId: string): Promise<VegapullCard[]> => {
   try {
-    const response = await fetch(`/data/data/english/json/cards_${packId}.json`);
+    // Use local server for Electron builds, fallback to static path for web
+    const isElectron = detectElectron();
+    const baseUrl = isElectron ? 'http://localhost:3001' : '';
+    
+    const url = `${baseUrl}/data/data/english/json/cards_${packId}.json`;
+    
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.warn(`Failed to load card data for pack ${packId}:`, error);
     return [];
@@ -151,11 +174,18 @@ const importCardData = async (packId: string): Promise<VegapullCard[]> => {
 // Dynamic import function for pack data
 const importPackData = async (): Promise<PackData[]> => {
   try {
-    const response = await fetch('/data/data/english/json/packs.json');
+    // Use local server for Electron builds, fallback to static path for web
+    const isElectron = detectElectron();
+    const baseUrl = isElectron ? 'http://localhost:3001' : '';
+    
+    const url = `${baseUrl}/data/data/english/json/packs.json`;
+    
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.warn('Failed to load pack data:', error);
     return [];

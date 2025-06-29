@@ -7,7 +7,8 @@ const api = {
   getAppVersion: () => process.versions.app,
   getNodeVersion: () => process.versions.node,
   getChromeVersion: () => process.versions.chrome,
-  getElectronVersion: () => process.versions.electron
+  getElectronVersion: () => process.versions.electron,
+  isElectron: () => true
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

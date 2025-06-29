@@ -3,9 +3,73 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
+import { createServer } from 'http'
+import { readFile } from 'fs/promises'
+import { existsSync } from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+
+// Create a simple HTTP server to serve data files
+let dataServer: any = null
+
+function startDataServer(): void {
+  const port = 3001
+  
+  dataServer = createServer(async (req, res) => {
+    try {
+      if (!req.url) {
+        res.writeHead(404)
+        res.end('Not found')
+        return
+      }
+
+      // Remove leading slash and decode URL
+      const filePath = decodeURIComponent(req.url.substring(1))
+      
+      // Security: only allow access to data directory
+      if (!filePath.startsWith('data/')) {
+        res.writeHead(403)
+        res.end('Forbidden')
+        return
+      }
+
+      // Construct full path to the data file
+      // In development, use the project root, in production use resourcesPath
+      const isDev = is.dev
+      const basePath = isDev ? join(__dirname, '..') : process.resourcesPath
+      const fullPath = join(basePath, filePath)
+      
+      if (!existsSync(fullPath)) {
+        res.writeHead(404)
+        res.end('File not found')
+        return
+      }
+
+      const content = await readFile(fullPath)
+      
+      // Set appropriate content type
+      if (filePath.endsWith('.json')) {
+        res.setHeader('Content-Type', 'application/json')
+      } else if (filePath.endsWith('.png')) {
+        res.setHeader('Content-Type', 'image/png')
+      } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+        res.setHeader('Content-Type', 'image/jpeg')
+      }
+      
+      res.writeHead(200)
+      res.end(content)
+    } catch (error) {
+      console.error('Error serving data file:', error)
+      res.writeHead(500)
+      res.end('Internal server error')
+    }
+  })
+
+  dataServer.listen(port, () => {
+    console.log(`Data server running on port ${port}`)
+  })
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -47,6 +111,9 @@ app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.onepiece.tcg.manager')
 
+  // Start data server for serving card data
+  startDataServer()
+
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/quick-start/tree/master/packages/main-process#devtools
@@ -68,6 +135,13 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
+})
+
+// Clean up data server when app quits
+app.on('before-quit', () => {
+  if (dataServer) {
+    dataServer.close()
+  }
 })
 
 // In this file you can include the rest of your app's specific main process

@@ -8,6 +8,7 @@ export interface IAPI {
   getNodeVersion: () => string
   getChromeVersion: () => string
   getElectronVersion: () => string
+  isElectron: () => boolean
 }
 
 declare global {
