@@ -1,6 +1,7 @@
 # One Piece TCG Manager
 
 A modern desktop application for managing your One Piece Trading Card Game collection and building decks.
+![image](https://github.com/user-attachments/assets/cdb5bd23-fa50-4314-b44f-e4e35b25f513)
 
 ## Features
 
