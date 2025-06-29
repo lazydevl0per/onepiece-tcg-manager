@@ -61,7 +61,7 @@ export default defineConfig({
     port: 5173
   },
   publicDir: 'public',
-  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg'],
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.json'],
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -73,5 +73,9 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 1000, // Increase warning limit
+  },
+  // Copy data directory to build output
+  define: {
+    __DATA_DIR__: JSON.stringify('/data')
   }
 }) 

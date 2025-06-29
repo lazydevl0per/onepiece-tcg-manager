@@ -137,8 +137,11 @@ const transformVegapullCard = (vegapullCard: VegapullCard, packData: PackData): 
 // Dynamic import function for card data
 const importCardData = async (packId: string): Promise<VegapullCard[]> => {
   try {
-    const module = await import(`../../data/data/english/json/cards_${packId}.json`);
-    return module.default || module;
+    const response = await fetch(`/data/data/english/json/cards_${packId}.json`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
   } catch (error) {
     console.warn(`Failed to load card data for pack ${packId}:`, error);
     return [];
@@ -148,8 +151,11 @@ const importCardData = async (packId: string): Promise<VegapullCard[]> => {
 // Dynamic import function for pack data
 const importPackData = async (): Promise<PackData[]> => {
   try {
-    const module = await import('../../data/data/english/json/packs.json');
-    return module.default || module;
+    const response = await fetch('/data/data/english/json/packs.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
   } catch (error) {
     console.warn('Failed to load pack data:', error);
     return [];
