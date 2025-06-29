@@ -58,7 +58,7 @@ function startDataServer(): void {
       } else {
         // console.log(`Production mode - resourcesPath: ${process.resourcesPath}`)
         try {
-          const _baseContents = fs.readdirSync(basePath);
+          fs.readdirSync(basePath); // Just call it for side effect if needed, or remove entirely if not needed
           // console.log(`Base path contents: ${baseContents.join(', ')}`);
         } catch (_error) {
           // console.log(`Error reading base path: ${(error as Error).message}`);
