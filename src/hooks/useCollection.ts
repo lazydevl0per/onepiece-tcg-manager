@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   getAllCards, 
   filterCards, 
@@ -45,24 +45,29 @@ export function useCollection() {
     loadData();
   }, []);
 
-  // Filter cards based on search and filters
-  const filteredCards = filterCards(
-    cards,
-    searchTerm,
-    colorFilter,
-    typeFilter,
-    rarityFilter,
-    setFilter
-  ).filter(card => !showOwnedOnly || card.owned > 0);
+  // Memoize filtered cards to prevent recalculation on every render
+  const filteredCards = useMemo(() => {
+    const filtered = filterCards(
+      cards,
+      searchTerm,
+      colorFilter,
+      typeFilter,
+      rarityFilter,
+      setFilter
+    );
+    return filtered.filter(card => !showOwnedOnly || card.owned > 0);
+  }, [cards, searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
 
-  const updateCardOwned = (cardId: string, owned: number) => {
-    setCards(cards.map(card => 
+  // Optimize card update function
+  const updateCardOwned = useCallback((cardId: string, owned: number) => {
+    setCards(prevCards => prevCards.map(card => 
       card.id === cardId ? { ...card, owned } : card
     ));
-  };
+  }, []);
 
-  const ownedCardsCount = cards.filter(c => c.owned > 0).length;
-  const totalCopies = cards.reduce((sum, c) => sum + c.owned, 0);
+  // Memoize expensive calculations
+  const ownedCardsCount = useMemo(() => cards.filter(c => c.owned > 0).length, [cards]);
+  const totalCopies = useMemo(() => cards.reduce((sum, c) => sum + c.owned, 0), [cards]);
 
   return {
     // State
@@ -80,7 +85,7 @@ export function useCollection() {
     showOwnedOnly,
     filteredCards,
     
-    // Actions
+    // Actions - use the setter functions directly since they're stable
     setSearchTerm,
     setColorFilter,
     setTypeFilter,

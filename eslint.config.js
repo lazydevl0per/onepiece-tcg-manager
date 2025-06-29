@@ -28,6 +28,20 @@ export default [
         React: 'readonly',
         // TypeScript globals
         HTMLInputElement: 'readonly',
+        HTMLDivElement: 'readonly',
+        HTMLImageElement: 'readonly',
+        Event: 'readonly',
+        UIEvent: 'readonly',
+        // Performance and timing globals
+        performance: 'readonly',
+        PerformanceObserver: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        // Node.js globals (for Electron)
+        process: 'readonly',
+        globalThis: 'readonly',
       },
     },
     plugins: {

@@ -4,6 +4,7 @@ import { type SetInfo } from '../services/cardDataService';
 import SearchAndFilters from './SearchAndFilters';
 import Card from './Card';
 import ManageCollectionModal from './ManageCollectionModal';
+import { useMemo, useCallback } from 'react';
 
 interface CollectionTabProps {
   cards: AppCard[];
@@ -62,8 +63,54 @@ export default function CollectionTab({
   sets,
   MAX_COPIES_PER_CARD
 }: CollectionTabProps) {
-  const ownedCardsCount = cards.filter(c => c.owned > 0).length;
-  const totalCopies = cards.reduce((sum, c) => sum + c.owned, 0);
+  // Memoize expensive calculations
+  const ownedCardsCount = useMemo(() => cards.filter(c => c.owned > 0).length, [cards]);
+  const totalCopies = useMemo(() => cards.reduce((sum, c) => sum + c.owned, 0), [cards]);
+
+  // Memoize card rendering to prevent unnecessary re-renders during resize
+  const renderedCards = useMemo(() => 
+    filteredCards.map(card => (
+      <Card
+        key={card.id}
+        card={card}
+        owned={card.owned}
+        onUpdateOwned={onUpdateCardOwned}
+        onAddToDeck={onAddCardToDeck}
+        isInDeck={isCardInDeck ? isCardInDeck(card) : false}
+        deckQuantity={getCardQuantityInDeck ? getCardQuantityInDeck(card) : 0}
+        canAddToDeck={!!selectedDeck}
+        addToDeckDisabled={
+          card.owned === 0 || 
+          (isCardInDeck && getCardQuantityInDeck && 
+           isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD)
+        }
+        addToDeckTitle={
+          card.owned === 0 
+            ? 'You need to own this card to add it to your deck'
+            : isCardInDeck && getCardQuantityInDeck && 
+              isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD
+            ? `Maximum ${MAX_COPIES_PER_CARD} copies already in deck`
+            : 'Add to deck'
+        }
+      />
+    )), [filteredCards, onUpdateCardOwned, onAddCardToDeck, isCardInDeck, getCardQuantityInDeck, selectedDeck, MAX_COPIES_PER_CARD]);
+
+  // Memoize modal actions to prevent unnecessary re-renders
+  const handleClearAllCollections = useCallback(() => {
+    cards.forEach(card => onUpdateCardOwned(card.id, 0));
+  }, [cards, onUpdateCardOwned]);
+
+  const handleSetAllToOne = useCallback(() => {
+    cards.forEach(card => onUpdateCardOwned(card.id, 1));
+  }, [cards, onUpdateCardOwned]);
+
+  const handleShowManageCollection = useCallback(() => {
+    onShowManageCollection(true);
+  }, [onShowManageCollection]);
+
+  const handleCloseManageCollection = useCallback(() => {
+    onShowManageCollection(false);
+  }, [onShowManageCollection]);
 
   return (
     <div>
@@ -80,7 +127,7 @@ export default function CollectionTab({
         onSetFilterChange={onSetFilterChange}
         showOwnedOnly={showOwnedOnly}
         onShowOwnedOnlyChange={onShowOwnedOnlyChange}
-        onShowManageCollection={() => onShowManageCollection(true)}
+        onShowManageCollection={handleShowManageCollection}
         filteredCardsCount={filteredCards.length}
         totalCardsCount={cards.length}
         ownedCardsCount={ownedCardsCount}
@@ -90,44 +137,16 @@ export default function CollectionTab({
         sets={sets}
       />
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredCards.map(card => (
-          <Card
-            key={card.id}
-            card={card}
-            owned={card.owned}
-            onUpdateOwned={onUpdateCardOwned}
-            onAddToDeck={onAddCardToDeck}
-            isInDeck={isCardInDeck ? isCardInDeck(card) : false}
-            deckQuantity={getCardQuantityInDeck ? getCardQuantityInDeck(card) : 0}
-            canAddToDeck={!!selectedDeck}
-            addToDeckDisabled={
-              card.owned === 0 || 
-              (isCardInDeck && getCardQuantityInDeck && 
-               isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD)
-            }
-            addToDeckTitle={
-              card.owned === 0 
-                ? 'You need to own this card to add it to your deck'
-                : isCardInDeck && getCardQuantityInDeck && 
-                  isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD
-                ? `Maximum ${MAX_COPIES_PER_CARD} copies already in deck`
-                : 'Add to deck'
-            }
-          />
-        ))}
+      {/* Cards Grid - Optimized for resize performance */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 will-change-auto">
+        {renderedCards}
       </div>
 
       <ManageCollectionModal
         isOpen={showManageCollection}
-        onClose={() => onShowManageCollection(false)}
-        onClearAllCollections={() => {
-          cards.forEach(card => onUpdateCardOwned(card.id, 0));
-        }}
-        onSetAllToOne={() => {
-          cards.forEach(card => onUpdateCardOwned(card.id, 1));
-        }}
+        onClose={handleCloseManageCollection}
+        onClearAllCollections={handleClearAllCollections}
+        onSetAllToOne={handleSetAllToOne}
         totalCards={cards.length}
         ownedCards={ownedCardsCount}
         totalCopies={totalCopies}

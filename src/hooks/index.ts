@@ -1,2 +1,3 @@
 export { useCollection } from './useCollection';
-export { useDeckBuilder } from './useDeckBuilder'; 
+export { useDeckBuilder } from './useDeckBuilder';
+export { useResizeOptimization } from './useResizeOptimization'; 

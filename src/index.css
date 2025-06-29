@@ -39,6 +39,26 @@
   --op-neutral-silver-alt: #D3D3D3;
 }
 
+/* Performance optimizations for window resizing */
+/*
+* {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+*/
+
+/* Optimize grid layout for better resize performance */
+/* .grid, .transition-all, .shadow-lg, .shadow-xl, img, button, .modal, [role="dialog"] {
+  will-change: auto;
+  transform: none;
+} */
+
+/* Only keep GPU hints on elements that actually animate or transition */
+.transition-all {
+  will-change: transform, opacity;
+}
+
 /* Custom styles for the One Piece TCG app */
 .line-clamp-3 {
   display: -webkit-box;
@@ -51,6 +71,10 @@
 body {
   background: var(--op-blue-deep-navy);
   color: var(--op-white-pure);
+  /* Optimize for smooth scrolling and resizing */
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* One Piece Card Back Utility Class */

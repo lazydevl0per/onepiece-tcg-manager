@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppShell, CollectionTab, DeckBuilderTab } from './components';
-import { useCollection, useDeckBuilder } from './hooks';
+import { useCollection, useDeckBuilder, useResizeOptimization } from './hooks';
 import { MAX_COPIES_PER_CARD } from './utils/constants';
 
 export default function OnePieceTCGApp() {
@@ -11,6 +11,11 @@ export default function OnePieceTCGApp() {
   const collection = useCollection();
   const deckBuilder = useDeckBuilder();
 
+  // Optimize window resize performance (no forced layout recalculation)
+  useResizeOptimization({
+    throttleMs: 50
+  });
+
   return (
     <AppShell
       activeTab={activeTab}
@@ -19,7 +24,7 @@ export default function OnePieceTCGApp() {
       collectionCount={collection.ownedCardsCount}
       deckCount={deckBuilder.decks.length}
     >
-      {activeTab === 'collection' && (
+      {activeTab === 'collection' ? (
         <CollectionTab
           cards={collection.cards}
           filteredCards={collection.filteredCards}
@@ -48,9 +53,7 @@ export default function OnePieceTCGApp() {
           sets={collection.sets}
           MAX_COPIES_PER_CARD={MAX_COPIES_PER_CARD}
         />
-      )}
-
-      {activeTab === 'deckbuilder' && (
+      ) : (
         <DeckBuilderTab
           decks={deckBuilder.decks}
           selectedDeck={deckBuilder.selectedDeck}
