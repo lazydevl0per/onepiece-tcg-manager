@@ -1,4 +1,6 @@
 import { type AppCard } from '../services/cardDataService';
+import { type Deck } from '../hooks/useDeckBuilder';
+import { type SetInfo } from '../services/cardDataService';
 import SearchAndFilters from './SearchAndFilters';
 import Card from './Card';
 import ManageCollectionModal from './ManageCollectionModal';
@@ -22,13 +24,13 @@ interface CollectionTabProps {
   onShowManageCollection: (show: boolean) => void;
   onUpdateCardOwned: (cardId: string, owned: number) => void;
   onAddCardToDeck?: (card: AppCard) => void;
-  selectedDeck?: any;
+  selectedDeck: Deck | null;
   isCardInDeck?: (card: AppCard) => boolean;
   getCardQuantityInDeck?: (card: AppCard) => number;
   colors: string[];
   types: string[];
   rarities: string[];
-  sets: any[];
+  sets: SetInfo[];
   MAX_COPIES_PER_CARD: number;
 }
 

@@ -1,12 +1,14 @@
 import { Plus, Trash2, Edit, BookOpen, Layers } from 'lucide-react';
 import { getCardColorClass, DECK_SIZE_LIMIT, MAX_COPIES_PER_CARD } from '../utils/constants';
+import { type Deck, type DeckStatistics } from '../hooks/useDeckBuilder';
+import { type AppCard } from '../services/cardDataService';
 
 interface DeckBuilderTabProps {
-  decks: any[];
-  selectedDeck: any;
+  decks: Deck[];
+  selectedDeck: Deck | null;
   editingDeckName: string | null;
   editingDeckNameValue: string;
-  onSelectDeck: (deck: any) => void;
+  onSelectDeck: (deck: Deck) => void;
   onEditDeckName: (deckId: string) => void;
   onEditingDeckNameValueChange: (value: string) => void;
   onUpdateDeckName: (deckId: string, newName: string) => void;
@@ -14,11 +16,11 @@ interface DeckBuilderTabProps {
   onDeleteDeck: (deckId: string) => void;
   onCreateDeck: () => void;
   onImportDeck: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onExportDeck: (deck: any) => void;
+  onExportDeck: (deck: Deck) => void;
   onRemoveCardFromDeck: (cardId: string) => void;
   onUpdateCardQuantity: (cardId: string, quantity: number) => void;
-  getTotalCards: (deck: any) => number;
-  getDeckStatistics: (deck: any) => any;
+  getTotalCards: (deck: Deck) => number;
+  getDeckStatistics: (deck: Deck) => DeckStatistics;
 }
 
 export default function DeckBuilderTab({
@@ -215,7 +217,7 @@ export default function DeckBuilderTab({
             )}
 
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {selectedDeck.cards.map(({ card, quantity }: { card: any; quantity: number }) => (
+              {selectedDeck.cards.map(({ card, quantity }: { card: AppCard; quantity: number }) => (
                 <div key={card.id} className="flex items-center justify-between p-3 bg-op-blue-medium/10 rounded-lg border border-op-gold-primary/20">
                   <div className="flex items-center gap-3">
                     <div className={`w-3 h-3 rounded-full ${getCardColorClass(card.color)} shadow-sm`}></div>

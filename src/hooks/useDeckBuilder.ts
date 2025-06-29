@@ -3,13 +3,21 @@ import { type AppCard } from '../services/cardDataService';
 import { DECK_SIZE_LIMIT, MAX_COPIES_PER_CARD } from '../utils/constants';
 
 // Updated Deck interface to use AppCard
-interface Deck {
+export interface Deck {
   id: string;
   name: string;
   leader?: AppCard;
   cards: { card: AppCard; quantity: number }[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface DeckStatistics {
+  totalCards: number;
+  averageCost: string;
+  characters: number;
+  events: number;
+  colorBreakdown: Record<string, number>;
 }
 
 export function useDeckBuilder() {
@@ -164,7 +172,7 @@ export function useDeckBuilder() {
         };
         setDecks([...decks, newDeck]);
         setSelectedDeck(newDeck);
-      } catch (error) {
+      } catch {
         alert('Invalid deck file format');
       }
     };
