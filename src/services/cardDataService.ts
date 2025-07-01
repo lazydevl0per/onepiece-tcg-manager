@@ -86,7 +86,7 @@ let progressiveLoadingCallbacks: Array<(cards: CardData[], progress: number) => 
 
 // Rate limiting configuration
 const RATE_LIMIT_DELAY = 1000; // 1 second between requests
-const BATCH_SIZE = 3; // Load 3 packs at a time
+const BATCH_SIZE = 2; // Load 3 packs at a time
 
 // Helper function to delay execution
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -343,10 +343,26 @@ const loadCardsProgressively = async (onProgress?: (cards: CardData[], progress:
   }
 };
 
+// Update metadata caches when card data is loaded
+const updateMetadataCaches = async () => {
+  if (!allCardDataCache) return;
+  
+  // Update all metadata caches in parallel
+  await Promise.allSettled([
+    getUniqueSets().then(sets => { setsCache = sets; }),
+    getUniqueColors().then(colors => { colorsCache = colors; }),
+    getUniqueTypes().then(types => { typesCache = types; }),
+    getUniqueRarities().then(rarities => { raritiesCache = rarities; })
+  ]);
+};
+
 // All card data combined - loaded lazily with progressive loading
 const getAllCardData = async (onProgress?: (cards: CardData[], progress: number) => void): Promise<CardData[]> => {
   if (!allCardDataCache) {
-    return await loadCardsProgressively(onProgress);
+    const result = await loadCardsProgressively(onProgress);
+    // Update metadata caches after card data is loaded
+    updateMetadataCaches();
+    return result;
   }
   
   return allCardDataCache || [];
@@ -522,100 +538,197 @@ export const getAllCards = async (onProgress?: (cards: AppCard[], progress: numb
 
 // Get all sets
 export const getSets = async (): Promise<SetInfo[]> => {
-  // Return static sets immediately, then update with dynamic data if available
+  // Return cached data if available
+  if (setsCache) {
+    return setsCache;
+  }
+  
+  // Return static sets immediately
   const staticSets = getStaticSets();
-  if (!setsCache) {
-    setsCache = staticSets;
-    // Update with dynamic data in background
+  setsCache = staticSets;
+  
+  // Update with dynamic data in background only if we have card data
+  if (allCardDataCache) {
     getUniqueSets().then(dynamicSets => {
       setsCache = dynamicSets;
     }).catch(() => {
       // Keep static sets if dynamic loading fails
     });
   }
-  return setsCache || staticSets;
+  
+  return setsCache;
 };
 
 // Get all colors
 export const getColors = async (): Promise<string[]> => {
-  // Return static colors immediately, then update with dynamic data if available
+  // Return cached data if available
+  if (colorsCache) {
+    return colorsCache;
+  }
+  
+  // Return static colors immediately
   const staticColors = getStaticColors();
-  if (!colorsCache) {
-    colorsCache = staticColors;
-    // Update with dynamic data in background
+  colorsCache = staticColors;
+  
+  // Update with dynamic data in background only if we have card data
+  if (allCardDataCache) {
     getUniqueColors().then(dynamicColors => {
       colorsCache = dynamicColors;
     }).catch(() => {
       // Keep static colors if dynamic loading fails
     });
   }
-  return colorsCache || staticColors;
+  
+  return colorsCache;
 };
 
 // Get all types
 export const getTypes = async (): Promise<string[]> => {
-  // Return static types immediately, then update with dynamic data if available
+  // Return cached data if available
+  if (typesCache) {
+    return typesCache;
+  }
+  
+  // Return static types immediately
   const staticTypes = getStaticTypes();
-  if (!typesCache) {
-    typesCache = staticTypes;
-    // Update with dynamic data in background
+  typesCache = staticTypes;
+  
+  // Update with dynamic data in background only if we have card data
+  if (allCardDataCache) {
     getUniqueTypes().then(dynamicTypes => {
       typesCache = dynamicTypes;
     }).catch(() => {
       // Keep static types if dynamic loading fails
     });
   }
-  return typesCache || staticTypes;
+  
+  return typesCache;
 };
 
 // Get all rarities
 export const getRarities = async (): Promise<string[]> => {
-  // Return static rarities immediately, then update with dynamic data if available
+  // Return cached data if available
+  if (raritiesCache) {
+    return raritiesCache;
+  }
+  
+  // Return static rarities immediately
   const staticRarities = getStaticRarities();
-  if (!raritiesCache) {
-    raritiesCache = staticRarities;
-    // Update with dynamic data in background
+  raritiesCache = staticRarities;
+  
+  // Update with dynamic data in background only if we have card data
+  if (allCardDataCache) {
     getUniqueRarities().then(dynamicRarities => {
       raritiesCache = dynamicRarities;
     }).catch(() => {
       // Keep static rarities if dynamic loading fails
     });
   }
-  return raritiesCache || staticRarities;
+  
+  return raritiesCache;
 };
+
+// Cache invalidation functions
+export const clearCardDataCache = () => {
+  allCardDataCache = null;
+  loadedPacks.clear();
+  isLoadingProgressively = false;
+  progressiveLoadingCallbacks = [];
+};
+
+export const clearMetadataCache = () => {
+  setsCache = null;
+  colorsCache = null;
+  typesCache = null;
+  raritiesCache = null;
+};
+
+export const clearAllCaches = () => {
+  clearCardDataCache();
+  clearMetadataCache();
+};
+
+
 
 // Get card by ID
 export const getCardById = async (id: string): Promise<AppCard | undefined> => {
+  // Use cached data if available, otherwise load
+  if (allCardDataCache) {
+    const card = allCardDataCache.find(card => card.id === id);
+    return card ? convertToAppCard(card) : undefined;
+  }
+  
+  // Only load if not cached
   const cards = await getAllCards();
   return cards.find(card => card.id === id);
 };
 
 // Get cards by set
 export const getCardsBySet = async (setCode: string): Promise<AppCard[]> => {
+  // Use cached data if available, otherwise load
+  if (allCardDataCache) {
+    return allCardDataCache
+      .filter(card => card.set.name === setCode)
+      .map(convertToAppCard);
+  }
+  
+  // Only load if not cached
   const cards = await getAllCards();
   return cards.filter(card => card.set.name === setCode);
 };
 
 // Get leader cards
 export const getLeaderCards = async (): Promise<AppCard[]> => {
+  // Use cached data if available, otherwise load
+  if (allCardDataCache) {
+    return allCardDataCache
+      .filter(card => card.type === 'LEADER')
+      .map(convertToAppCard);
+  }
+  
+  // Only load if not cached
   const cards = await getAllCards();
   return cards.filter(card => card.type === 'LEADER');
 };
 
 // Get character cards
 export const getCharacterCards = async (): Promise<AppCard[]> => {
+  // Use cached data if available, otherwise load
+  if (allCardDataCache) {
+    return allCardDataCache
+      .filter(card => card.type === 'CHARACTER')
+      .map(convertToAppCard);
+  }
+  
+  // Only load if not cached
   const cards = await getAllCards();
   return cards.filter(card => card.type === 'CHARACTER');
 };
 
 // Get event cards
 export const getEventCards = async (): Promise<AppCard[]> => {
+  // Use cached data if available, otherwise load
+  if (allCardDataCache) {
+    return allCardDataCache
+      .filter(card => card.type === 'EVENT')
+      .map(convertToAppCard);
+  }
+  
+  // Only load if not cached
   const cards = await getAllCards();
   return cards.filter(card => card.type === 'EVENT');
 };
 
 // Get stage cards
 export const getStageCards = async (): Promise<AppCard[]> => {
+  // Use cached data if available, otherwise load
+  if (allCardDataCache) {
+    return allCardDataCache
+      .filter(card => card.type === 'STAGE')
+      .map(convertToAppCard);
+  }
+  
+  // Only load if not cached
   const cards = await getAllCards();
   return cards.filter(card => card.type === 'STAGE');
 }; 

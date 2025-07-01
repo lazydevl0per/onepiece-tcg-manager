@@ -35,6 +35,9 @@ export function useCollection() {
         setIsLoading(true);
         setLoadingProgress(0);
         
+        // Load saved collection data once at the beginning
+        const savedCollection = StorageService.loadCollection();
+        
         // Load metadata first (these are small and can be loaded quickly)
         console.log('📊 Loading metadata...');
         const [allSets, allColors, allTypes, allRarities] = await Promise.all([
@@ -54,11 +57,9 @@ export function useCollection() {
         console.log('🃏 Loading cards...');
         const allCards = await getAllCards((progressCards, progress) => {
           console.log(`📈 Loading progress: ${Math.round(progress * 100)}% (${progressCards.length} cards)`);
-          // Load saved collection data
-          const savedCollection = StorageService.loadCollection();
           
+          // Merge saved collection data with card data for progress updates
           if (savedCollection) {
-            // Merge saved collection data with card data
             const cardsWithOwned = progressCards.map(card => ({
               ...card,
               owned: savedCollection.cards[card.id] || 0
@@ -73,8 +74,7 @@ export function useCollection() {
         
         console.log('✅ All cards loaded:', allCards.length);
         
-        // Final update with all cards
-        const savedCollection = StorageService.loadCollection();
+        // Final update with all cards (no need to reload saved collection)
         if (savedCollection) {
           const cardsWithOwned = allCards.map(card => ({
             ...card,
@@ -113,38 +113,43 @@ export function useCollection() {
     const totalImages = allCards.length;
     let loadedImages = 0;
     
-    // Load images sequentially with a small delay between each
-    const delayBetweenImages = 200; // 200ms between image requests
+    // Load images in smaller batches with shorter delays
+    const batchSize = 5; // Load 5 images at a time
+    const delayBetweenBatches = 100; // 100ms between batches
     
-    for (let i = 0; i < totalImages; i++) {
-      const card = allCards[i];
+    for (let i = 0; i < totalImages; i += batchSize) {
+      const batch = allCards.slice(i, i + batchSize);
       
-      try {
-        // Create a temporary image element to trigger loading
-        const img = new Image();
-        img.src = card.images.small;
-        
-        // Wait for the image to load or fail
-        await new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve; // Don't reject on error, just continue
-          // Timeout after 5 seconds
-          setTimeout(resolve, 5000);
-        });
-      } catch (_error) {
-        // Silently ignore image loading errors
-      }
+      // Load batch of images in parallel
+      const batchPromises = batch.map(async (card) => {
+        try {
+          const img = new Image();
+          img.src = card.images.small;
+          
+          // Wait for the image to load or fail with shorter timeout
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve; // Don't reject on error, just continue
+            // Timeout after 3 seconds (reduced from 5)
+            setTimeout(resolve, 3000);
+          });
+        } catch (_error) {
+          // Silently ignore image loading errors
+        }
+      });
       
-      loadedImages++;
+      await Promise.all(batchPromises);
+      
+      loadedImages += batch.length;
       setImageLoadingProgress(loadedImages / totalImages);
       
-      if (i % 100 === 0) {
+      if (loadedImages % 50 === 0) {
         console.log(`🖼️ Image loading progress: ${Math.round((loadedImages / totalImages) * 100)}% (${loadedImages}/${totalImages})`);
       }
       
-      // Small delay between images (except for the last image)
-      if (i < totalImages - 1) {
-        await new Promise(resolve => setTimeout(resolve, delayBetweenImages));
+      // Small delay between batches (except for the last batch)
+      if (i + batchSize < totalImages) {
+        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
       }
     }
     
