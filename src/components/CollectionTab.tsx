@@ -65,34 +65,55 @@ export default function CollectionTab({
 
   // Memoize card rendering to prevent unnecessary re-renders during resize
   const renderedCards = useMemo(() => 
-    filteredCards.map(card => (
-      <Card
-        key={card.id}
-        card={card}
-        owned={card.owned}
-        onUpdateOwned={onUpdateCardOwned}
-        onAddToDeck={onAddCardToDeck}
-        isInDeck={isCardInDeck ? isCardInDeck(card) : false}
-        deckQuantity={getCardQuantityInDeck ? getCardQuantityInDeck(card) : 0}
-        canAddToDeck={!!selectedDeck}
-        addToDeckDisabled={
-          card.owned === 0 ||
-          (card.type === 'LEADER' && selectedDeck && selectedDeck.leader && selectedDeck.leader.id !== card.id) ||
-          (isCardInDeck && getCardQuantityInDeck &&
-           isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD)
+    filteredCards.map(card => {
+      // Color identity check
+      let colorIdentityInvalid = false;
+      let colorIdentityMessage = '';
+      if (
+        selectedDeck &&
+        selectedDeck.leader &&
+        card.type !== 'LEADER' &&
+        card.color !== 'Colorless'
+      ) {
+        const leaderColors = selectedDeck.leader.color.split('/').map(c => c.trim());
+        const cardColors = card.color.split('/').map(c => c.trim());
+        if (!cardColors.every(c => leaderColors.includes(c))) {
+          colorIdentityInvalid = true;
+          colorIdentityMessage = `This card's color (${card.color}) does not match your Leader's color identity (${selectedDeck.leader.color})`;
         }
-        addToDeckTitle={
-          card.owned === 0
-            ? 'You need to own this card to add it to your deck'
-            : card.type === 'LEADER' && selectedDeck && selectedDeck.leader && selectedDeck.leader.id !== card.id
-            ? 'A deck can only have one leader card'
-            : isCardInDeck && getCardQuantityInDeck &&
-              isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD
-            ? `Maximum ${MAX_COPIES_PER_CARD} copies already in deck`
-            : 'Add to deck'
-        }
-      />
-    )), [filteredCards, onUpdateCardOwned, onAddCardToDeck, isCardInDeck, getCardQuantityInDeck, selectedDeck, MAX_COPIES_PER_CARD]);
+      }
+      return (
+        <Card
+          key={card.id}
+          card={card}
+          owned={card.owned}
+          onUpdateOwned={onUpdateCardOwned}
+          onAddToDeck={onAddCardToDeck}
+          isInDeck={isCardInDeck ? isCardInDeck(card) : false}
+          deckQuantity={getCardQuantityInDeck ? getCardQuantityInDeck(card) : 0}
+          canAddToDeck={!!selectedDeck}
+          addToDeckDisabled={
+            !!colorIdentityInvalid ||
+            card.owned === 0 ||
+            (!!(card.type === 'LEADER' && selectedDeck && selectedDeck.leader)) ||
+            (isCardInDeck && getCardQuantityInDeck &&
+             isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD)
+          }
+          addToDeckTitle={
+            colorIdentityInvalid
+              ? colorIdentityMessage
+              : card.owned === 0
+              ? 'You need to own this card to add it to your deck'
+              : card.type === 'LEADER' && selectedDeck && selectedDeck.leader
+              ? 'A deck can only have one leader card'
+              : isCardInDeck && getCardQuantityInDeck &&
+                isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD
+              ? `Maximum ${MAX_COPIES_PER_CARD} copies already in deck`
+              : 'Add to deck'
+          }
+        />
+      );
+    }), [filteredCards, onUpdateCardOwned, onAddCardToDeck, isCardInDeck, getCardQuantityInDeck, selectedDeck, MAX_COPIES_PER_CARD]);
 
   const handleShowManageCollection = useCallback(() => {
     onShowManageCollection(true);

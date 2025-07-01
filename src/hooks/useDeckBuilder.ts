@@ -85,6 +85,15 @@ export function useDeckBuilder() {
       }
       updatedDeck.leader = card;
     } else {
+      // Enforce color identity rule
+      if (updatedDeck.leader) {
+        const leaderColors = updatedDeck.leader.color.split('/').map(c => c.trim());
+        // Allow colorless cards (if any), which are usually marked as 'Colorless'
+        if (card.color !== 'Colorless' && !leaderColors.includes(card.color)) {
+          alert(`This card's color (${card.color}) does not match your Leader's color identity (${updatedDeck.leader.color}).`);
+          return;
+        }
+      }
       // Check deck size limit
       const currentTotal = getTotalCards(updatedDeck);
       if (currentTotal >= DECK_SIZE_LIMIT) {
