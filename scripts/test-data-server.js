@@ -75,8 +75,8 @@ function startTestDataServer() {
   server.listen(port, () => {
     console.log(`✅ Test data server running on port ${port}`);
     console.log('🌐 Test URLs:');
-    console.log(`   http://localhost:${port}/data/data/english/json/packs.json`);
-    console.log(`   http://localhost:${port}/data/data/english/json/cards_569001.json`);
+    console.log(`   http://localhost:${port}/data/english/json/packs.json`);
+    console.log(`   http://localhost:${port}/data/english/json/cards_569001.json`);
   });
   
   return server;
@@ -94,7 +94,7 @@ async function testDataServer() {
   try {
     // Test fetching packs.json
     console.log('\n📡 Testing packs.json...');
-    const response = await fetch('http://localhost:3001/data/data/english/json/packs.json');
+    const response = await fetch('http://localhost:3001/data/english/json/packs.json');
     if (response.ok) {
       const data = await response.json();
       console.log(`✅ Successfully fetched packs.json with ${data.length} packs`);
@@ -104,7 +104,7 @@ async function testDataServer() {
     
     // Test fetching a card file
     console.log('\n📡 Testing cards_569001.json...');
-    const cardResponse = await fetch('http://localhost:3001/data/data/english/json/cards_569001.json');
+    const cardResponse = await fetch('http://localhost:3001/data/english/json/cards_569001.json');
     if (cardResponse.ok) {
       const cardData = await cardResponse.json();
       console.log(`✅ Successfully fetched cards_569001.json with ${cardData.length} cards`);

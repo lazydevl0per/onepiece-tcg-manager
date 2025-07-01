@@ -65,7 +65,7 @@ free -h
 node scripts/copy-data.js
 
 # Check if data directory exists
-ls -la data/data/english/
+ls -la data/english/
 ```
 
 ### 5. Artifact Upload Failures

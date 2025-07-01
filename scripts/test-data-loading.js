@@ -19,17 +19,17 @@ async function testDataLoading() {
     const jsonPath = path.join(distDataPath, 'data', 'english', 'json');
     if (fs.existsSync(jsonPath)) {
       const jsonFiles = fs.readdirSync(jsonPath).filter(f => f.endsWith('.json'));
-      console.log(`✅ Found ${jsonFiles.length} JSON files in dist/data/data/english/json`);
+      console.log(`✅ Found ${jsonFiles.length} JSON files in dist/data/english/json`);
     } else {
-      console.log('❌ dist/data/data/english/json directory not found');
+      console.log('❌ dist/data/english/json directory not found');
     }
     
     const imagesPath = path.join(distDataPath, 'data', 'english', 'images');
     if (fs.existsSync(imagesPath)) {
       const imageFiles = fs.readdirSync(imagesPath).filter(f => f.endsWith('.png'));
-      console.log(`✅ Found ${imageFiles.length} PNG files in dist/data/data/english/images`);
+      console.log(`✅ Found ${imageFiles.length} PNG files in dist/data/english/images`);
     } else {
-      console.log('❌ dist/data/data/english/images directory not found');
+      console.log('❌ dist/data/english/images directory not found');
     }
   } else {
     console.log('❌ dist/data directory not found');
@@ -44,9 +44,9 @@ async function testDataLoading() {
     const jsonPath = path.join(publicDataPath, 'data', 'english', 'json');
     if (fs.existsSync(jsonPath)) {
       const jsonFiles = fs.readdirSync(jsonPath).filter(f => f.endsWith('.json'));
-      console.log(`✅ Found ${jsonFiles.length} JSON files in public/data/data/english/json`);
+      console.log(`✅ Found ${jsonFiles.length} JSON files in public/data/english/json`);
     } else {
-      console.log('❌ public/data/data/english/json directory not found');
+      console.log('❌ public/data/english/json directory not found');
     }
   } else {
     console.log('❌ public/data directory not found');
@@ -61,9 +61,9 @@ async function testDataLoading() {
     const jsonPath = path.join(originalDataPath, 'data', 'english', 'json');
     if (fs.existsSync(jsonPath)) {
       const jsonFiles = fs.readdirSync(jsonPath).filter(f => f.endsWith('.json'));
-      console.log(`✅ Found ${jsonFiles.length} JSON files in original data/data/english/json`);
+      console.log(`✅ Found ${jsonFiles.length} JSON files in original data/english/json`);
     } else {
-      console.log('❌ Original data/data/english/json directory not found');
+      console.log('❌ Original data/english/json directory not found');
     }
   } else {
     console.log('❌ Original data directory not found');

@@ -220,7 +220,7 @@ npm run dist
 node scripts/copy-data.js
 
 # Check data directory structure
-ls -la data/data/english/
+ls -la data/english/
 ```
 
 ### Debugging Builds

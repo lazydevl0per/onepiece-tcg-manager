@@ -104,10 +104,10 @@ const getLocalImagePath = (imgUrl: string): string => {
   let imagePath: string;
   if (isElectron) {
     // In Electron, use the local data server
-    imagePath = `http://localhost:3001/data/data/english/images/${filename}`;
+    imagePath = `http://localhost:3001/data/english/images/${filename}`;
   } else {
     // In web mode, use relative path to the public directory
-    imagePath = `/data/data/english/images/${filename}`;
+    imagePath = `/data/english/images/${filename}`;
   }
   
   return imagePath;
@@ -174,7 +174,7 @@ const importCardData = async (packId: string): Promise<VegapullCard[]> => {
     const isElectron = detectElectron();
     const baseUrl = isElectron ? 'http://localhost:3001' : '';
     
-    const url = `${baseUrl}/data/data/english/json/cards_${packId}.json`;
+    const url = `${baseUrl}/data/english/json/cards_${packId}.json`;
     
     const response = await fetch(url);
     if (!response.ok) {
@@ -194,7 +194,7 @@ const importPackData = async (): Promise<PackData[]> => {
     const isElectron = detectElectron();
     const baseUrl = isElectron ? 'http://localhost:3001' : '';
     
-    const url = `${baseUrl}/data/data/english/json/packs.json`;
+    const url = `${baseUrl}/data/english/json/packs.json`;
     
     const response = await fetch(url);
     if (!response.ok) {
