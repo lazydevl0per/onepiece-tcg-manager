@@ -2,7 +2,7 @@
 
 A modern desktop application for managing your One Piece Trading Card Game collection and building decks.
 
-![One Piece TCG Manager](https://github.com/user-attachments/assets/cdb5bd23-fa50-4314-b44f-e4e35b25f513)
+![image](https://github.com/user-attachments/assets/12029acb-feba-41a7-bc37-6afe6f3f36b3)
 
 ## Features
 
@@ -38,7 +38,7 @@ A modern desktop application for managing your One Piece Trading Card Game colle
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd onepiece-tcg.online
+cd onepiece-tcg-manager
 ```
 
 2. Install dependencies:
@@ -46,19 +46,21 @@ cd onepiece-tcg.online
 npm install
 ```
 
-3. Start the development server:
+3. Build for files:
+```bash
+npm run build
+```
+
+4. Start the development server:
 ```bash
 # For web development (browser)
 npm run dev
 
 # For Electron development (desktop app)
-npm run electron-dev
+npm run electron
 ```
 
-4. Build for production:
-```bash
-# Build web version
-npm run build
+
 
 # Build Electron app
 npm run dist
