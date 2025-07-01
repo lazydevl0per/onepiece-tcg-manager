@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
 
+type StorageManager = {
+  estimate?: () => Promise<{ usage: number; quota: number }>;
+  persist?: () => Promise<boolean>;
+  persisted?: () => Promise<boolean>;
+  clear?: () => Promise<void>;
+};
+
 export default function StorageStatus() {
   const [storageInfo, setStorageInfo] = useState<{
     used: number;
@@ -78,7 +85,7 @@ export default function StorageStatus() {
       <button
         onClick={() => {
           if ('storage' in navigator && 'clear' in navigator.storage) {
-            (navigator.storage as any).clear();
+            (navigator.storage as StorageManager & { clear?: () => Promise<void> }).clear?.();
             window.location.reload();
           }
         }}

@@ -18,8 +18,8 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
-  } catch {
-    // console.error(error)
+  } catch (error) {
+    console.error(error)
   }
 } else {
   // @ts-expect-error (define in dts)

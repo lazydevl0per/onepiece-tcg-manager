@@ -39,6 +39,7 @@ export function useCollection() {
         
         // Load saved collection data
         const savedCollection = StorageService.loadCollection();
+        // eslint-disable-next-line no-console
         console.log('Loaded collection from storage:', savedCollection);
         if (savedCollection) {
           // Merge saved collection data with card data
@@ -46,6 +47,7 @@ export function useCollection() {
             ...card,
             owned: savedCollection.cards[card.id] || 0
           }));
+          // eslint-disable-next-line no-console
           console.log('Merged cards with owned:', cardsWithOwned.filter(c => c.owned > 0));
           setCards(cardsWithOwned);
         } else {
@@ -58,6 +60,7 @@ export function useCollection() {
         setRarities(allRarities);
       } catch (error) {
         // Handle error silently or implement proper error state management
+        // eslint-disable-next-line no-console
         console.error('Failed to load card data:', error);
       } finally {
         setIsLoading(false);
@@ -95,6 +98,7 @@ export function useCollection() {
       );
       
       // Save to localStorage after state update
+      // eslint-disable-next-line no-console
       console.log('Saving collection to storage:', updatedCards.filter(c => c.owned > 0));
       StorageService.saveCollection(updatedCards);
       
@@ -148,6 +152,7 @@ export function useCollection() {
         setCards(updatedCards);
         StorageService.saveCollection(updatedCards);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Failed to import collection:', error);
         alert('Invalid collection file format');
       }
@@ -184,6 +189,7 @@ export function useCollection() {
           alert('Failed to restore backup data');
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Failed to restore backup:', error);
         alert('Invalid backup file format');
       }

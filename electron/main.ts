@@ -6,7 +6,6 @@ import { dirname } from 'path'
 import { createServer, Server } from 'http'
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
-import fs from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -16,10 +15,6 @@ let dataServer: Server | null = null
 
 function startDataServer(): void {
   const port = 3001
-  
-  // console.log('🚀 Starting data server...');
-  // console.log(`📁 Resources path: ${process.resourcesPath}`);
-  // console.log(`🔧 Is dev: ${is.dev}`);
   
   dataServer = createServer(async (req, res) => {
     try {
@@ -45,26 +40,6 @@ function startDataServer(): void {
       const basePath = isDev ? join(__dirname, '..') : process.resourcesPath
       const fullPath = join(basePath, filePath)
       
-      // Debug logging
-      // console.log(`Data server request: ${req.url}`)
-      // console.log(`Is dev: ${isDev}`)
-      // console.log(`Base path: ${basePath}`)
-      // console.log(`Full path: ${fullPath}`)
-      // console.log(`File exists: ${existsSync(fullPath)}`)
-      
-      // List contents of basePath for debugging
-      if (isDev) {
-        // console.log(`Dev mode - __dirname: ${__dirname}`)
-      } else {
-        // console.log(`Production mode - resourcesPath: ${process.resourcesPath}`)
-        try {
-          fs.readdirSync(basePath); // Just call it for side effect if needed, or remove entirely if not needed
-          // console.log(`Base path contents: ${baseContents.join(', ')}`);
-        } catch (_error) {
-          // console.log(`Error reading base path: ${(error as Error).message}`);
-        }
-      }
-      
       if (!existsSync(fullPath)) {
         res.writeHead(404)
         res.end('File not found')
@@ -85,15 +60,12 @@ function startDataServer(): void {
       res.writeHead(200)
       res.end(content)
     } catch (_error) {
-      // console.error('Error serving data file:', error)
       res.writeHead(500)
       res.end('Internal server error')
     }
   })
 
-  dataServer.listen(port, () => {
-    // console.log(`Data server running on port ${port}`)
-  })
+  dataServer.listen(port, () => {})
 }
 
 function createWindow(): void {

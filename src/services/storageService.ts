@@ -33,6 +33,7 @@ export class StorageService {
       
       localStorage.setItem(COLLECTION_STORAGE_KEY, JSON.stringify(collectionData));
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to save collection to localStorage:', error);
     }
   }
@@ -46,6 +47,7 @@ export class StorageService {
       
       // Validate the data structure
       if (!collectionData.cards || typeof collectionData.cards !== 'object') {
+        // eslint-disable-next-line no-console
         console.warn('Invalid collection data structure, clearing storage');
         localStorage.removeItem(COLLECTION_STORAGE_KEY);
         return null;
@@ -53,6 +55,7 @@ export class StorageService {
       
       return collectionData;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load collection from localStorage:', error);
       // Clear corrupted data
       localStorage.removeItem(COLLECTION_STORAGE_KEY);
@@ -78,6 +81,7 @@ export class StorageService {
       
       localStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(deckData));
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to save decks to localStorage:', error);
     }
   }
@@ -91,6 +95,7 @@ export class StorageService {
       
       // Validate the data structure
       if (!deckData.decks || !Array.isArray(deckData.decks)) {
+        // eslint-disable-next-line no-console
         console.warn('Invalid deck data structure, clearing storage');
         localStorage.removeItem(DECKS_STORAGE_KEY);
         return null;
@@ -105,6 +110,7 @@ export class StorageService {
       
       return deckData;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load decks from localStorage:', error);
       // Clear corrupted data
       localStorage.removeItem(DECKS_STORAGE_KEY);
@@ -164,6 +170,7 @@ export class StorageService {
       
       return true;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to restore data from backup:', error);
       return false;
     }
@@ -181,7 +188,7 @@ export class StorageService {
         };
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, { name: string; owned: number; set: string; rarity: string }>);
     
     return JSON.stringify(collectionData, null, 2);
   }
@@ -196,6 +203,7 @@ export class StorageService {
         owned: importedData[card.id]?.owned || card.owned
       }));
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to import collection data:', error);
       return cards;
     }
