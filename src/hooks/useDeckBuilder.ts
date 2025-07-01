@@ -79,6 +79,19 @@ export function useDeckBuilder() {
     
     // Check if it's a leader card
     if (card.type === 'LEADER') {
+      // Check if any cards in the deck do not match the new leader's color identity
+      const leaderColors = card.color.split('/').map(c => c.trim());
+      const mismatchedCards = updatedDeck.cards.filter(entry => {
+        // Allow colorless cards
+        if (entry.card.color === 'Colorless') return false;
+        const cardColors = entry.card.color.split('/').map(c => c.trim());
+        return !cardColors.every(c => leaderColors.includes(c));
+      });
+      if (mismatchedCards.length > 0) {
+        const mismatchedNames = mismatchedCards.map(entry => `${entry.card.name} (${entry.card.color})`).join(', ');
+        alert(`Cannot add this leader. The following cards do not match the leader's color identity (${card.color}):\n${mismatchedNames}`);
+        return;
+      }
       if (updatedDeck.leader) {
         alert('A deck can only have one leader card');
         return;

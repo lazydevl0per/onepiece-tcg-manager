@@ -82,6 +82,25 @@ export default function CollectionTab({
           colorIdentityMessage = `This card's color (${card.color}) does not match your Leader's color identity (${selectedDeck.leader.color})`;
         }
       }
+      // Leader color identity edge case: check if adding this leader would make the deck illegal
+      let leaderColorIdentityInvalid = false;
+      let leaderColorIdentityMessage = '';
+      if (
+        card.type === 'LEADER' &&
+        selectedDeck &&
+        selectedDeck.cards.length > 0
+      ) {
+        const leaderColors = card.color.split('/').map(c => c.trim());
+        const mismatchedCards = selectedDeck.cards.filter(entry => {
+          if (entry.card.color === 'Colorless') return false;
+          const cardColors = entry.card.color.split('/').map(c => c.trim());
+          return !cardColors.every(c => leaderColors.includes(c));
+        });
+        if (mismatchedCards.length > 0) {
+          leaderColorIdentityInvalid = true;
+          leaderColorIdentityMessage = `Cannot add this leader. The deck contains cards that do not match the leader's color identity (${card.color}):\n` + mismatchedCards.map(entry => `${entry.card.name} (${entry.card.color})`).join(', ');
+        }
+      }
       return (
         <Card
           key={card.id}
@@ -96,6 +115,7 @@ export default function CollectionTab({
             !!colorIdentityInvalid ||
             card.owned === 0 ||
             (!!(card.type === 'LEADER' && selectedDeck && selectedDeck.leader)) ||
+            leaderColorIdentityInvalid ||
             (isCardInDeck && getCardQuantityInDeck &&
              isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD)
           }
@@ -106,6 +126,8 @@ export default function CollectionTab({
               ? 'You need to own this card to add it to your deck'
               : card.type === 'LEADER' && selectedDeck && selectedDeck.leader
               ? 'A deck can only have one leader card'
+              : leaderColorIdentityInvalid
+              ? leaderColorIdentityMessage
               : isCardInDeck && getCardQuantityInDeck &&
                 isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD
               ? `Maximum ${MAX_COPIES_PER_CARD} copies already in deck`
