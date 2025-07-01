@@ -75,6 +75,13 @@
     ],
     "extraResources": [
       {
+        "from": "data",
+        "to": "data",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
         "from": "dist/data",
         "to": "data",
         "filter": [
