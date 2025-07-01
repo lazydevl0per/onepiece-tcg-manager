@@ -76,14 +76,17 @@ export default function CollectionTab({
         deckQuantity={getCardQuantityInDeck ? getCardQuantityInDeck(card) : 0}
         canAddToDeck={!!selectedDeck}
         addToDeckDisabled={
-          card.owned === 0 || 
-          (isCardInDeck && getCardQuantityInDeck && 
+          card.owned === 0 ||
+          (card.type === 'LEADER' && selectedDeck && selectedDeck.leader && selectedDeck.leader.id !== card.id) ||
+          (isCardInDeck && getCardQuantityInDeck &&
            isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD)
         }
         addToDeckTitle={
-          card.owned === 0 
+          card.owned === 0
             ? 'You need to own this card to add it to your deck'
-            : isCardInDeck && getCardQuantityInDeck && 
+            : card.type === 'LEADER' && selectedDeck && selectedDeck.leader && selectedDeck.leader.id !== card.id
+            ? 'A deck can only have one leader card'
+            : isCardInDeck && getCardQuantityInDeck &&
               isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD
             ? `Maximum ${MAX_COPIES_PER_CARD} copies already in deck`
             : 'Add to deck'

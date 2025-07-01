@@ -118,8 +118,8 @@ export default function Card({
             title={addToDeckTitle}
             className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
               addToDeckDisabled
-                ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-slate-600 text-slate-300 cursor-not-allowed'
+                ? 'bg-slate-600 text-slate-300 cursor-not-allowed'
+                : 'bg-red-500 hover:bg-red-600 text-white cursor-pointer'
             }`}
           >
             {isInDeck ? (
