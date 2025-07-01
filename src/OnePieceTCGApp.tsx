@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AppShell, CollectionTab, DeckBuilderTab } from './components';
+import { AppShell, CollectionTab, DeckBuilderTab, ManageCollectionModal } from './components';
 import { useCollection, useDeckBuilder, useResizeOptimization } from './hooks';
 import { MAX_COPIES_PER_CARD } from './utils/constants';
 
@@ -40,7 +40,6 @@ export default function OnePieceTCGApp() {
           onSetFilterChange={collection.setSetFilter}
           showOwnedOnly={collection.showOwnedOnly}
           onShowOwnedOnlyChange={collection.setShowOwnedOnly}
-          showManageCollection={showManageCollection}
           onShowManageCollection={setShowManageCollection}
           onUpdateCardOwned={collection.updateCardOwned}
           onAddCardToDeck={deckBuilder.addCardToDeck}
@@ -74,6 +73,20 @@ export default function OnePieceTCGApp() {
           getDeckStatistics={deckBuilder.getDeckStatistics}
         />
       )}
+
+      <ManageCollectionModal
+        isOpen={showManageCollection}
+        onClose={() => setShowManageCollection(false)}
+        onClearAllCollections={collection.clearAllCollections}
+        onSetAllToOne={collection.setAllToOne}
+        onExportCollection={collection.exportCollection}
+        onImportCollection={collection.importCollection}
+        onBackupAllData={collection.backupAllData}
+        onRestoreAllData={collection.restoreAllData}
+        totalCards={collection.cards.length}
+        ownedCards={collection.ownedCardsCount}
+        totalCopies={collection.totalCopies}
+      />
     </AppShell>
   );
 } 

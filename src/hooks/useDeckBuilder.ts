@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { type AppCard } from '../services/cardDataService';
 import { DECK_SIZE_LIMIT, MAX_COPIES_PER_CARD } from '../utils/constants';
+import { StorageService } from '../services/storageService';
 
 // Updated Deck interface to use AppCard
 export interface Deck {
@@ -26,6 +27,18 @@ export function useDeckBuilder() {
   const [editingDeckName, setEditingDeckName] = useState<string | null>(null);
   const [editingDeckNameValue, setEditingDeckNameValue] = useState('');
 
+  // Load saved decks on component mount
+  useEffect(() => {
+    const savedDeckData = StorageService.loadDecks();
+    if (savedDeckData) {
+      setDecks(savedDeckData.decks);
+      if (savedDeckData.selectedDeckId) {
+        const selected = savedDeckData.decks.find(d => d.id === savedDeckData.selectedDeckId);
+        setSelectedDeck(selected || null);
+      }
+    }
+  }, []);
+
   const createDeck = () => {
     const newDeck: Deck = {
       id: Date.now().toString(),
@@ -34,8 +47,10 @@ export function useDeckBuilder() {
       createdAt: new Date(),
       updatedAt: new Date()
     };
-    setDecks([...decks, newDeck]);
+    const updatedDecks = [...decks, newDeck];
+    setDecks(updatedDecks);
     setSelectedDeck(newDeck);
+    StorageService.saveDecks(updatedDecks, newDeck.id);
   };
 
   const removeCardFromDeck = (cardId: string) => {
@@ -51,8 +66,10 @@ export function useDeckBuilder() {
     }
     
     updatedDeck.updatedAt = new Date();
-    setDecks(decks.map(d => d.id === updatedDeck.id ? updatedDeck : d));
+    const updatedDecks = decks.map(d => d.id === updatedDeck.id ? updatedDeck : d);
+    setDecks(updatedDecks);
     setSelectedDeck(updatedDeck);
+    StorageService.saveDecks(updatedDecks, updatedDeck.id);
   };
 
   const addCardToDeck = (card: AppCard) => {
@@ -89,8 +106,10 @@ export function useDeckBuilder() {
     }
     
     updatedDeck.updatedAt = new Date();
-    setDecks(decks.map(d => d.id === updatedDeck.id ? updatedDeck : d));
+    const updatedDecks = decks.map(d => d.id === updatedDeck.id ? updatedDeck : d);
+    setDecks(updatedDecks);
     setSelectedDeck(updatedDeck);
+    StorageService.saveDecks(updatedDecks, updatedDeck.id);
   };
 
   const updateCardQuantity = (cardId: string, quantity: number) => {
@@ -110,8 +129,10 @@ export function useDeckBuilder() {
       }
       
       updatedDeck.updatedAt = new Date();
-      setDecks(decks.map(d => d.id === updatedDeck.id ? updatedDeck : d));
+      const updatedDecks = decks.map(d => d.id === updatedDeck.id ? updatedDeck : d);
+      setDecks(updatedDecks);
       setSelectedDeck(updatedDeck);
+      StorageService.saveDecks(updatedDecks, updatedDeck.id);
     }
   };
 
@@ -120,18 +141,21 @@ export function useDeckBuilder() {
     if (updatedDeck) {
       updatedDeck.name = newName;
       updatedDeck.updatedAt = new Date();
-      setDecks(decks.map(d => d.id === deckId ? updatedDeck : d));
+      const updatedDecks = decks.map(d => d.id === deckId ? updatedDeck : d);
+      setDecks(updatedDecks);
       if (selectedDeck?.id === deckId) {
         setSelectedDeck(updatedDeck);
       }
+      StorageService.saveDecks(updatedDecks, selectedDeck?.id || null);
     }
   };
 
   const deleteDeck = (deckId: string) => {
-    setDecks(decks.filter(d => d.id !== deckId));
-    if (selectedDeck?.id === deckId) {
-      setSelectedDeck(null);
-    }
+    const updatedDecks = decks.filter(d => d.id !== deckId);
+    setDecks(updatedDecks);
+    const newSelectedDeck = selectedDeck?.id === deckId ? null : selectedDeck;
+    setSelectedDeck(newSelectedDeck);
+    StorageService.saveDecks(updatedDecks, newSelectedDeck?.id || null);
   };
 
   const exportDeck = (deck: Deck) => {
@@ -170,8 +194,10 @@ export function useDeckBuilder() {
           createdAt: new Date(deckData.createdAt) || new Date(),
           updatedAt: new Date()
         };
-        setDecks([...decks, newDeck]);
+        const updatedDecks = [...decks, newDeck];
+        setDecks(updatedDecks);
         setSelectedDeck(newDeck);
+        StorageService.saveDecks(updatedDecks, newDeck.id);
       } catch {
         alert('Invalid deck file format');
       }
@@ -224,6 +250,12 @@ export function useDeckBuilder() {
     return cardEntry ? cardEntry.quantity : 0;
   };
 
+  // Wrapper for setSelectedDeck that also saves to localStorage
+  const selectDeck = (deck: Deck | null) => {
+    setSelectedDeck(deck);
+    StorageService.saveDecks(decks, deck?.id || null);
+  };
+
   return {
     // State
     decks,
@@ -232,7 +264,7 @@ export function useDeckBuilder() {
     editingDeckNameValue,
     
     // Actions
-    setSelectedDeck,
+    setSelectedDeck: selectDeck,
     setEditingDeckName,
     setEditingDeckNameValue,
     createDeck,

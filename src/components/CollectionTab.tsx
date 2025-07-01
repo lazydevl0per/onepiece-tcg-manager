@@ -3,7 +3,6 @@ import { type Deck } from '../hooks/useDeckBuilder';
 import { type SetInfo } from '../services/cardDataService';
 import SearchAndFilters from './SearchAndFilters';
 import Card from './Card';
-import ManageCollectionModal from './ManageCollectionModal';
 import { useMemo, useCallback } from 'react';
 
 interface CollectionTabProps {
@@ -21,7 +20,6 @@ interface CollectionTabProps {
   onSetFilterChange: (set: string) => void;
   showOwnedOnly: boolean;
   onShowOwnedOnlyChange: (show: boolean) => void;
-  showManageCollection: boolean;
   onShowManageCollection: (show: boolean) => void;
   onUpdateCardOwned: (cardId: string, owned: number) => void;
   onAddCardToDeck?: (card: AppCard) => void;
@@ -50,7 +48,6 @@ export default function CollectionTab({
   onSetFilterChange,
   showOwnedOnly,
   onShowOwnedOnlyChange,
-  showManageCollection,
   onShowManageCollection,
   onUpdateCardOwned,
   onAddCardToDeck,
@@ -65,7 +62,6 @@ export default function CollectionTab({
 }: CollectionTabProps) {
   // Memoize expensive calculations
   const ownedCardsCount = useMemo(() => cards.filter(c => c.owned > 0).length, [cards]);
-  const totalCopies = useMemo(() => cards.reduce((sum, c) => sum + c.owned, 0), [cards]);
 
   // Memoize card rendering to prevent unnecessary re-renders during resize
   const renderedCards = useMemo(() => 
@@ -95,21 +91,8 @@ export default function CollectionTab({
       />
     )), [filteredCards, onUpdateCardOwned, onAddCardToDeck, isCardInDeck, getCardQuantityInDeck, selectedDeck, MAX_COPIES_PER_CARD]);
 
-  // Memoize modal actions to prevent unnecessary re-renders
-  const handleClearAllCollections = useCallback(() => {
-    cards.forEach(card => onUpdateCardOwned(card.id, 0));
-  }, [cards, onUpdateCardOwned]);
-
-  const handleSetAllToOne = useCallback(() => {
-    cards.forEach(card => onUpdateCardOwned(card.id, 1));
-  }, [cards, onUpdateCardOwned]);
-
   const handleShowManageCollection = useCallback(() => {
     onShowManageCollection(true);
-  }, [onShowManageCollection]);
-
-  const handleCloseManageCollection = useCallback(() => {
-    onShowManageCollection(false);
   }, [onShowManageCollection]);
 
   return (
@@ -141,16 +124,6 @@ export default function CollectionTab({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 will-change-auto">
         {renderedCards}
       </div>
-
-      <ManageCollectionModal
-        isOpen={showManageCollection}
-        onClose={handleCloseManageCollection}
-        onClearAllCollections={handleClearAllCollections}
-        onSetAllToOne={handleSetAllToOne}
-        totalCards={cards.length}
-        ownedCards={ownedCardsCount}
-        totalCopies={totalCopies}
-      />
     </div>
   );
 } 

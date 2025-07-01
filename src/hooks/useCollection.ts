@@ -8,6 +8,7 @@ import {
   type AppCard,
   type SetInfo
 } from '../services/cardDataService';
+import { StorageService } from '../services/storageService';
 
 export function useCollection() {
   const [cards, setCards] = useState<AppCard[]>([]);
@@ -36,7 +37,21 @@ export function useCollection() {
           getRarities()
         ]);
         
-        setCards(allCards);
+        // Load saved collection data
+        const savedCollection = StorageService.loadCollection();
+        console.log('Loaded collection from storage:', savedCollection);
+        if (savedCollection) {
+          // Merge saved collection data with card data
+          const cardsWithOwned = allCards.map(card => ({
+            ...card,
+            owned: savedCollection.cards[card.id] || 0
+          }));
+          console.log('Merged cards with owned:', cardsWithOwned.filter(c => c.owned > 0));
+          setCards(cardsWithOwned);
+        } else {
+          setCards(allCards);
+        }
+        
         setSets(allSets);
         setColors(allColors);
         setTypes(allTypes);
@@ -72,16 +87,107 @@ export function useCollection() {
     return filtered.filter(card => !showOwnedOnly || card.owned > 0);
   }, [cards, searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
 
-  // Optimize card update function
+  // Optimize card update function with persistence
   const updateCardOwned = useCallback((cardId: string, owned: number) => {
-    setCards(prevCards => prevCards.map(card => 
-      card.id === cardId ? { ...card, owned } : card
-    ));
+    setCards(prevCards => {
+      const updatedCards = prevCards.map(card => 
+        card.id === cardId ? { ...card, owned } : card
+      );
+      
+      // Save to localStorage after state update
+      console.log('Saving collection to storage:', updatedCards.filter(c => c.owned > 0));
+      StorageService.saveCollection(updatedCards);
+      
+      return updatedCards;
+    });
   }, []);
 
   // Memoize expensive calculations
   const ownedCardsCount = useMemo(() => cards.filter(c => c.owned > 0).length, [cards]);
   const totalCopies = useMemo(() => cards.reduce((sum, c) => sum + c.owned, 0), [cards]);
+
+  // Collection management functions
+  const clearAllCollections = useCallback(() => {
+    setCards(prevCards => {
+      const clearedCards = prevCards.map(card => ({ ...card, owned: 0 }));
+      StorageService.saveCollection(clearedCards);
+      return clearedCards;
+    });
+  }, []);
+
+  const setAllToOne = useCallback(() => {
+    setCards(prevCards => {
+      const updatedCards = prevCards.map(card => ({ ...card, owned: 1 }));
+      StorageService.saveCollection(updatedCards);
+      return updatedCards;
+    });
+  }, []);
+
+  const exportCollection = useCallback(() => {
+    const exportData = StorageService.exportCollection(cards);
+    const blob = new Blob([exportData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `onepiece-tcg-collection-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [cards]);
+
+  const importCollection = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importData = e.target?.result as string;
+        const updatedCards = StorageService.importCollection(cards, importData);
+        setCards(updatedCards);
+        StorageService.saveCollection(updatedCards);
+      } catch (error) {
+        alert('Invalid collection file format');
+      }
+    };
+    reader.readAsText(file);
+  }, [cards]);
+
+  const backupAllData = useCallback(() => {
+    const backupData = StorageService.backupData();
+    const blob = new Blob([backupData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `onepiece-tcg-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const restoreAllData = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const backupData = e.target?.result as string;
+        const success = StorageService.restoreData(backupData);
+        if (success) {
+          // Reload the page to apply the restored data
+          window.location.reload();
+        } else {
+          alert('Failed to restore backup data');
+        }
+      } catch (error) {
+        alert('Invalid backup file format');
+      }
+    };
+    reader.readAsText(file);
+  }, []);
 
   return {
     // State
@@ -107,6 +213,14 @@ export function useCollection() {
     setSetFilter,
     setShowOwnedOnly,
     updateCardOwned,
+    
+    // Collection management
+    clearAllCollections,
+    setAllToOne,
+    exportCollection,
+    importCollection,
+    backupAllData,
+    restoreAllData,
     
     // Computed values
     ownedCardsCount,

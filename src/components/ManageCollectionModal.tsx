@@ -1,8 +1,14 @@
+import StorageStatus from './StorageStatus';
+
 interface ManageCollectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onClearAllCollections: () => void;
   onSetAllToOne: () => void;
+  onExportCollection: () => void;
+  onImportCollection: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onBackupAllData: () => void;
+  onRestoreAllData: (event: React.ChangeEvent<HTMLInputElement>) => void;
   totalCards: number;
   ownedCards: number;
   totalCopies: number;
@@ -13,6 +19,10 @@ export default function ManageCollectionModal({
   onClose,
   onClearAllCollections,
   onSetAllToOne,
+  onExportCollection,
+  onImportCollection,
+  onBackupAllData,
+  onRestoreAllData,
   totalCards,
   ownedCards,
   totalCopies
@@ -30,7 +40,7 @@ export default function ManageCollectionModal({
             Cards with 0 copies will be hidden when "Owned Only" is enabled.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-op-blue-medium/10 p-4 rounded-lg border border-op-gold-primary/20">
               <h4 className="font-semibold text-op-white-pure mb-2">Collection Stats</h4>
               <p className="text-sm text-op-blue-light">Total Cards: {totalCards}</p>
@@ -48,11 +58,49 @@ export default function ManageCollectionModal({
               </button>
               <button
                 onClick={onSetAllToOne}
-                className="block w-full text-left text-sm text-op-gold-primary hover:text-op-gold-secondary"
+                className="block w-full text-left text-sm text-op-gold-primary hover:text-op-gold-secondary mb-1"
               >
                 Set All to 1 Copy
               </button>
+              <button
+                onClick={onExportCollection}
+                className="block w-full text-left text-sm text-op-blue-light hover:text-op-blue-bright mb-1"
+              >
+                Export Collection
+              </button>
+              <label className="block w-full text-left text-sm text-op-blue-light hover:text-op-blue-bright cursor-pointer">
+                Import Collection
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={onImportCollection}
+                  className="hidden"
+                />
+              </label>
             </div>
+
+            <div className="bg-op-blue-medium/10 p-4 rounded-lg border border-op-gold-primary/20">
+              <h4 className="font-semibold text-op-white-pure mb-2">Backup & Restore</h4>
+              <button
+                onClick={onBackupAllData}
+                className="block w-full text-left text-sm text-op-green-bright hover:text-op-green-medium mb-1"
+              >
+                Backup All Data
+              </button>
+              <label className="block w-full text-left text-sm text-op-green-bright hover:text-op-green-medium cursor-pointer">
+                Restore All Data
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={onRestoreAllData}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <StorageStatus />
           </div>
         </div>
         
