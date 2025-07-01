@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AppShell, CollectionTab, DeckBuilderTab, ManageCollectionModal } from './components';
+import { AppShell, CollectionTab, DeckBuilderTab, ManageCollectionModal, LoadingProgress } from './components';
 import { useCollection, useDeckBuilder, useResizeOptimization } from './hooks';
 import { MAX_COPIES_PER_CARD } from './utils/constants';
 
@@ -17,13 +17,21 @@ export default function OnePieceTCGApp() {
   });
 
   return (
-    <AppShell
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
-      isLoading={collection.isLoading}
-      collectionCount={collection.ownedCardsCount}
-      deckCount={deckBuilder.decks.length}
-    >
+    <>
+      <LoadingProgress 
+        progress={collection.loadingProgress} 
+        isLoading={collection.isLoading}
+        isImageLoading={collection.isImageLoading}
+        imageProgress={collection.imageLoadingProgress}
+      />
+      <AppShell
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        isLoading={collection.isLoading}
+        isImageLoading={collection.isImageLoading}
+        collectionCount={collection.ownedCardsCount}
+        deckCount={deckBuilder.decks.length}
+      >
       {activeTab === 'collection' ? (
         <CollectionTab
           cards={collection.cards}
@@ -88,5 +96,6 @@ export default function OnePieceTCGApp() {
         totalCopies={collection.totalCopies}
       />
     </AppShell>
+    </>
   );
 } 

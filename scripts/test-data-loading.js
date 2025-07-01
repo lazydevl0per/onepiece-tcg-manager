@@ -24,13 +24,8 @@ async function testDataLoading() {
       console.log('❌ dist/data/english/json directory not found');
     }
     
-    const imagesPath = path.join(distDataPath, 'data', 'english', 'images');
-    if (fs.existsSync(imagesPath)) {
-      const imageFiles = fs.readdirSync(imagesPath).filter(f => f.endsWith('.png'));
-      console.log(`✅ Found ${imageFiles.length} PNG files in dist/data/english/images`);
-    } else {
-      console.log('❌ dist/data/english/images directory not found');
-    }
+    // Note: Images are now fetched remotely, so no local image directory check needed
+    console.log('ℹ️  Images are fetched from remote URLs and cached locally');
   } else {
     console.log('❌ dist/data directory not found');
   }
@@ -48,6 +43,9 @@ async function testDataLoading() {
     } else {
       console.log('❌ public/data/english/json directory not found');
     }
+    
+    // Note: Images are now fetched remotely, so no local image directory check needed
+    console.log('ℹ️  Images are fetched from remote URLs and cached locally');
   } else {
     console.log('❌ public/data directory not found');
   }

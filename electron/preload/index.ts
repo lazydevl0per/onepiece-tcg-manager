@@ -1,4 +1,4 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
@@ -8,7 +8,12 @@ const api = {
   getNodeVersion: () => process.versions.node,
   getChromeVersion: () => process.versions.chrome,
   getElectronVersion: () => process.versions.electron,
-  isElectron: () => true
+  isElectron: () => true,
+  
+  // New API for card image caching
+  getCardImagePath: async (imageUrl: string): Promise<string> => {
+    return await ipcRenderer.invoke('get-card-image-path', imageUrl)
+  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

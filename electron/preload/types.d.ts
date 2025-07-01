@@ -9,6 +9,7 @@ export interface IAPI {
   getChromeVersion: () => string
   getElectronVersion: () => string
   isElectron: () => boolean
+  getCardImagePath: (imageUrl: string) => Promise<string>
 }
 
 declare global {

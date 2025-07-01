@@ -21,6 +21,11 @@ function copyDir(src, dest) {
     const destPath = path.join(dest, entry.name);
 
     if (entry.isDirectory()) {
+      // Skip images directory since we're using remote images
+      if (entry.name === 'images') {
+        console.log('⏭️  Skipping images directory (using remote images)');
+        continue;
+      }
       // Recursively copy subdirectories
       copyDir(srcPath, destPath);
     } else {

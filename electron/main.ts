@@ -1,11 +1,16 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
 import { createServer, Server } from 'http'
-import { readFile } from 'fs/promises'
+import { readFile, writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
+import { request } from 'https'
+
+// Image caching rate limiting
+let lastImageRequestTime = 0
+const IMAGE_REQUEST_DELAY = 500 // 500ms between image requests
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -138,6 +143,78 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   if (dataServer) {
     dataServer.close()
+  }
+})
+
+// IPC handler for card image caching with improved error handling
+ipcMain.handle('get-card-image-path', async (_, imageUrl: string): Promise<string> => {
+  try {
+    // Extract filename from URL (e.g., "OP11-006.png" from "https://en.onepiece-cardgame.com/images/cardlist/card/OP11-006.png")
+    const urlParts = imageUrl.split('/')
+    const filename = urlParts[urlParts.length - 1].split('?')[0] // Remove query params
+    
+    // Create cache directory in user data
+    const cacheDir = join(app.getPath('userData'), 'images')
+    if (!existsSync(cacheDir)) {
+      await mkdir(cacheDir, { recursive: true })
+    }
+    
+    const cachePath = join(cacheDir, filename)
+    
+    // Check if image is already cached
+    if (existsSync(cachePath)) {
+      return `file://${cachePath}`
+    }
+    
+    // Rate limiting for image requests
+    const now = Date.now()
+    const timeSinceLastRequest = now - lastImageRequestTime
+    if (timeSinceLastRequest < IMAGE_REQUEST_DELAY) {
+      await new Promise(resolve => setTimeout(resolve, IMAGE_REQUEST_DELAY - timeSinceLastRequest))
+    }
+    lastImageRequestTime = Date.now()
+    
+    // Fetch image from remote URL with timeout and retry logic
+    const imageBuffer = await new Promise<Buffer>((resolve, reject) => {
+      const timeout = 10000 // 10 second timeout
+      const req = request(imageUrl, { timeout }, (res) => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`Failed to fetch image: ${res.statusCode}`))
+          return
+        }
+        
+        const chunks: Buffer[] = []
+        res.on('data', (chunk) => chunks.push(chunk))
+        res.on('end', () => resolve(Buffer.concat(chunks)))
+        res.on('error', reject)
+      })
+      
+      req.on('error', (error: any) => {
+        // Log the error but don't spam the console
+        if (error.code === 'ETIMEDOUT') {
+          console.warn(`Timeout fetching image: ${filename}`)
+        } else {
+          console.warn(`Network error fetching image: ${filename} - ${error.message}`)
+        }
+        reject(error)
+      })
+      
+      req.on('timeout', () => {
+        req.destroy()
+        reject(new Error('Request timeout'))
+      })
+      
+      req.end()
+    })
+    
+    // Save to cache
+    await writeFile(cachePath, imageBuffer)
+    
+    return `file://${cachePath}`
+  } catch (error) {
+    // Silently fallback to original URL if caching fails
+    // This prevents the app from crashing due to network issues
+    return imageUrl
   }
 })
 

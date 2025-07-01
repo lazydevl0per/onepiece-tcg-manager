@@ -189,6 +189,7 @@ Each card includes:
 
 ## Performance Optimizations
 
+- **Smart Loading**: App becomes ready immediately after JSON data loads, while images load sequentially in the background
 - **Code Splitting**: Card data is split into separate chunks for faster loading
 - **Lazy Loading**: Card data is loaded on-demand to reduce initial bundle size
 - **Image Optimization**: Progressive image loading with fallback handling
