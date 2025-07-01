@@ -5,6 +5,4 @@ export { default as ManageCollectionModal } from './ManageCollectionModal';
 export { default as CollectionTab } from './CollectionTab';
 export { default as DeckBuilderTab } from './DeckBuilderTab';
 export { default as StorageStatus } from './StorageStatus';
-export { VirtualizedGrid } from './VirtualizedGrid';
-export { default as Badge } from './Badge';
 export { default as LoadingProgress } from './LoadingProgress'; 

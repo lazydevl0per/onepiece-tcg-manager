@@ -131,7 +131,7 @@ export function useCollection() {
           // Timeout after 5 seconds
           setTimeout(resolve, 5000);
         });
-      } catch (error) {
+      } catch (_error) {
         // Silently ignore image loading errors
       }
       

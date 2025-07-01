@@ -189,12 +189,13 @@ ipcMain.handle('get-card-image-path', async (_, imageUrl: string): Promise<strin
         res.on('error', reject)
       })
       
-      req.on('error', (error: any) => {
+      req.on('error', (error: unknown) => {
         // Log the error but don't spam the console
-        if (error.code === 'ETIMEDOUT') {
+        const err = error as { code?: string; message?: string }
+        if (err.code === 'ETIMEDOUT') {
           console.warn(`Timeout fetching image: ${filename}`)
         } else {
-          console.warn(`Network error fetching image: ${filename} - ${error.message}`)
+          console.warn(`Network error fetching image: ${filename} - ${err.message}`)
         }
         reject(error)
       })
@@ -211,7 +212,7 @@ ipcMain.handle('get-card-image-path', async (_, imageUrl: string): Promise<strin
     await writeFile(cachePath, imageBuffer)
     
     return `file://${cachePath}`
-  } catch (error) {
+  } catch (_error) {
     // Silently fallback to original URL if caching fails
     // This prevents the app from crashing due to network issues
     return imageUrl

@@ -36,6 +36,7 @@ export default [
         HTMLImageElement: 'readonly',
         Event: 'readonly',
         UIEvent: 'readonly',
+        Image: 'readonly',
         // Performance and timing globals
         performance: 'readonly',
         PerformanceObserver: 'readonly',

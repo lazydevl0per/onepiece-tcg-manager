@@ -127,7 +127,7 @@ const getCachedOrRemoteImagePath = async (imgUrl: string): Promise<string> => {
       }
       
       // Use the new Electron API for caching
-      return await (window as any).api.getCardImagePath(fullUrl);
+      return await (window as typeof window & { api?: { getCardImagePath: (url: string) => Promise<string> } }).api?.getCardImagePath(fullUrl) || fullUrl;
     } catch (error) {
       console.error('Error getting cached image path:', error);
       // Fallback to remote URL
