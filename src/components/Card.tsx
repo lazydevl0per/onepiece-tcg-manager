@@ -1,6 +1,7 @@
+import { useState } from 'react';
+import { Plus, Minus, Trash2 } from 'lucide-react';
 import { type AppCard } from '../services/cardDataService';
-import { getCardColorClass, getRarityColorClass, getTypeColorClass } from '../utils/constants';
-import { memo, useCallback } from 'react';
+import { getRarityColorClass, getTypeColorClass } from '../utils/constants';
 
 interface CardProps {
   card: AppCard;
@@ -14,7 +15,7 @@ interface CardProps {
   addToDeckTitle?: string;
 }
 
-const Card = memo(function Card({
+export default function Card({
   card,
   owned,
   onUpdateOwned,
@@ -25,131 +26,116 @@ const Card = memo(function Card({
   addToDeckDisabled = false,
   addToDeckTitle = 'Add to deck'
 }: CardProps) {
-  // Memoize expensive calculations
-  const cardColorClass = getCardColorClass(card.color);
-  const rarityColorClass = getRarityColorClass(card.rarity);
-  const typeColorClass = getTypeColorClass(card.type);
+  const [imageError, setImageError] = useState(false);
 
-  // Optimize event handlers
-  const handleDecreaseOwned = useCallback(() => {
-    onUpdateOwned(card.id, Math.max(0, owned - 1));
-  }, [onUpdateOwned, card.id, owned]);
+  const handleImageError = () => {
+    setImageError(true);
+  };
 
-  const handleIncreaseOwned = useCallback(() => {
-    onUpdateOwned(card.id, owned + 1);
-  }, [onUpdateOwned, card.id, owned]);
+  const handleUpdateOwned = (increment: boolean) => {
+    const newOwned = increment ? Math.min(owned + 1, 99) : Math.max(owned - 1, 0);
+    onUpdateOwned(card.id, newOwned);
+  };
 
-  const handleAddToDeck = useCallback(() => {
-    if (onAddToDeck) {
+  const handleAddToDeck = () => {
+    if (onAddToDeck && !addToDeckDisabled) {
       onAddToDeck(card);
     }
-  }, [onAddToDeck, card]);
-
-  const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // Try to use external image URL as fallback
-    if (card.externalImageUrl && e.currentTarget.src !== card.externalImageUrl) {
-      e.currentTarget.src = card.externalImageUrl;
-    } else {
-      // If no external URL or already tried, hide the image
-      e.currentTarget.style.display = 'none';
-    }
-  }, [card.externalImageUrl]);
-
-  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.style.opacity = '1';
-  }, []);
+  };
 
   return (
-    <div className="bg-op-blue-deep-navy/60 backdrop-blur-sm rounded-xl p-4 border border-op-gold-primary/30 hover:border-op-gold-primary/60 transition-all shadow-lg hover:shadow-xl will-change-transform">
-      {/* Card Image - Optimized loading */}
-      {card.images?.small && (
-        <div className="mb-3 relative">
-          <img 
-            src={card.images.small} 
+    <div className="bg-slate-700/50 backdrop-blur-sm rounded-xl p-4 border border-slate-600/50 hover:border-slate-500/50 transition-all hover:shadow-lg">
+      {/* Card Image */}
+      <div className="relative mb-4">
+        {!imageError ? (
+          <img
+            src={card.images.small}
             alt={card.name}
-            className="w-full h-48 object-cover rounded-lg border border-op-gold-primary/20"
             onError={handleImageError}
-            onLoad={handleImageLoad}
-            style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
-            loading="lazy"
+            className="w-full h-48 object-cover rounded-lg border border-slate-500/20"
           />
-          <div className="absolute inset-0 bg-op-blue-deep-navy/20 rounded-lg border border-op-gold-primary/20 flex items-center justify-center">
-            <div className="text-op-blue-light text-sm text-center px-2">
-              {card.name}
+        ) : (
+          <div className="w-full h-48 bg-slate-600/20 rounded-lg border border-slate-500/20 flex items-center justify-center">
+            <div className="text-slate-400 text-sm text-center px-2">
+              Image not available
             </div>
           </div>
-        </div>
-      )}
-      
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className={`w-4 h-4 rounded-full ${cardColorClass} shadow-sm`}></div>
-          <span className="text-sm text-op-blue-light">{card.code}</span>
-        </div>
-        <span className={`text-sm font-bold ${rarityColorClass}`}>
-          {card.rarity}
-        </span>
-      </div>
-      
-      <h3 className="text-lg font-bold mb-2 text-op-white-pure">{card.name}</h3>
-      
-      <div className="flex items-center gap-4 mb-3 text-sm">
-        <span className={`px-2 py-1 rounded border ${typeColorClass}`}>
-          {card.type}
-        </span>
-        <span className="text-op-blue-light">Cost: {card.cost}</span>
-        {card.power && <span className="text-op-blue-light">Power: {card.power}</span>}
-        {card.counter && card.counter !== '-' && (
-          <span className="text-op-gold-primary">Counter: +{card.counter}</span>
         )}
       </div>
-      
-      {card.ability && (
-        <p className="text-sm text-op-blue-light-alt mb-3 line-clamp-3">
-          {card.ability}
+
+      {/* Card Info */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-slate-400">{card.code}</span>
+          <span className={`text-sm font-semibold ${getRarityColorClass(card.rarity)}`}>
+            {card.rarity}
+          </span>
+        </div>
+
+        <h3 className="text-lg font-bold mb-2 text-slate-50">{card.name}</h3>
+
+        <div className="flex items-center gap-4 text-sm">
+          <span className="text-slate-400">Cost: {card.cost}</span>
+          {card.power && <span className="text-slate-400">Power: {card.power}</span>}
+          {card.counter && (
+            <span className="text-yellow-400">Counter: +{card.counter}</span>
+          )}
+        </div>
+
+        <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${getTypeColorClass(card.type)}`}>
+          {card.type}
+        </div>
+
+        <p className="text-sm text-slate-300 mb-3 line-clamp-3">
+          {card.ability || 'No effect text available.'}
         </p>
-      )}
-      
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-op-blue-light">Owned:</span>
-          <div className="flex items-center gap-1">
+
+        {/* Ownership Controls */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm text-slate-400">Owned:</span>
+          <div className="flex items-center gap-2">
             <button
-              onClick={handleDecreaseOwned}
-              className="w-6 h-6 bg-op-blue-medium hover:bg-op-blue-medium-alt text-op-white-pure rounded border border-op-gold-primary/30 flex items-center justify-center text-sm"
+              onClick={() => handleUpdateOwned(false)}
+              className="w-6 h-6 bg-slate-600 hover:bg-slate-500 text-slate-50 rounded border border-slate-500/30 flex items-center justify-center text-sm"
             >
-              -
+              <Minus size={12} />
             </button>
-            <span className="text-sm text-op-white-pure min-w-[2rem] text-center">{owned}</span>
+            <span className="text-sm text-slate-50 min-w-[2rem] text-center">{owned}</span>
             <button
-              onClick={handleIncreaseOwned}
-              className="w-6 h-6 bg-op-gold-primary hover:bg-op-gold-secondary text-op-neutral-black rounded border border-op-gold-primary/30 flex items-center justify-center text-sm"
+              onClick={() => handleUpdateOwned(true)}
+              className="w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-slate-900 rounded border border-yellow-500/30 flex items-center justify-center text-sm"
             >
-              +
+              <Plus size={12} />
             </button>
           </div>
         </div>
-        
-        {canAddToDeck && onAddToDeck && (
+
+        {/* Add to Deck Button */}
+        {canAddToDeck && (
           <button
             onClick={handleAddToDeck}
             disabled={addToDeckDisabled}
-            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-              !addToDeckDisabled
-                ? 'bg-op-red-medium hover:bg-op-red-medium-alt text-op-white-cream'
-                : 'bg-op-neutral-dark-gray text-op-neutral-silver cursor-not-allowed'
-            }`}
             title={addToDeckTitle}
+            className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+              addToDeckDisabled
+                ? 'bg-red-500 hover:bg-red-600 text-white'
+                : 'bg-slate-600 text-slate-300 cursor-not-allowed'
+            }`}
           >
-            {isInDeck 
-              ? `In Deck (${deckQuantity})`
-              : 'Add to Deck'
-            }
+            {isInDeck ? (
+              <div className="flex items-center justify-center gap-2">
+                <Trash2 size={16} />
+                In Deck ({deckQuantity})
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <Plus size={16} />
+                Add to Deck
+              </div>
+            )}
           </button>
         )}
       </div>
     </div>
   );
-});
-
-export default Card; 
+} 

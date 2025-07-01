@@ -1,59 +1,59 @@
 // Color mapping for One Piece TCG colors to CSS classes
 export const colorMap: Record<string, string> = {
-  'Red': 'bg-op-red-bright',
-  'Blue': 'bg-op-blue-medium',
+  'Red': 'bg-red-500',
+  'Blue': 'bg-blue-500',
   'Green': 'bg-green-500',
-  'Yellow': 'bg-op-gold-primary',
+  'Yellow': 'bg-yellow-500',
   'Purple': 'bg-purple-500',
-  'Black': 'bg-op-neutral-black',
-  'Colorless': 'bg-op-neutral-silver',
-  'Red/Green': 'bg-gradient-to-r from-op-red-bright to-green-500',
-  'Red/Blue': 'bg-gradient-to-r from-op-red-bright to-op-blue-medium',
-  'Red/Yellow': 'bg-gradient-to-r from-op-red-bright to-op-gold-primary',
-  'Blue/Green': 'bg-gradient-to-r from-op-blue-medium to-green-500',
-  'Blue/Yellow': 'bg-gradient-to-r from-op-blue-medium to-op-gold-primary',
-  'Green/Yellow': 'bg-gradient-to-r from-green-500 to-op-gold-primary',
+  'Black': 'bg-gray-900',
+  'Colorless': 'bg-gray-400',
+  'Red/Green': 'bg-gradient-to-r from-red-500 to-green-500',
+  'Red/Blue': 'bg-gradient-to-r from-red-500 to-blue-500',
+  'Red/Yellow': 'bg-gradient-to-r from-red-500 to-yellow-500',
+  'Blue/Green': 'bg-gradient-to-r from-blue-500 to-green-500',
+  'Blue/Yellow': 'bg-gradient-to-r from-blue-500 to-yellow-500',
+  'Green/Yellow': 'bg-gradient-to-r from-green-500 to-yellow-500',
   'Green/Purple': 'bg-gradient-to-r from-green-500 to-purple-500',
-  'Yellow/Purple': 'bg-gradient-to-r from-op-gold-primary to-purple-500',
-  'Red/Blue/Green': 'bg-gradient-to-r from-op-red-bright via-op-blue-medium to-green-500',
-  'Red/Blue/Yellow': 'bg-gradient-to-r from-op-red-bright via-op-blue-medium to-op-gold-primary',
-  'Red/Green/Yellow': 'bg-gradient-to-r from-op-red-bright via-green-500 to-op-gold-primary',
-  'Blue/Green/Yellow': 'bg-gradient-to-r from-op-blue-medium via-green-500 to-op-gold-primary',
-  'Red/Blue/Green/Yellow': 'bg-gradient-to-r from-op-red-bright via-op-blue-medium via-green-500 to-op-gold-primary'
+  'Yellow/Purple': 'bg-gradient-to-r from-yellow-500 to-purple-500',
+  'Red/Blue/Green': 'bg-gradient-to-r from-red-500 via-blue-500 to-green-500',
+  'Red/Blue/Yellow': 'bg-gradient-to-r from-red-500 via-blue-500 to-yellow-500',
+  'Red/Green/Yellow': 'bg-gradient-to-r from-red-500 via-green-500 to-yellow-500',
+  'Blue/Green/Yellow': 'bg-gradient-to-r from-blue-500 via-green-500 to-yellow-500',
+  'Red/Blue/Green/Yellow': 'bg-gradient-to-r from-red-500 via-blue-500 via-green-500 to-yellow-500'
 };
 
-// Rarity colors using One Piece TCG palette
+// Rarity colors using modern palette
 export const rarityColors: Record<string, string> = {
-  'C': 'text-op-neutral-silver',
-  'UC': 'text-op-blue-light',
-  'R': 'text-op-blue-medium',
-  'SR': 'text-op-gold-primary',
-  'SEC': 'text-op-gold-metallic',
-  'L': 'text-op-red-bright',
-  'P': 'text-op-gold-secondary',
-  'ST': 'text-op-gold-primary',
-  'PR': 'text-op-gold-secondary'
+  'C': 'text-gray-400',
+  'UC': 'text-blue-300',
+  'R': 'text-blue-500',
+  'SR': 'text-yellow-400',
+  'SEC': 'text-yellow-600',
+  'L': 'text-red-500',
+  'P': 'text-yellow-500',
+  'ST': 'text-yellow-400',
+  'PR': 'text-yellow-500'
 };
 
 // Card type colors
 export const typeColors: Record<string, string> = {
-  'LEADER': 'bg-op-red-deep-crimson/20 text-op-red-bright border-op-red-bright/30',
-  'CHARACTER': 'bg-op-blue-medium/20 text-op-blue-light border-op-blue-medium/30',
-  'EVENT': 'bg-op-gold-primary/20 text-op-gold-primary border-op-gold-primary/30',
-  'STAGE': 'bg-op-neutral-dark-gray/20 text-op-neutral-silver border-op-neutral-dark-gray/30'
+  'LEADER': 'bg-red-500/20 text-red-400 border-red-500/30',
+  'CHARACTER': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  'EVENT': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+  'STAGE': 'bg-gray-600/20 text-gray-300 border-gray-600/30'
 };
 
 // Utility functions for converting values to CSS classes
 export const getCardColorClass = (color: string): string => {
-  return colorMap[color] || 'bg-op-neutral-silver';
+  return colorMap[color] || 'bg-gray-400';
 };
 
 export const getRarityColorClass = (rarity: string): string => {
-  return rarityColors[rarity] || 'text-op-neutral-silver';
+  return rarityColors[rarity] || 'text-gray-400';
 };
 
 export const getTypeColorClass = (type: string): string => {
-  return typeColors[type] || 'bg-op-neutral-dark-gray/20 text-op-neutral-silver border-op-neutral-dark-gray/30';
+  return typeColors[type] || 'bg-gray-600/20 text-gray-300 border-gray-600/30';
 };
 
 // Set abbreviations and full names

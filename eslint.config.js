@@ -26,6 +26,8 @@ export default [
         FileReader: 'readonly',
         navigator: 'readonly',
         fetch: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
         // React globals
         React: 'readonly',
         // TypeScript globals

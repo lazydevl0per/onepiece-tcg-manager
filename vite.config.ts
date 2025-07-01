@@ -42,7 +42,7 @@ export default defineConfig({
           build: {
             sourcemap: false,
             minify: false,
-            outDir: 'dist-electron',
+            outDir: 'dist-electron/preload',
             rollupOptions: {
               external: ['electron']
             }

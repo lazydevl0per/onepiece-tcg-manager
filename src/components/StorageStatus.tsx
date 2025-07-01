@@ -1,28 +1,33 @@
 import { useState, useEffect } from 'react';
-import { StorageService } from '../services/storageService';
 
 export default function StorageStatus() {
   const [storageInfo, setStorageInfo] = useState<{
-    collectionSize: number;
-    decksSize: number;
-    totalSize: number;
+    used: number;
+    total: number;
+    percentage: number;
   } | null>(null);
 
   useEffect(() => {
     const updateStorageInfo = () => {
-      setStorageInfo(StorageService.getStorageInfo());
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        navigator.storage.estimate().then((estimate) => {
+          if (estimate.usage && estimate.quota) {
+            const used = estimate.usage;
+            const total = estimate.quota;
+            const percentage = (used / total) * 100;
+            setStorageInfo({ used, total, percentage });
+          }
+        });
+      }
     };
 
     updateStorageInfo();
-    
-    // Update storage info when storage changes
-    const handleStorageChange = () => {
-      updateStorageInfo();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    // Update every 30 seconds
+    const interval = setInterval(updateStorageInfo, 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  if (!storageInfo) return null;
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -32,28 +37,54 @@ export default function StorageStatus() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleClearAllData = () => {
-    if (confirm('Are you sure you want to clear all saved data? This action cannot be undone.')) {
-      StorageService.clearAllData();
-      setStorageInfo(StorageService.getStorageInfo());
-    }
+  const getStorageColor = (percentage: number) => {
+    if (percentage > 90) return 'text-red-400';
+    if (percentage > 70) return 'text-yellow-400';
+    return 'text-green-400';
   };
 
-  if (!storageInfo) return null;
-
   return (
-    <div className="bg-op-blue-medium/10 p-3 rounded-lg border border-op-gold-primary/20">
-      <h4 className="font-semibold text-op-white-pure mb-2 text-sm">Storage Status</h4>
-      <div className="space-y-1 text-xs text-op-blue-light">
-        <p>Collection: {formatBytes(storageInfo.collectionSize)}</p>
-        <p>Decks: {formatBytes(storageInfo.decksSize)}</p>
-        <p>Total: {formatBytes(storageInfo.totalSize)}</p>
+    <div className="bg-slate-600/10 p-3 rounded-lg border border-slate-500/20">
+      <h4 className="font-semibold text-slate-50 mb-2 text-sm">Storage Status</h4>
+      <div className="space-y-1 text-xs text-slate-300">
+        <div className="flex items-center justify-between">
+          <span>Used:</span>
+          <span>{formatBytes(storageInfo.used)}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Available:</span>
+          <span>{formatBytes(storageInfo.total - storageInfo.used)}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Total:</span>
+          <span>{formatBytes(storageInfo.total)}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Usage:</span>
+          <span className={getStorageColor(storageInfo.percentage)}>
+            {storageInfo.percentage.toFixed(1)}%
+          </span>
+        </div>
+      </div>
+      <div className="mt-2 w-full bg-slate-600 rounded-full h-2">
+        <div
+          className={`h-2 rounded-full transition-all ${
+            storageInfo.percentage > 90 ? 'bg-red-400' :
+            storageInfo.percentage > 70 ? 'bg-yellow-400' : 'bg-green-400'
+          }`}
+          style={{ width: `${Math.min(storageInfo.percentage, 100)}%` }}
+        />
       </div>
       <button
-        onClick={handleClearAllData}
-        className="mt-2 text-xs text-op-red-bright hover:text-op-red-medium transition-colors"
+        onClick={() => {
+          if ('storage' in navigator && 'clear' in navigator.storage) {
+            (navigator.storage as any).clear();
+            window.location.reload();
+          }
+        }}
+        className="mt-2 text-xs text-red-400 hover:text-red-300 transition-colors"
       >
-        Clear All Data
+        Clear all data
       </button>
     </div>
   );

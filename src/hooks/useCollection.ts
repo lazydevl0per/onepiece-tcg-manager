@@ -56,9 +56,9 @@ export function useCollection() {
         setColors(allColors);
         setTypes(allTypes);
         setRarities(allRarities);
-      } catch (_error) {
+      } catch (error) {
         // Handle error silently or implement proper error state management
-        // console.error('Failed to load card data:', error);
+        console.error('Failed to load card data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -148,6 +148,7 @@ export function useCollection() {
         setCards(updatedCards);
         StorageService.saveCollection(updatedCards);
       } catch (error) {
+        console.error('Failed to import collection:', error);
         alert('Invalid collection file format');
       }
     };
@@ -183,6 +184,7 @@ export function useCollection() {
           alert('Failed to restore backup data');
         }
       } catch (error) {
+        console.error('Failed to restore backup:', error);
         alert('Invalid backup file format');
       }
     };

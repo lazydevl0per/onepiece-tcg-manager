@@ -97,11 +97,20 @@ const getLocalImagePath = (imgUrl: string): string => {
   const cleanUrl = imgUrl.split('?')[0];
   // Extract the filename from the path (e.g., "../images/cardlist/card/ST01-001.png" -> "ST01-001.png")
   const filename = cleanUrl.split('/').pop();
+  
   // Use local server for Electron builds, fallback to static path for web
   const isElectron = detectElectron();
-  const baseUrl = isElectron ? 'http://localhost:3001' : '';
-  // Construct the path to the local image
-  return `${baseUrl}/data/data/english/images/${filename}`;
+  
+  let imagePath: string;
+  if (isElectron) {
+    // In Electron, use the local data server
+    imagePath = `http://localhost:3001/data/data/english/images/${filename}`;
+  } else {
+    // In web mode, use relative path to the public directory
+    imagePath = `/data/data/english/images/${filename}`;
+  }
+  
+  return imagePath;
 };
 
 // Transform vegapull card to application card format
@@ -146,6 +155,14 @@ const detectElectron = (): boolean => {
   // Also check if window.api or window.electron are available
   const hasApi = !!(window as typeof window & { api?: unknown }).api;
   const hasElectron = !!(window as typeof window & { electron?: unknown }).electron;
+  
+  // Check if we're running in development mode (localhost:5173 is Vite dev server)
+  const isDevServer = window.location.hostname === 'localhost' && window.location.port === '5173';
+  
+  // In development, prefer web mode for easier debugging
+  if (isDevServer) {
+    return false;
+  }
   
   return isElectronUA || hasApi || hasElectron;
 };

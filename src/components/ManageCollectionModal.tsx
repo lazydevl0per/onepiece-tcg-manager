@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { X, Download, Upload } from 'lucide-react';
 import StorageStatus from './StorageStatus';
 
 interface ManageCollectionModalProps {
@@ -27,90 +29,106 @@ export default function ManageCollectionModal({
   ownedCards,
   totalCopies
 }: ManageCollectionModalProps) {
+  const [fileInputKey, setFileInputKey] = useState(0);
+
   if (!isOpen) return null;
 
+  const handleImportCollection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onImportCollection(event);
+    setFileInputKey(prev => prev + 1);
+  };
+
+  const handleRestoreAllData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onRestoreAllData(event);
+    setFileInputKey(prev => prev + 1);
+  };
+
   return (
-    <div className="fixed inset-0 bg-op-neutral-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-op-blue-deep-navy rounded-xl p-6 w-full max-w-2xl border border-op-gold-primary/30 max-h-[80vh] overflow-y-auto">
-        <h3 className="text-xl font-bold mb-4 text-op-white-pure">Manage Your Collection</h3>
-        
-        <div className="space-y-4">
-          <p className="text-op-blue-light">
-            Use the + and - buttons on each card to adjust your collection. 
-            Cards with 0 copies will be hidden when "Owned Only" is enabled.
+    <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-700 rounded-xl p-6 w-full max-w-2xl border border-slate-500/30 max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-slate-50">Manage Your Collection</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-300">
+            <X size={24} />
+          </button>
+        </div>
+
+        <p className="text-slate-300">
+          Manage your card collection and backup your data.
+        </p>
+
+        {/* Collection Stats */}
+        <div className="bg-slate-600/10 p-4 rounded-lg border border-slate-500/20 mt-4">
+          <h4 className="font-semibold text-slate-50 mb-2">Collection Stats</h4>
+          <p className="text-sm text-slate-300">Total Cards: {totalCards}</p>
+          <p className="text-sm text-slate-300">Owned Cards: {ownedCards}</p>
+          <p className="text-sm text-slate-300">Total Copies: {totalCopies}</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-slate-600/10 p-4 rounded-lg border border-slate-500/20 mt-4">
+          <h4 className="font-semibold text-slate-50 mb-2">Quick Actions</h4>
+          <button
+            onClick={onClearAllCollections}
+            className="block w-full text-left text-sm text-red-400 hover:text-red-300 mb-1"
+          >
+            Clear all collections (set all cards to 0)
+          </button>
+          <button
+            onClick={onSetAllToOne}
+            className="block w-full text-left text-sm text-yellow-400 hover:text-yellow-300 mb-1"
+          >
+            Set all cards to 1 copy
+          </button>
+          <button
+            onClick={onExportCollection}
+            className="block w-full text-left text-sm text-blue-400 hover:text-blue-300 mb-1"
+          >
+            Export collection data
+          </button>
+          <label className="block w-full text-left text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
+            <Upload size={14} className="inline mr-1" />
+            Import collection data
+            <input
+              key={fileInputKey}
+              type="file"
+              accept=".json"
+              onChange={handleImportCollection}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        {/* Backup & Restore */}
+        <div className="bg-slate-600/10 p-4 rounded-lg border border-slate-500/20 mt-4">
+          <h4 className="font-semibold text-slate-50 mb-2">Backup & Restore</h4>
+          <p className="text-sm text-slate-300 mb-3">
+            Backup includes all your collections and deck data. Restore will replace all current data.
           </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-op-blue-medium/10 p-4 rounded-lg border border-op-gold-primary/20">
-              <h4 className="font-semibold text-op-white-pure mb-2">Collection Stats</h4>
-              <p className="text-sm text-op-blue-light">Total Cards: {totalCards}</p>
-              <p className="text-sm text-op-blue-light">Owned Cards: {ownedCards}</p>
-              <p className="text-sm text-op-blue-light">Total Copies: {totalCopies}</p>
-            </div>
-            
-            <div className="bg-op-blue-medium/10 p-4 rounded-lg border border-op-gold-primary/20">
-              <h4 className="font-semibold text-op-white-pure mb-2">Quick Actions</h4>
-              <button
-                onClick={onClearAllCollections}
-                className="block w-full text-left text-sm text-op-red-bright hover:text-op-red-medium mb-1"
-              >
-                Clear All Collections
-              </button>
-              <button
-                onClick={onSetAllToOne}
-                className="block w-full text-left text-sm text-op-gold-primary hover:text-op-gold-secondary mb-1"
-              >
-                Set All to 1 Copy
-              </button>
-              <button
-                onClick={onExportCollection}
-                className="block w-full text-left text-sm text-op-blue-light hover:text-op-blue-bright mb-1"
-              >
-                Export Collection
-              </button>
-              <label className="block w-full text-left text-sm text-op-blue-light hover:text-op-blue-bright cursor-pointer">
-                Import Collection
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={onImportCollection}
-                  className="hidden"
-                />
-              </label>
-            </div>
-
-            <div className="bg-op-blue-medium/10 p-4 rounded-lg border border-op-gold-primary/20">
-              <h4 className="font-semibold text-op-white-pure mb-2">Backup & Restore</h4>
-              <button
-                onClick={onBackupAllData}
-                className="block w-full text-left text-sm text-op-green-bright hover:text-op-green-medium mb-1"
-              >
-                Backup All Data
-              </button>
-              <label className="block w-full text-left text-sm text-op-green-bright hover:text-op-green-medium cursor-pointer">
-                Restore All Data
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={onRestoreAllData}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <StorageStatus />
+          <div className="flex gap-2">
+            <button
+              onClick={onBackupAllData}
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-slate-900 py-2 rounded-lg transition-colors font-semibold"
+            >
+              <Download size={16} className="inline mr-1" />
+              Backup All Data
+            </button>
+            <label className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors font-semibold cursor-pointer text-center">
+              <Upload size={16} className="inline mr-1" />
+              Restore All Data
+              <input
+                key={fileInputKey + 'backup'}
+                type="file"
+                accept=".json"
+                onChange={handleRestoreAllData}
+                className="hidden"
+              />
+            </label>
           </div>
         </div>
-        
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-op-gold-primary hover:bg-op-gold-secondary text-op-neutral-black py-2 rounded-lg transition-colors font-semibold"
-          >
-            Close
-          </button>
+
+        <div className="mt-4">
+          <StorageStatus />
         </div>
       </div>
     </div>

@@ -1,44 +1,5 @@
 @import "tailwindcss";
 
-/* One Piece TCG Color Palette - CSS Custom Properties */
-:root {
-  /* Standard Blue Back Palette */
-  --op-blue-deep-navy: #1B3A57;
-  --op-blue-deep-navy-alt: #2C4A6B;
-  --op-blue-medium: #4A6FA5;
-  --op-blue-medium-alt: #5B7BB8;
-  --op-blue-light: #7BA7D9;
-  --op-blue-light-alt: #A8C8E8;
-
-  /* Leader Red Back Palette */
-  --op-red-deep-crimson: #8B1538;
-  --op-red-deep-crimson-alt: #A91E47;
-  --op-red-medium: #C73E1D;
-  --op-red-medium-alt: #D4462A;
-  --op-red-bright: #FF4444;
-  --op-red-bright-alt: #E55B5B;
-
-  /* Gold/Yellow Details */
-  --op-gold-primary: #FFD700;
-  --op-gold-secondary: #F4C842;
-  --op-gold-metallic: #B8860B;
-  --op-gold-metallic-alt: #CD853F;
-  --op-gold-dark: #DAA520;
-
-  /* White/Cream */
-  --op-white-pure: #FFFFFF;
-  --op-white-cream: #FFFEF7;
-  --op-white-cream-alt: #F8F5E4;
-
-  /* Common Design Elements */
-  --op-neutral-black: #000000;
-  --op-neutral-black-alt: #1A1A1A;
-  --op-neutral-dark-gray: #333333;
-  --op-neutral-dark-gray-alt: #4A4A4A;
-  --op-neutral-silver: #C0C0C0;
-  --op-neutral-silver-alt: #D3D3D3;
-}
-
 /* Performance optimizations for window resizing */
 /*
 * {
@@ -69,8 +30,8 @@
 
 /* Global app background and text color */
 body {
-  background: var(--op-blue-deep-navy);
-  color: var(--op-white-pure);
+  background: #1e293b; /* slate-800 */
+  color: #f8fafc; /* slate-50 */
   /* Optimize for smooth scrolling and resizing */
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -98,4 +59,32 @@ body {
   color: var(--op-white-cream);
 }
 
-/* Example: Use .onepiece-card-back and .op-gold in your components */ 
+/* Example: Use .onepiece-card-back and .op-gold in your components */
+
+/* Card Rarity Glows */
+.card-glow-sr   { box-shadow: 0 0 12px 2px var(--op-gold-primary), 0 2px 24px 0 rgba(0,0,0,0.25); }
+.card-glow-sec  { box-shadow: 0 0 16px 4px var(--op-gold-metallic), 0 2px 32px 0 rgba(0,0,0,0.35); }
+.card-glow-l    { box-shadow: 0 0 10px 2px var(--op-red-bright), 0 2px 20px 0 rgba(0,0,0,0.20); }
+.card-glow-c    { box-shadow: 0 0 6px 1px var(--op-neutral-silver), 0 2px 12px 0 rgba(0,0,0,0.10); }
+
+/* Badge Styles */
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15em 0.7em;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  margin-right: 0.25em;
+  margin-bottom: 0.15em;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.10);
+}
+.badge-leader    { background: var(--op-red-deep-crimson); color: var(--op-gold-primary); border-color: var(--op-gold-primary);}
+.badge-character { background: var(--op-blue-medium); color: var(--op-white-cream); border-color: var(--op-blue-light);}
+.badge-event     { background: var(--op-gold-primary); color: var(--op-neutral-black); border-color: var(--op-gold-dark);}
+.badge-stage     { background: var(--op-neutral-dark-gray); color: var(--op-white-cream); border-color: var(--op-neutral-silver);}
+.badge-sr        { background: var(--op-gold-primary); color: var(--op-neutral-black); border-color: var(--op-gold-metallic);}
+.badge-sec       { background: var(--op-gold-metallic); color: var(--op-white-pure); border-color: var(--op-gold-primary);}
+.badge-l         { background: var(--op-red-bright); color: var(--op-white-pure); border-color: var(--op-gold-primary);}
+.badge-c         { background: var(--op-neutral-silver); color: var(--op-blue-deep-navy); border-color: var(--op-blue-light);} 
