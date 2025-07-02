@@ -3,21 +3,26 @@ interface LoadingProgressProps {
   isLoading: boolean;
   isImageLoading?: boolean;
   imageProgress?: number;
+  imageLoadingSkipped?: boolean;
 }
 
 export default function LoadingProgress({ 
   progress, 
   isLoading, 
   isImageLoading = false, 
-  imageProgress = 0 
+  imageProgress = 0,
+  imageLoadingSkipped = false
 }: LoadingProgressProps) {
-  if (!isLoading && !isImageLoading) return null;
+  // Don't show image loading if it was skipped
+  const shouldShowImageLoading = isImageLoading && !imageLoadingSkipped;
+  
+  if (!isLoading && !shouldShowImageLoading) return null;
 
   const percentage = Math.round(progress * 100);
   const imagePercentage = Math.round(imageProgress * 100);
 
   // If only image loading, show at bottom
-  if (!isLoading && isImageLoading) {
+  if (!isLoading && shouldShowImageLoading) {
     return (
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-800/95 backdrop-blur-sm border-t border-slate-600/50 shadow-t">
         <div className="max-w-4xl mx-auto px-4 py-3">
@@ -61,7 +66,7 @@ export default function LoadingProgress({
           </>
         )}
         {/* If both are loading, show image progress below main progress */}
-        {isLoading && isImageLoading && (
+        {isLoading && shouldShowImageLoading && (
           <>
             <div className="flex items-center justify-between text-sm text-slate-300 mt-4 mb-2">
               <span>Loading card images sequentially...</span>

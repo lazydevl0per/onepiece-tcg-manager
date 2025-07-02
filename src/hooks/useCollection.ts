@@ -26,6 +26,7 @@ export function useCollection() {
   const [rarityFilter, setRarityFilter] = useState<string>('all');
   const [setFilter, setSetFilter] = useState<string>('all');
   const [showOwnedOnly, setShowOwnedOnly] = useState(false);
+  const [imageLoadingSkipped, setImageLoadingSkipped] = useState(false);
 
   // Load card data and metadata on component mount
   useEffect(() => {
@@ -104,14 +105,72 @@ export function useCollection() {
     loadData();
   }, []);
 
-  // Image preloading function - loads images sequentially
+  // Image preloading function - loads images sequentially with caching checks
   const startImagePreloading = async (allCards: AppCard[]) => {
     console.log('🖼️ Starting image preloading for', allCards.length, 'cards');
+    
+    // Check if we're in Electron and can check cache status
+    const isElectron = !!(window as typeof window & { api?: unknown }).api;
+    
+    if (isElectron) {
+      try {
+        // Check if all images are already cached first
+        const api = (window as typeof window & { api?: { isImageCached?: (url: string) => Promise<boolean> } }).api;
+        if (api?.isImageCached) {
+          console.log('🔍 Checking if all images are already cached...');
+          
+          // Check first 10 images to see if caching is working
+          const sampleImages = allCards.slice(0, 10);
+          console.log('🔍 Sample image URLs being checked:');
+          sampleImages.forEach((card, index) => {
+            console.log(`  ${index + 1}. ${card.images.small}`);
+          });
+          
+          const cacheChecks = await Promise.all(
+            sampleImages.map(async (card, index) => {
+              const isCached = await api.isImageCached!(card.images.small);
+              console.log(`  ${index + 1}. ${card.images.small} - Cached: ${isCached}`);
+              return isCached;
+            })
+          );
+          
+          const cachedCount = cacheChecks.filter(cached => cached).length;
+          console.log(`📊 Cache check sample: ${cachedCount}/${sampleImages.length} images cached`);
+          
+          // If most images are cached, check all images
+          if (cachedCount >= sampleImages.length * 0.8) { // 80% threshold
+            console.log('🔍 Checking all images for cache status...');
+            const allCacheChecks = await Promise.all(
+              allCards.map(card => api.isImageCached!(card.images.small))
+            );
+            
+            const allCached = allCacheChecks.every(cached => cached);
+            if (allCached) {
+              console.log('✅ All images are already cached! Skipping image preloading.');
+              // Explicitly set image loading states to false when skipping
+              setIsImageLoading(false);
+              setImageLoadingProgress(1);
+              console.log('🔧 Image loading states reset to false');
+              // Add a small delay to ensure state updates are processed
+              await new Promise(resolve => setTimeout(resolve, 50));
+              setImageLoadingSkipped(true);
+              return; // Skip the entire preloading process
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking image cache status:', error);
+      }
+    }
+    
+    // Proceed with normal image preloading if not all images are cached
+    console.log('🔄 Starting normal image preloading...');
     setIsImageLoading(true);
     setImageLoadingProgress(0);
     
     const totalImages = allCards.length;
     let loadedImages = 0;
+    let skippedImages = 0;
     
     // Load images in smaller batches with shorter delays
     const batchSize = 5; // Load 5 images at a time
@@ -123,6 +182,27 @@ export function useCollection() {
       // Load batch of images in parallel
       const batchPromises = batch.map(async (card) => {
         try {
+          // Check if image is already cached first
+          const isElectron = !!(window as typeof window & { api?: unknown }).api;
+          let isCached = false;
+          
+          if (isElectron) {
+            try {
+              const api = (window as typeof window & { api?: { isImageCached?: (url: string) => Promise<boolean> } }).api;
+              if (api?.isImageCached) {
+                isCached = await api.isImageCached(card.images.small);
+              }
+            } catch (error) {
+              console.error('Error checking image cache:', error);
+            }
+          }
+          
+          if (isCached) {
+            skippedImages++;
+            return; // Skip loading if already cached
+          }
+          
+          // Load image if not cached
           const img = new Image();
           img.src = card.images.small;
           
@@ -144,7 +224,7 @@ export function useCollection() {
       setImageLoadingProgress(loadedImages / totalImages);
       
       if (loadedImages % 50 === 0) {
-        console.log(`🖼️ Image loading progress: ${Math.round((loadedImages / totalImages) * 100)}% (${loadedImages}/${totalImages})`);
+        console.log(`🖼️ Image loading progress: ${Math.round((loadedImages / totalImages) * 100)}% (${loadedImages}/${totalImages}, ${skippedImages} cached)`);
       }
       
       // Small delay between batches (except for the last batch)
@@ -153,7 +233,7 @@ export function useCollection() {
       }
     }
     
-    console.log('✅ Image preloading complete!');
+    console.log(`✅ Image preloading complete! Loaded: ${loadedImages - skippedImages}, Cached: ${skippedImages}, Total: ${totalImages}`);
     setIsImageLoading(false);
     setImageLoadingProgress(1);
   };
@@ -302,6 +382,7 @@ export function useCollection() {
     rarityFilter,
     setFilter,
     showOwnedOnly,
+    imageLoadingSkipped,
     filteredCards,
     
     // Actions - use the setter functions directly since they're stable

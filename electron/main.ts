@@ -219,5 +219,40 @@ ipcMain.handle('get-card-image-path', async (_, imageUrl: string): Promise<strin
   }
 })
 
+// IPC handler to check if image is already cached (without downloading)
+ipcMain.handle('is-image-cached', async (_, imageUrl: string): Promise<boolean> => {
+  try {
+    // Extract filename from URL - handle both file:// URLs and regular URLs
+    let filename: string;
+    
+    if (imageUrl.startsWith('file://')) {
+      // For file:// URLs, extract the filename from the path
+      const pathParts = imageUrl.replace('file://', '').split(/[/\\]/);
+      filename = pathParts[pathParts.length - 1].split('?')[0]; // Remove query params
+    } else {
+      // For regular URLs, extract filename from the URL
+      const urlParts = imageUrl.split('/');
+      filename = urlParts[urlParts.length - 1].split('?')[0]; // Remove query params
+    }
+    
+    // Check cache directory in user data
+    const cacheDir = join(app.getPath('userData'), 'images')
+    const cachePath = join(cacheDir, filename)
+    
+    // Add debugging
+    console.log(`🔍 Checking cache for: ${imageUrl}`)
+    console.log(`  Filename: ${filename}`)
+    console.log(`  Cache path: ${cachePath}`)
+    console.log(`  Cache exists: ${existsSync(cachePath)}`)
+    
+    // Return true if file exists in cache
+    return existsSync(cachePath)
+  } catch (_error) {
+    // If there's any error checking cache, assume not cached
+    console.error('Error checking image cache:', _error)
+    return false
+  }
+})
+
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here. 

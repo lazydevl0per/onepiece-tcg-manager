@@ -13,6 +13,11 @@ const api = {
   // New API for card image caching
   getCardImagePath: async (imageUrl: string): Promise<string> => {
     return await ipcRenderer.invoke('get-card-image-path', imageUrl)
+  },
+  
+  // New API to check if image is already cached
+  isImageCached: async (imageUrl: string): Promise<boolean> => {
+    return await ipcRenderer.invoke('is-image-cached', imageUrl)
   }
 }
 

@@ -84,9 +84,11 @@ let isLoadingProgressively = false;
 let loadedPacks = new Set<string>();
 let progressiveLoadingCallbacks: Array<(cards: CardData[], progress: number) => void> = [];
 
-// Rate limiting configuration
-const RATE_LIMIT_DELAY = 1000; // 1 second between requests
-const BATCH_SIZE = 2; // Load 3 packs at a time
+// Rate limiting configuration - only for image loading, not JSON
+const JSON_BATCH_SIZE = 10; // Load 10 JSON packs at a time (increased from 2)
+
+// Image cache to avoid re-loading already cached images
+const imageCache = new Set<string>();
 
 // Helper function to delay execution
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -102,6 +104,8 @@ const getAttributeImageCode = (attribute: string): string => {
   };
   return attributeMap[attribute] || '01';
 };
+
+
 
 // Helper function to get cached or remote image path
 const getCachedOrRemoteImagePath = async (imgUrl: string): Promise<string> => {
@@ -127,7 +131,12 @@ const getCachedOrRemoteImagePath = async (imgUrl: string): Promise<string> => {
       }
       
       // Use the new Electron API for caching
-      return await (window as typeof window & { api?: { getCardImagePath: (url: string) => Promise<string> } }).api?.getCardImagePath(fullUrl) || fullUrl;
+      const cachedPath = await (window as typeof window & { api?: { getCardImagePath: (url: string) => Promise<string> } }).api?.getCardImagePath(fullUrl);
+      if (cachedPath) {
+        imageCache.add(fullUrl);
+        return cachedPath;
+      }
+      return fullUrl;
     } catch (error) {
       console.error('Error getting cached image path:', error);
       // Fallback to remote URL
@@ -144,8 +153,9 @@ const getCachedOrRemoteImagePath = async (imgUrl: string): Promise<string> => {
   }
 };
 
-// Transform vegapull card to application card format
+// Transform vegapull card to application card format (optimized for speed)
 const transformVegapullCard = async (vegapullCard: VegapullCard, packData: PackData): Promise<CardData> => {
+  // Get image path without waiting for full image loading
   const localImagePath = await getCachedOrRemoteImagePath(vegapullCard.img_url);
   
   return {
@@ -278,11 +288,11 @@ const loadCardsProgressively = async (onProgress?: (cards: CardData[], progress:
     const totalPacks = packIds.length;
     let loadedCount = 0;
 
-    // Load packs in batches with rate limiting
-    for (let i = 0; i < packIds.length; i += BATCH_SIZE) {
-      const batch = packIds.slice(i, i + BATCH_SIZE);
+    // Load packs in batches WITHOUT rate limiting for JSON (much faster)
+    for (let i = 0; i < packIds.length; i += JSON_BATCH_SIZE) {
+      const batch = packIds.slice(i, i + JSON_BATCH_SIZE);
       
-      // Load batch of packs
+      // Load batch of packs in parallel (no delay)
       const batchPromises = batch.map(async (packId) => {
         if (loadedPacks.has(packId)) {
           return []; // Skip if already loaded
@@ -303,7 +313,7 @@ const loadCardsProgressively = async (onProgress?: (cards: CardData[], progress:
       loadedCount += batch.length;
       const progress = loadedCount / totalPacks;
 
-      // Transform cards loaded so far
+      // Transform cards loaded so far (this is where image paths are resolved)
       const transformedCards = await Promise.all(allVegapullCards.map(async card => {
         const packData = packMap.get(card.pack_id);
         if (!packData) {
@@ -326,9 +336,10 @@ const loadCardsProgressively = async (onProgress?: (cards: CardData[], progress:
       onProgress?.(transformedCards, progress);
       progressiveLoadingCallbacks.forEach(callback => callback(transformedCards, progress));
 
-      // Rate limiting delay (except for the last batch)
-      if (i + BATCH_SIZE < packIds.length) {
-        await delay(RATE_LIMIT_DELAY);
+      // No rate limiting delay for JSON loading - much faster!
+      // Only add a minimal delay to prevent blocking the UI
+      if (i + JSON_BATCH_SIZE < packIds.length) {
+        await delay(10); // Just 10ms to allow UI updates
       }
     }
 
