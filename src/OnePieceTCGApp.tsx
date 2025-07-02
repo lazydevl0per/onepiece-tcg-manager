@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AppShell, CollectionTab, DeckBuilderTab, ManageCollectionModal, LoadingProgress } from './components';
 import { useCollection, useDeckBuilder, useResizeOptimization } from './hooks';
 import { MAX_COPIES_PER_CARD } from './utils/constants';
+import SearchAndFilters from './components/SearchAndFilters';
 
 export default function OnePieceTCGApp() {
   const [activeTab, setActiveTab] = useState<'collection' | 'deckbuilder'>('collection');
@@ -15,6 +16,32 @@ export default function OnePieceTCGApp() {
   useResizeOptimization({
     throttleMs: 50
   });
+
+  // Create SearchAndFilters component for the header when on collection tab
+  const searchAndFilters = activeTab === 'collection' ? (
+    <SearchAndFilters
+      searchTerm={collection.searchTerm}
+      onSearchChange={collection.setSearchTerm}
+      colorFilter={collection.colorFilter}
+      onColorFilterChange={collection.setColorFilter}
+      typeFilter={collection.typeFilter}
+      onTypeFilterChange={collection.setTypeFilter}
+      rarityFilter={collection.rarityFilter}
+      onRarityFilterChange={collection.setRarityFilter}
+      setFilter={collection.setFilter}
+      onSetFilterChange={collection.setSetFilter}
+      showOwnedOnly={collection.showOwnedOnly}
+      onShowOwnedOnlyChange={collection.setShowOwnedOnly}
+      onShowManageCollection={() => setShowManageCollection(true)}
+      filteredCardsCount={collection.filteredCards.length}
+      totalCardsCount={collection.cards.length}
+      ownedCardsCount={collection.ownedCardsCount}
+      colors={collection.colors}
+      types={collection.types}
+      rarities={collection.rarities}
+      sets={collection.sets}
+    />
+  ) : undefined;
 
   return (
     <>
@@ -31,33 +58,16 @@ export default function OnePieceTCGApp() {
         isImageLoading={collection.isImageLoading}
         collectionCount={collection.ownedCardsCount}
         deckCount={deckBuilder.decks.length}
+        searchAndFilters={searchAndFilters}
       >
       {activeTab === 'collection' ? (
         <CollectionTab
-          cards={collection.cards}
           filteredCards={collection.filteredCards}
-          searchTerm={collection.searchTerm}
-          onSearchChange={collection.setSearchTerm}
-          colorFilter={collection.colorFilter}
-          onColorFilterChange={collection.setColorFilter}
-          typeFilter={collection.typeFilter}
-          onTypeFilterChange={collection.setTypeFilter}
-          rarityFilter={collection.rarityFilter}
-          onRarityFilterChange={collection.setRarityFilter}
-          setFilter={collection.setFilter}
-          onSetFilterChange={collection.setSetFilter}
-          showOwnedOnly={collection.showOwnedOnly}
-          onShowOwnedOnlyChange={collection.setShowOwnedOnly}
-          onShowManageCollection={setShowManageCollection}
           onUpdateCardOwned={collection.updateCardOwned}
           onAddCardToDeck={deckBuilder.addCardToDeck}
           selectedDeck={deckBuilder.selectedDeck}
           isCardInDeck={deckBuilder.isCardInDeck}
           getCardQuantityInDeck={deckBuilder.getCardQuantityInDeck}
-          colors={collection.colors}
-          types={collection.types}
-          rarities={collection.rarities}
-          sets={collection.sets}
           MAX_COPIES_PER_CARD={MAX_COPIES_PER_CARD}
         />
       ) : (

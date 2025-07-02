@@ -47,17 +47,18 @@ export default function SearchAndFilters({
   sets
 }: SearchAndFiltersProps) {
   return (
-    <div className="bg-slate-700/40 backdrop-blur-sm rounded-xl p-6 mb-6 border border-slate-600/50">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+    <div className="bg-slate-700/40 backdrop-blur-sm rounded-xl p-4 border border-slate-600/50">
+      {/* Search and Filters Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 mb-3">
         <div className="lg:col-span-2">
           <div className="relative">
-            <Search className="absolute left-3 top-3 text-slate-400" size={20} />
+            <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
             <input
               type="text"
               placeholder="Search cards by name, ability, or code..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-600/20 border border-slate-500/30 rounded-lg text-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-4 py-2 bg-slate-600/20 border border-slate-500/30 rounded-lg text-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
           </div>
         </div>
@@ -65,7 +66,7 @@ export default function SearchAndFilters({
         <select
           value={colorFilter}
           onChange={(e) => onColorFilterChange(e.target.value)}
-          className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         >
           <option value="all">All Colors</option>
           {colors.map(color => (
@@ -76,7 +77,7 @@ export default function SearchAndFilters({
         <select
           value={typeFilter}
           onChange={(e) => onTypeFilterChange(e.target.value)}
-          className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         >
           <option value="all">All Types</option>
           {types.map(type => (
@@ -87,7 +88,7 @@ export default function SearchAndFilters({
         <select
           value={rarityFilter}
           onChange={(e) => onRarityFilterChange(e.target.value)}
-          className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         >
           <option value="all">All Rarities</option>
           {rarities.map(rarity => (
@@ -98,7 +99,7 @@ export default function SearchAndFilters({
         <select
           value={setFilter}
           onChange={(e) => onSetFilterChange(e.target.value)}
-          className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         >
           <option value="all">All Sets</option>
           {sets.map(set => (
@@ -107,32 +108,33 @@ export default function SearchAndFilters({
         </select>
       </div>
 
-      <div className="mt-4 flex justify-between items-center">
+      {/* Stats and Actions Row */}
+      <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <p className="text-slate-300">
+          <p className="text-slate-300 text-sm">
             {filteredCardsCount} cards found
           </p>
           <button
             onClick={() => onShowOwnedOnlyChange(!showOwnedOnly)}
-            className={`flex items-center gap-2 px-3 py-1 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm ${
               showOwnedOnly 
                 ? 'bg-yellow-500 text-slate-900' 
                 : 'bg-slate-600/20 text-slate-300 hover:bg-slate-600/30'
             }`}
           >
-            {showOwnedOnly ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showOwnedOnly ? <EyeOff size={14} /> : <Eye size={14} />}
             {showOwnedOnly ? 'Show All' : 'Owned Only'}
           </button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div className="text-sm text-slate-300">
             Collection: {ownedCardsCount}/{totalCardsCount} cards
           </div>
           <button
             onClick={onShowManageCollection}
-            className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-semibold"
+            className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 px-3 py-1.5 rounded-lg flex items-center gap-2 transition-colors font-semibold text-sm"
           >
-            <Plus size={20} />
+            <Plus size={16} />
             Manage Collection
           </button>
         </div>
