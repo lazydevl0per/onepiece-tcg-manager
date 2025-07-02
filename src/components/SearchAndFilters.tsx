@@ -103,7 +103,7 @@ export default function SearchAndFilters({
         >
           <option value="all">All Sets</option>
           {sets.map(set => (
-            <option key={set.code} value={set.code}>{set.code} - {set.name}</option>
+            <option key={set.id} value={set.id}>{set.code} - {set.name}</option>
           ))}
         </select>
       </div>

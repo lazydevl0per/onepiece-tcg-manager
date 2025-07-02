@@ -92,9 +92,6 @@ const JSON_BATCH_SIZE = 10; // Load 10 JSON packs at a time (increased from 2)
 // Image cache to avoid re-loading already cached images
 const imageCache = new Set<string>();
 
-// Cache for set code to pack id mapping
-let setCodeToPackIdMap: Record<string, string> | null = null;
-
 // Helper function to delay execution
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -461,52 +458,6 @@ const getUniqueRarities = async (): Promise<string[]> => {
   return raritiesCache;
 };
 
-// Get static metadata (doesn't depend on card data)
-const getStaticSets = (): SetInfo[] => {
-  return [
-    { id: 'OP01', name: 'ROMANCE DAWN', code: 'OP01' },
-    { id: 'OP02', name: 'PARAMOUNT WAR', code: 'OP02' },
-    { id: 'OP03', name: 'PILLARS OF STRENGTH', code: 'OP03' },
-    { id: 'OP04', name: 'KINGDOMS OF INTRIGUE', code: 'OP04' },
-    { id: 'OP05', name: 'AWAKENING OF THE NEW ERA', code: 'OP05' },
-    { id: 'OP06', name: 'WINGS OF THE CAPTAIN', code: 'OP06' },
-    { id: 'OP07', name: '500 YEARS IN THE FUTURE', code: 'OP07' },
-    { id: 'OP08', name: 'TWO LEGENDS', code: 'OP08' },
-    { id: 'OP09', name: 'EMPERORS IN THE NEW WORLD', code: 'OP09' },
-    { id: 'OP10', name: 'ROYAL BLOOD', code: 'OP10' },
-    { id: 'OP11', name: 'A FIST OF DIVINE SPEED', code: 'OP11' },
-    { id: 'ST01', name: 'ST01', code: 'ST01' },
-    { id: 'ST02', name: 'ST02', code: 'ST02' },
-    { id: 'ST03', name: 'ST03', code: 'ST03' },
-    { id: 'ST04', name: 'ST04', code: 'ST04' },
-    { id: 'ST05', name: 'ST05', code: 'ST05' },
-    { id: 'ST06', name: 'ST06', code: 'ST06' },
-    { id: 'ST07', name: 'ST07', code: 'ST07' },
-    { id: 'ST08', name: 'ST08', code: 'ST08' },
-    { id: 'ST09', name: 'ST09', code: 'ST09' },
-    { id: 'ST10', name: 'ST10', code: 'ST10' },
-    { id: 'ST11', name: 'ST11', code: 'ST11' },
-    { id: 'ST12', name: 'ST12', code: 'ST12' },
-    { id: 'ST13', name: 'ST13', code: 'ST13' },
-    { id: 'ST14', name: 'ST14', code: 'ST14' },
-    { id: 'ST15', name: 'ST15', code: 'ST15' },
-    { id: 'ST16', name: 'ST16', code: 'ST16' },
-    { id: 'ST17', name: 'ST17', code: 'ST17' },
-    { id: 'ST18', name: 'ST18', code: 'ST18' },
-    { id: 'ST19', name: 'ST19', code: 'ST19' },
-    { id: 'ST20', name: 'ST20', code: 'ST20' },
-    { id: 'ST21', name: 'ST21', code: 'ST21' },
-    { id: 'ST23', name: 'ST23', code: 'ST23' },
-    { id: 'ST24', name: 'ST24', code: 'ST24' },
-    { id: 'ST25', name: 'ST25', code: 'ST25' },
-    { id: 'ST26', name: 'ST26', code: 'ST26' },
-    { id: 'ST27', name: 'ST27', code: 'ST27' },
-    { id: 'ST28', name: 'ST28', code: 'ST28' },
-    { id: 'PROMO', name: 'PROMO', code: 'PROMO' },
-    { id: 'OTHER', name: 'OTHER', code: 'OTHER' }
-  ];
-};
-
 const getStaticColors = (): string[] => {
   return ['RED', 'GREEN', 'BLUE', 'PURPLE', 'BLACK', 'YELLOW'];
 };
@@ -525,19 +476,6 @@ const convertToAppCard = (cardData: CardData): AppCard => ({
   owned: 0
 });
 
-// Helper to build set code to pack id mapping synchronously
-const getSetCodeToPackIdMap = (): Record<string, string> => {
-  if (setCodeToPackIdMap) return setCodeToPackIdMap;
-  const map: Record<string, string> = {};
-  for (const pack of getStaticSets()) {
-    if (pack.code) {
-      map[pack.code.toUpperCase()] = pack.id;
-    }
-  }
-  setCodeToPackIdMap = map;
-  return map;
-};
-
 // Filter cards based on search term and filters
 export const filterCards = async (
   cards: AppCard[],
@@ -547,24 +485,14 @@ export const filterCards = async (
   rarityFilter: string = 'all',
   setFilter: string = 'all'
 ): Promise<AppCard[]> => {
-  console.log('[filterCards] called', { searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, cardsCount: cards.length });
-  let packId: string | null = null;
-  if (setFilter !== 'all') {
-    const map = getSetCodeToPackIdMap();
-    packId = map[setFilter.toUpperCase().trim()] || null;
-    console.log('[filterCards] setFilter:', setFilter, 'resolved packId:', packId);
-  }
   return cards.filter(card => {
-    if (setFilter !== 'all') {
-      console.log('[filterCards] card.id:', card.id, 'card.pack_id:', card.pack_id);
-    }
     const matchesSearch = !searchTerm || 
       card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       card.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesColor = colorFilter === 'all' || card.color === colorFilter;
     const matchesType = typeFilter === 'all' || card.type === typeFilter;
     const matchesRarity = rarityFilter === 'all' || card.rarity === rarityFilter;
-    const matchesSet = setFilter === 'all' || (packId && card.pack_id === packId);
+    const matchesSet = setFilter === 'all' || card.pack_id === setFilter;
     return matchesSearch && matchesColor && matchesType && matchesRarity && matchesSet;
   });
 };
@@ -578,26 +506,17 @@ export const getAllCards = async (onProgress?: (cards: AppCard[], progress: numb
   return cardData.map(convertToAppCard);
 };
 
-// Get all sets
+// Get all sets from packs.json
 export const getSets = async (): Promise<SetInfo[]> => {
-  // Return cached data if available
-  if (setsCache) {
-    return setsCache;
-  }
-  
-  // Return static sets immediately
-  const staticSets = getStaticSets();
-  setsCache = staticSets;
-  
-  // Update with dynamic data in background only if we have card data
-  if (allCardDataCache) {
-    getUniqueSets().then(dynamicSets => {
-      setsCache = dynamicSets;
-    }).catch(() => {
-      // Keep static sets if dynamic loading fails
-    });
-  }
-  
+  if (setsCache) return setsCache;
+  // Load packs.json
+  const packsData = await importPackData();
+  // Map to SetInfo: id = pack_id, code = label (e.g. OP-01), name = title
+  setsCache = packsData.map(pack => ({
+    id: pack.id, // e.g. '569101'
+    code: pack.title_parts.label || pack.id, // e.g. 'OP-01' or fallback to id
+    name: pack.title_parts.title || pack.raw_title // e.g. 'ROMANCE DAWN' or fallback
+  }));
   return setsCache;
 };
 
