@@ -15,23 +15,12 @@ interface AppShellProps {
 export default function AppShell({
   activeTab,
   onTabChange,
-  isLoading,
   collectionCount,
   deckCount,
   children,
   searchAndFilters
 }: AppShellProps) {
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-400 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-slate-50 mb-2">Loading One Piece TCG Manager</h2>
-          <p className="text-slate-300">Loading card data...</p>
-        </div>
-      </div>
-    );
-  }
+  // App shows immediately while data loads in background - no blocking spinner
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 text-slate-50 flex">
