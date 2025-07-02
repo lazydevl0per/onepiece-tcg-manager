@@ -1,3 +1,5 @@
+import { normalizeRarity } from '../utils/constants';
+
 // Vegapull card data interface
 interface VegapullCard {
   id: string;
@@ -491,7 +493,7 @@ export const filterCards = async (
       card.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesColor = colorFilter === 'all' || card.color === colorFilter;
     const matchesType = typeFilter === 'all' || card.type === typeFilter;
-    const matchesRarity = rarityFilter === 'all' || card.rarity === rarityFilter;
+    const matchesRarity = rarityFilter === 'all' || normalizeRarity(card.rarity) === normalizeRarity(rarityFilter);
     const matchesSet = setFilter === 'all' || card.pack_id === setFilter;
     return matchesSearch && matchesColor && matchesType && matchesRarity && matchesSet;
   });

@@ -11,6 +11,7 @@ import {
 } from '../services/cardDataService';
 import { StorageService } from '../services/storageService';
 import { imageRateLimiter } from '../services/rateLimiter';
+import { normalizeRarity } from '../utils/constants';
 
 export function useCollection() {
   const [cards, setCards] = useState<AppCard[]>([]);
@@ -398,7 +399,7 @@ export function useCollection() {
     setSearchTerm,
     setColorFilter,
     setTypeFilter,
-    setRarityFilter,
+    setRarityFilter: (rarity: string) => setRarityFilter(rarity === 'all' ? 'all' : normalizeRarity(rarity)),
     setSetFilter,
     setShowOwnedOnly,
     updateCardOwned,

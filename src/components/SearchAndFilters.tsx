@@ -1,5 +1,6 @@
 import { Search, Plus, Eye, EyeOff } from 'lucide-react';
 import { type SetInfo } from '../services/cardDataService';
+import { normalizeRarity, formatRarity } from '../utils/constants';
 
 interface SearchAndFiltersProps {
   searchTerm: string;
@@ -23,6 +24,9 @@ interface SearchAndFiltersProps {
   rarities: string[];
   sets: SetInfo[];
 }
+
+// Helper to format type for display
+const formatType = (type: string) => type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
 export default function SearchAndFilters({
   searchTerm,
@@ -81,18 +85,18 @@ export default function SearchAndFilters({
         >
           <option value="all">All Types</option>
           {types.map(type => (
-            <option key={type} value={type}>{type}</option>
+            <option key={type} value={type}>{formatType(type)}</option>
           ))}
         </select>
 
         <select
-          value={rarityFilter}
+          value={normalizeRarity(rarityFilter)}
           onChange={(e) => onRarityFilterChange(e.target.value)}
           className="px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         >
           <option value="all">All Rarities</option>
           {rarities.map(rarity => (
-            <option key={rarity} value={rarity}>{rarity}</option>
+            <option key={normalizeRarity(rarity)} value={normalizeRarity(rarity)}>{formatRarity(rarity)}</option>
           ))}
         </select>
 

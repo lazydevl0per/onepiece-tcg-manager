@@ -90,4 +90,23 @@ export const defaultFilters = {
 // Deck building constants
 export const DECK_SIZE_LIMIT = 50;
 export const LEADER_LIMIT = 1;
-export const MAX_COPIES_PER_CARD = 4; 
+export const MAX_COPIES_PER_CARD = 4;
+
+// Rarity normalization and formatting helpers
+export const normalizeRarity = (rarity: string): string => {
+  if (!rarity) return '';
+  // Insert underscore between lowercase and uppercase, then uppercase and replace spaces
+  return rarity.trim()
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .replace(/\s+/g, '_')
+    .toUpperCase();
+};
+
+export const formatRarity = (rarity: string): string => {
+  if (!rarity) return '';
+  // Convert to Title Case and replace underscores with spaces
+  return rarity
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}; 
