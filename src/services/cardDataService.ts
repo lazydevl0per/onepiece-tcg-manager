@@ -491,7 +491,7 @@ export const filterCards = async (
     const matchesSearch = !searchTerm || 
       card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       card.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesColor = colorFilter === 'all' || card.color === colorFilter;
+    const matchesColor = colorFilter === 'all' || card.color.split('/').map(c => c.toLowerCase()).includes(colorFilter.toLowerCase());
     const matchesType = typeFilter === 'all' || card.type === typeFilter;
     const matchesRarity = rarityFilter === 'all' || normalizeRarity(card.rarity) === normalizeRarity(rarityFilter);
     const matchesSet = setFilter === 'all' || card.pack_id === setFilter;

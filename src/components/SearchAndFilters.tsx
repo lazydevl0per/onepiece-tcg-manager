@@ -74,7 +74,7 @@ export default function SearchAndFilters({
         >
           <option value="all">All Colors</option>
           {colors.map(color => (
-            <option key={color} value={color}>{color}</option>
+            <option key={color} value={color}>{color.charAt(0).toUpperCase() + color.slice(1).toLowerCase()}</option>
           ))}
         </select>
 

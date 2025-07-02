@@ -51,7 +51,6 @@ export default function OnePieceTCGApp() {
         isLoading={collection.isLoading}
         isImageLoading={collection.isImageLoading}
         imageProgress={collection.imageLoadingProgress}
-        imageLoadingSkipped={collection.imageLoadingSkipped}
       />
       <AppShell
         activeTab={activeTab}
