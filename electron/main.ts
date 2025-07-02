@@ -8,9 +8,79 @@ import { readFile, writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { request } from 'https'
 
-// Image caching rate limiting
-let lastImageRequestTime = 0
-const IMAGE_REQUEST_DELAY = 500 // 500ms between image requests
+// Image caching rate limiting - using token bucket algorithm
+// Maximum 250 requests per minute
+
+// Token bucket rate limiter for image requests
+class ImageRateLimiter {
+  private tokens: number;
+  private lastRefill: number;
+  private readonly maxTokens: number;
+  private readonly refillRate: number; // tokens per millisecond
+  private queue: Array<() => void> = [];
+  private isProcessing = false;
+
+  constructor() {
+    this.maxTokens = 250; // 250 requests per minute
+    this.tokens = this.maxTokens;
+    this.lastRefill = Date.now();
+    this.refillRate = 250 / (60 * 1000); // tokens per millisecond
+  }
+
+  private refillTokens(): void {
+    const now = Date.now();
+    const timePassed = now - this.lastRefill;
+    const tokensToAdd = timePassed * this.refillRate;
+    
+    this.tokens = Math.min(this.maxTokens, this.tokens + tokensToAdd);
+    this.lastRefill = now;
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.isProcessing || this.queue.length === 0) {
+      return;
+    }
+
+    this.isProcessing = true;
+
+    while (this.queue.length > 0) {
+      this.refillTokens();
+      
+      if (this.tokens >= 1) {
+        const resolve = this.queue.shift();
+        if (resolve) {
+          this.tokens -= 1;
+          resolve();
+        }
+      } else {
+        // Wait for tokens to refill
+        const waitTime = (1 - this.tokens) / this.refillRate;
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+
+    this.isProcessing = false;
+  }
+
+  async acquire(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      this.queue.push(resolve);
+      this.processQueue();
+    });
+  }
+
+  getStatus() {
+    this.refillTokens();
+    return {
+      tokens: this.tokens,
+      maxTokens: this.maxTokens,
+      queueLength: this.queue.length,
+      isProcessing: this.isProcessing
+    };
+  }
+}
+
+const imageRateLimiter = new ImageRateLimiter();
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -166,13 +236,8 @@ ipcMain.handle('get-card-image-path', async (_, imageUrl: string): Promise<strin
       return `file://${cachePath}`
     }
     
-    // Rate limiting for image requests
-    const now = Date.now()
-    const timeSinceLastRequest = now - lastImageRequestTime
-    if (timeSinceLastRequest < IMAGE_REQUEST_DELAY) {
-      await new Promise(resolve => setTimeout(resolve, IMAGE_REQUEST_DELAY - timeSinceLastRequest))
-    }
-    lastImageRequestTime = Date.now()
+    // Rate limiting for image requests using token bucket algorithm
+    await imageRateLimiter.acquire()
     
     // Fetch image from remote URL with timeout and retry logic
     const imageBuffer = await new Promise<Buffer>((resolve, reject) => {
@@ -252,6 +317,11 @@ ipcMain.handle('is-image-cached', async (_, imageUrl: string): Promise<boolean> 
     console.error('Error checking image cache:', _error)
     return false
   }
+})
+
+// IPC handler to get rate limiter status for debugging
+ipcMain.handle('get-rate-limiter-status', async (): Promise<any> => {
+  return imageRateLimiter.getStatus();
 })
 
 // In this file you can include the rest of your app's specific main process

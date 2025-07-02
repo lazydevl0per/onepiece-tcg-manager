@@ -5,10 +5,12 @@ import {
   getColors, 
   getTypes, 
   getRarities,
+  filterCards,
   type AppCard,
   type SetInfo
 } from '../services/cardDataService';
 import { StorageService } from '../services/storageService';
+import { imageRateLimiter } from '../services/rateLimiter';
 
 export function useCollection() {
   const [cards, setCards] = useState<AppCard[]>([]);
@@ -27,6 +29,7 @@ export function useCollection() {
   const [setFilter, setSetFilter] = useState<string>('all');
   const [showOwnedOnly, setShowOwnedOnly] = useState(false);
   const [imageLoadingSkipped, setImageLoadingSkipped] = useState(false);
+  const [filteredCards, setFilteredCards] = useState<AppCard[]>([]);
 
   // Load card data and metadata on component mount
   useEffect(() => {
@@ -202,6 +205,15 @@ export function useCollection() {
             return; // Skip loading if already cached
           }
           
+          // Apply rate limiting before loading image
+          await imageRateLimiter.acquire();
+          
+          // Log rate limiter status periodically
+          if (loadedImages % 25 === 0) {
+            const status = imageRateLimiter.getStatus();
+            console.log(`🔄 Rate limiter status: ${status.tokens.toFixed(1)}/${status.maxTokens} tokens, queue: ${status.queueLength}`);
+          }
+          
           // Load image if not cached
           const img = new Image();
           img.src = card.images.small;
@@ -238,24 +250,21 @@ export function useCollection() {
     setImageLoadingProgress(1);
   };
 
-  // Memoize filtered cards to prevent recalculation on every render
-  const filteredCards = useMemo(() => {
-    // For now, filter synchronously since we have all cards in memory
-    // In the future, we could make this async if needed
-    const filtered = cards.filter(card => {
-      const matchesSearch = !searchTerm || 
-        card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        card.id.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesColor = colorFilter === 'all' || card.color === colorFilter;
-      const matchesType = typeFilter === 'all' || card.type === typeFilter;
-      const matchesRarity = rarityFilter === 'all' || card.rarity === rarityFilter;
-      const matchesSet = setFilter === 'all' || card.set.name === setFilter;
-      
-      return matchesSearch && matchesColor && matchesType && matchesRarity && matchesSet;
-    });
-    
-    return filtered.filter(card => !showOwnedOnly || card.owned > 0);
+  useEffect(() => {
+    let cancelled = false;
+    const doFilter = async () => {
+      const result = await filterCards(
+        cards,
+        searchTerm,
+        colorFilter,
+        typeFilter,
+        rarityFilter,
+        setFilter
+      );
+      if (!cancelled) setFilteredCards(result.filter(card => !showOwnedOnly || card.owned > 0));
+    };
+    doFilter();
+    return () => { cancelled = true; };
   }, [cards, searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
 
   // Optimize card update function with persistence

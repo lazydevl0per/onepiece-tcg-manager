@@ -18,6 +18,11 @@ const api = {
   // New API to check if image is already cached
   isImageCached: async (imageUrl: string): Promise<boolean> => {
     return await ipcRenderer.invoke('is-image-cached', imageUrl)
+  },
+  
+  // New API to get rate limiter status
+  getRateLimiterStatus: async (): Promise<any> => {
+    return await ipcRenderer.invoke('get-rate-limiter-status')
   }
 }
 

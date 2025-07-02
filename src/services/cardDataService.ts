@@ -51,6 +51,7 @@ export interface CardData {
   ability?: string;
   trigger?: string;
   set: {
+    code: string;
     name: string;
   };
   notes?: Array<{
@@ -58,6 +59,7 @@ export interface CardData {
     url?: string;
   }>;
   externalImageUrl?: string;
+  pack_id: string;
 }
 
 // Application Card interface (with owned quantity)
@@ -90,6 +92,9 @@ const JSON_BATCH_SIZE = 10; // Load 10 JSON packs at a time (increased from 2)
 // Image cache to avoid re-loading already cached images
 const imageCache = new Set<string>();
 
+// Cache for set code to pack id mapping
+let setCodeToPackIdMap: Record<string, string> | null = null;
+
 // Helper function to delay execution
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -104,8 +109,6 @@ const getAttributeImageCode = (attribute: string): string => {
   };
   return attributeMap[attribute] || '01';
 };
-
-
 
 // Helper function to get cached or remote image path
 const getCachedOrRemoteImagePath = async (imgUrl: string): Promise<string> => {
@@ -130,7 +133,7 @@ const getCachedOrRemoteImagePath = async (imgUrl: string): Promise<string> => {
         }
       }
       
-      // Use the new Electron API for caching
+      // Use the new Electron API for caching (this will apply rate limiting on the main process)
       const cachedPath = await (window as typeof window & { api?: { getCardImagePath: (url: string) => Promise<string> } }).api?.getCardImagePath(fullUrl);
       if (cachedPath) {
         imageCache.add(fullUrl);
@@ -180,10 +183,12 @@ const transformVegapullCard = async (vegapullCard: VegapullCard, packData: PackD
     ability: vegapullCard.effect === '-' ? '' : vegapullCard.effect,
     trigger: vegapullCard.trigger || '',
     set: {
+      code: packData.id,
       name: packData.raw_title
     },
     notes: [],
-    externalImageUrl: vegapullCard.img_full_url
+    externalImageUrl: vegapullCard.img_full_url,
+    pack_id: vegapullCard.pack_id
   };
 };
 
@@ -459,12 +464,17 @@ const getUniqueRarities = async (): Promise<string[]> => {
 // Get static metadata (doesn't depend on card data)
 const getStaticSets = (): SetInfo[] => {
   return [
-    { id: 'OP01', name: 'OP01', code: 'OP01' },
-    { id: 'OP02', name: 'OP02', code: 'OP02' },
-    { id: 'OP03', name: 'OP03', code: 'OP03' },
-    { id: 'OP04', name: 'OP04', code: 'OP04' },
-    { id: 'OP05', name: 'OP05', code: 'OP05' },
-    { id: 'OP06', name: 'OP06', code: 'OP06' },
+    { id: 'OP01', name: 'ROMANCE DAWN', code: 'OP01' },
+    { id: 'OP02', name: 'PARAMOUNT WAR', code: 'OP02' },
+    { id: 'OP03', name: 'PILLARS OF STRENGTH', code: 'OP03' },
+    { id: 'OP04', name: 'KINGDOMS OF INTRIGUE', code: 'OP04' },
+    { id: 'OP05', name: 'AWAKENING OF THE NEW ERA', code: 'OP05' },
+    { id: 'OP06', name: 'WINGS OF THE CAPTAIN', code: 'OP06' },
+    { id: 'OP07', name: '500 YEARS IN THE FUTURE', code: 'OP07' },
+    { id: 'OP08', name: 'TWO LEGENDS', code: 'OP08' },
+    { id: 'OP09', name: 'EMPERORS IN THE NEW WORLD', code: 'OP09' },
+    { id: 'OP10', name: 'ROYAL BLOOD', code: 'OP10' },
+    { id: 'OP11', name: 'A FIST OF DIVINE SPEED', code: 'OP11' },
     { id: 'ST01', name: 'ST01', code: 'ST01' },
     { id: 'ST02', name: 'ST02', code: 'ST02' },
     { id: 'ST03', name: 'ST03', code: 'ST03' },
@@ -515,6 +525,19 @@ const convertToAppCard = (cardData: CardData): AppCard => ({
   owned: 0
 });
 
+// Helper to build set code to pack id mapping synchronously
+const getSetCodeToPackIdMap = (): Record<string, string> => {
+  if (setCodeToPackIdMap) return setCodeToPackIdMap;
+  const map: Record<string, string> = {};
+  for (const pack of getStaticSets()) {
+    if (pack.code) {
+      map[pack.code.toUpperCase()] = pack.id;
+    }
+  }
+  setCodeToPackIdMap = map;
+  return map;
+};
+
 // Filter cards based on search term and filters
 export const filterCards = async (
   cards: AppCard[],
@@ -524,16 +547,24 @@ export const filterCards = async (
   rarityFilter: string = 'all',
   setFilter: string = 'all'
 ): Promise<AppCard[]> => {
+  console.log('[filterCards] called', { searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, cardsCount: cards.length });
+  let packId: string | null = null;
+  if (setFilter !== 'all') {
+    const map = getSetCodeToPackIdMap();
+    packId = map[setFilter.toUpperCase().trim()] || null;
+    console.log('[filterCards] setFilter:', setFilter, 'resolved packId:', packId);
+  }
   return cards.filter(card => {
+    if (setFilter !== 'all') {
+      console.log('[filterCards] card.id:', card.id, 'card.pack_id:', card.pack_id);
+    }
     const matchesSearch = !searchTerm || 
       card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       card.id.toLowerCase().includes(searchTerm.toLowerCase());
-    
     const matchesColor = colorFilter === 'all' || card.color === colorFilter;
     const matchesType = typeFilter === 'all' || card.type === typeFilter;
     const matchesRarity = rarityFilter === 'all' || card.rarity === rarityFilter;
-    const matchesSet = setFilter === 'all' || card.set.name === setFilter;
-    
+    const matchesSet = setFilter === 'all' || (packId && card.pack_id === packId);
     return matchesSearch && matchesColor && matchesType && matchesRarity && matchesSet;
   });
 };
@@ -659,8 +690,6 @@ export const clearAllCaches = () => {
   clearMetadataCache();
 };
 
-
-
 // Get card by ID
 export const getCardById = async (id: string): Promise<AppCard | undefined> => {
   // Use cached data if available, otherwise load
@@ -742,4 +771,4 @@ export const getStageCards = async (): Promise<AppCard[]> => {
   // Only load if not cached
   const cards = await getAllCards();
   return cards.filter(card => card.type === 'STAGE');
-}; 
+};
