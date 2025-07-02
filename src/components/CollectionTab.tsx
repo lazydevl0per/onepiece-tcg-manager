@@ -62,7 +62,7 @@ export default function CollectionTab({
       }
       return (
         <Card
-          key={card.id}
+          key={card.id + '-' + card.pack_id}
           card={card}
           owned={card.owned}
           onUpdateOwned={onUpdateCardOwned}
