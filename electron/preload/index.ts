@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
@@ -9,21 +9,6 @@ const api = {
   getChromeVersion: () => process.versions.chrome,
   getElectronVersion: () => process.versions.electron,
   isElectron: () => true,
-  
-  // New API for card image caching
-  getCardImagePath: async (imageUrl: string): Promise<string> => {
-    return await ipcRenderer.invoke('get-card-image-path', imageUrl)
-  },
-  
-  // New API to check if image is already cached
-  isImageCached: async (imageUrl: string): Promise<boolean> => {
-    return await ipcRenderer.invoke('is-image-cached', imageUrl)
-  },
-  
-  // New API to get rate limiter status
-  getRateLimiterStatus: async (): Promise<any> => {
-    return await ipcRenderer.invoke('get-rate-limiter-status')
-  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

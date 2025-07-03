@@ -1,140 +1,141 @@
-import { useState } from 'react';
-import { Plus, Minus, Trash2 } from 'lucide-react';
-import { type AppCard } from '../services/cardDataService';
-import { getRarityColorClass, getTypeColorClass } from '../utils/constants';
+import React from 'react';
+import { AppCard } from '../services/cardDataService';
 
 interface CardProps {
   card: AppCard;
-  owned: number;
-  onUpdateOwned: (cardId: string, owned: number) => void;
+  onUpdateOwned?: (cardId: string, owned: number) => void;
   onAddToDeck?: (card: AppCard) => void;
   isInDeck?: boolean;
   deckQuantity?: number;
-  canAddToDeck?: boolean;
-  addToDeckDisabled?: boolean;
-  addToDeckTitle?: string;
+  MAX_COPIES_PER_CARD?: number;
 }
 
-export default function Card({
-  card,
-  owned,
-  onUpdateOwned,
-  onAddToDeck,
-  isInDeck = false,
+export default function Card({ 
+  card, 
+  onUpdateOwned, 
+  onAddToDeck, 
+  isInDeck = false, 
   deckQuantity = 0,
-  canAddToDeck = false,
-  addToDeckDisabled = false,
-  addToDeckTitle = 'Add to deck'
+  MAX_COPIES_PER_CARD = 4 
 }: CardProps) {
-  const [imageError, setImageError] = useState(false);
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
-
-  const handleUpdateOwned = (increment: boolean) => {
-    const newOwned = increment ? Math.min(owned + 1, 99) : Math.max(owned - 1, 0);
-    onUpdateOwned(card.id, newOwned);
+  const handleOwnedChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newOwned = parseInt(event.target.value);
+    onUpdateOwned?.(card.id, newOwned);
   };
 
   const handleAddToDeck = () => {
-    if (onAddToDeck && !addToDeckDisabled) {
-      onAddToDeck(card);
-    }
+    onAddToDeck?.(card);
   };
 
   return (
-    <div className="bg-slate-700/50 backdrop-blur-sm rounded-xl p-4 border border-slate-600/50 hover:border-slate-500/50 transition-all hover:shadow-lg">
-      {/* Card Image */}
-      <div className="relative mb-4">
-        {!imageError ? (
-          <img
-            src={card.images.small}
-            alt={card.name}
-            onError={handleImageError}
-            className="w-full h-48 object-cover rounded-lg border border-slate-500/20"
-          />
-        ) : (
-          <div className="w-full h-48 bg-slate-600/20 rounded-lg border border-slate-500/20 flex items-center justify-center">
-            <div className="text-slate-400 text-sm text-center px-2">
-              Image not available
-            </div>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+      {/* Card Header */}
+      <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <h3 className="font-semibold text-sm leading-tight">{card.name}</h3>
+            <p className="text-xs opacity-90">{card.set.name}</p>
           </div>
-        )}
+          <div className="text-right">
+            <div className="text-lg font-bold">{card.cost || '-'}</div>
+            <div className="text-xs opacity-90">{card.type}</div>
+          </div>
+        </div>
       </div>
 
-      {/* Card Info */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-400">{card.code}</span>
-          <span className={`text-sm font-semibold ${getRarityColorClass(card.rarity)}`}>
-            {card.rarity}
-          </span>
-        </div>
-
-        <h3 className="text-lg font-bold mb-2 text-slate-50">{card.name}</h3>
-
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-slate-400">Cost: {card.cost}</span>
-          {card.power && <span className="text-slate-400">Power: {card.power}</span>}
+      {/* Card Content */}
+      <div className="p-3">
+        {/* Card Details */}
+        <div className="space-y-2 text-sm">
+          {card.attribute && (
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-600">Attribute:</span>
+              <span className="font-medium">{card.attribute.name}</span>
+            </div>
+          )}
+          
+          {card.power && (
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-600">Power:</span>
+              <span className="font-medium">{card.power}</span>
+            </div>
+          )}
+          
           {card.counter && (
-            <span className="text-yellow-400">Counter: +{card.counter}</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-600">Counter:</span>
+              <span className="font-medium">{card.counter}</span>
+            </div>
+          )}
+          
+          {card.color && (
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-600">Color:</span>
+              <span className="font-medium">{card.color}</span>
+            </div>
+          )}
+          
+          {card.family && (
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-600">Family:</span>
+              <span className="font-medium">{card.family}</span>
+            </div>
+          )}
+          
+          {card.rarity && (
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-600">Rarity:</span>
+              <span className="font-medium">{card.rarity}</span>
+            </div>
           )}
         </div>
 
-        <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${getTypeColorClass(card.type)}`}>
-          {card.type}
-        </div>
+        {/* Card Ability */}
+        {card.ability && (
+          <div className="mt-3 p-2 bg-gray-50 rounded text-xs">
+            <div className="font-medium text-gray-700 mb-1">Ability:</div>
+            <div className="text-gray-600 leading-relaxed">{card.ability}</div>
+          </div>
+        )}
 
-        <p className="text-sm text-slate-300 mb-3 line-clamp-3">
-          {card.ability || 'No effect text available.'}
-        </p>
+        {/* Trigger */}
+        {card.trigger && (
+          <div className="mt-2 p-2 bg-yellow-50 rounded text-xs">
+            <div className="font-medium text-yellow-700 mb-1">Trigger:</div>
+            <div className="text-yellow-600">{card.trigger}</div>
+          </div>
+        )}
 
-        {/* Ownership Controls */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-slate-400">Owned:</span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleUpdateOwned(false)}
-              className="w-6 h-6 bg-slate-600 hover:bg-slate-500 text-slate-50 rounded border border-slate-500/30 flex items-center justify-center text-sm"
+        {/* Collection Controls */}
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700">Owned:</label>
+            <select
+              value={card.owned || 0}
+              onChange={handleOwnedChange}
+              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <Minus size={12} />
-            </button>
-            <span className="text-sm text-slate-50 min-w-[2rem] text-center">{owned}</span>
+              {Array.from({ length: MAX_COPIES_PER_CARD + 1 }, (_, i) => (
+                <option key={i} value={i}>{i}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Deck Controls */}
+          <div className="flex items-center space-x-2">
             <button
-              onClick={() => handleUpdateOwned(true)}
-              className="w-6 h-6 bg-yellow-500 hover:bg-yellow-600 text-slate-900 rounded border border-yellow-500/30 flex items-center justify-center text-sm"
+              onClick={handleAddToDeck}
+              disabled={isInDeck}
+              className={`flex-1 px-3 py-1 text-sm rounded font-medium transition-colors ${
+                isInDeck
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
             >
-              <Plus size={12} />
+              {isInDeck ? `In Deck (${deckQuantity})` : 'Add to Deck'}
             </button>
           </div>
         </div>
-
-        {/* Add to Deck Button */}
-        {canAddToDeck && (
-          <button
-            onClick={handleAddToDeck}
-            disabled={addToDeckDisabled}
-            title={addToDeckTitle}
-            className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-              addToDeckDisabled
-                ? 'bg-slate-600 text-slate-300 cursor-not-allowed'
-                : 'bg-red-500 hover:bg-red-600 text-white cursor-pointer'
-            }`}
-          >
-            {isInDeck ? (
-              <div className="flex items-center justify-center gap-2">
-                <Trash2 size={16} />
-                In Deck ({deckQuantity})
-              </div>
-            ) : (
-              <div className="flex items-center justify-center gap-2">
-                <Plus size={16} />
-                Add to Deck
-              </div>
-            )}
-          </button>
-        )}
       </div>
     </div>
   );

@@ -37,14 +37,9 @@ export interface CardData {
   rarity: string;
   type: string;
   name: string;
-  images: {
-    small: string;
-    large: string;
-  };
   cost: number;
   attribute?: {
     name?: string;
-    image: string;
   };
   power?: number | null;
   counter?: string | null;
@@ -60,7 +55,6 @@ export interface CardData {
     name: string;
     url?: string;
   }>;
-  externalImageUrl?: string;
   pack_id: string;
 }
 
@@ -88,92 +82,22 @@ let isLoadingProgressively = false;
 let loadedPacks = new Set<string>();
 let progressiveLoadingCallbacks: Array<(cards: CardData[], progress: number) => void> = [];
 
-// Rate limiting configuration - only for image loading, not JSON
-const JSON_BATCH_SIZE = 10; // Load 10 JSON packs at a time (increased from 2)
-
-// Image cache to avoid re-loading already cached images
-const imageCache = new Set<string>();
+const JSON_BATCH_SIZE = 10; // Load 10 JSON packs at a time
 
 // Helper function to delay execution
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Helper function to get attribute image code
-const getAttributeImageCode = (attribute: string): string => {
-  const attributeMap: Record<string, string> = {
-    'Strike': '01',
-    'Slash': '02',
-    'Ranged': '04',
-    'Special': '03',
-    'Wisdom': '05'
-  };
-  return attributeMap[attribute] || '01';
-};
-
-// Helper function to get cached or remote image path
-const getCachedOrRemoteImagePath = async (imgUrl: string): Promise<string> => {
-  // Check if we're in Electron
-  const isElectron = detectElectron();
-  
-  if (isElectron) {
-    try {
-      // Use the full URL from vegapull data (img_full_url)
-      // If imgUrl is a relative path, construct the full URL
-      let fullUrl: string;
-      if (imgUrl.startsWith('http')) {
-        fullUrl = imgUrl;
-      } else {
-        // Extract filename and construct official URL
-        const filename = imgUrl.split('/').pop()?.split('?')[0];
-        if (filename) {
-          fullUrl = `https://en.onepiece-cardgame.com/images/cardlist/card/${filename}`;
-        } else {
-          // Fallback to original URL
-          fullUrl = imgUrl;
-        }
-      }
-      
-      // Use the new Electron API for caching (this will apply rate limiting on the main process)
-      const cachedPath = await (window as typeof window & { api?: { getCardImagePath: (url: string) => Promise<string> } }).api?.getCardImagePath(fullUrl);
-      if (cachedPath) {
-        imageCache.add(fullUrl);
-        return cachedPath;
-      }
-      return fullUrl;
-    } catch (error) {
-      console.error('Error getting cached image path:', error);
-      // Fallback to remote URL
-      return imgUrl.startsWith('http') ? imgUrl : `https://en.onepiece-cardgame.com/images/cardlist/card/${imgUrl.split('/').pop()}`;
-    }
-  } else {
-    // In web mode, use the remote URL directly
-    if (imgUrl.startsWith('http')) {
-      return imgUrl;
-    } else {
-      const filename = imgUrl.split('/').pop()?.split('?')[0];
-      return filename ? `https://en.onepiece-cardgame.com/images/cardlist/card/${filename}` : imgUrl;
-    }
-  }
-};
-
 // Transform vegapull card to application card format (optimized for speed)
 const transformVegapullCard = async (vegapullCard: VegapullCard, packData: PackData): Promise<CardData> => {
-  // Get image path without waiting for full image loading
-  const localImagePath = await getCachedOrRemoteImagePath(vegapullCard.img_url);
-  
   return {
     id: vegapullCard.id,
     code: vegapullCard.id,
     rarity: vegapullCard.rarity,
     type: vegapullCard.category.toUpperCase(),
     name: vegapullCard.name,
-    images: {
-      small: localImagePath,
-      large: localImagePath
-    },
     cost: vegapullCard.cost,
     attribute: vegapullCard.attributes.length > 0 ? {
-      name: vegapullCard.attributes[0],
-      image: `https://en.onepiece-cardgame.com/images/cardlist/attribute/ico_type${getAttributeImageCode(vegapullCard.attributes[0])}.png`
+      name: vegapullCard.attributes[0]
     } : undefined,
     power: vegapullCard.power,
     counter: vegapullCard.counter ? vegapullCard.counter.toString() : null,
@@ -186,7 +110,6 @@ const transformVegapullCard = async (vegapullCard: VegapullCard, packData: PackD
       name: packData.raw_title
     },
     notes: [],
-    externalImageUrl: vegapullCard.img_full_url,
     pack_id: vegapullCard.pack_id
   };
 };
@@ -252,7 +175,7 @@ const importPackData = async (): Promise<PackData[]> => {
   }
 };
 
-// Progressive card loading with rate limiting
+// Progressive card loading
 const loadCardsProgressively = async (onProgress?: (cards: CardData[], progress: number) => void): Promise<CardData[]> => {
   if (isLoadingProgressively) {
     // If already loading, wait for it to complete
@@ -292,7 +215,7 @@ const loadCardsProgressively = async (onProgress?: (cards: CardData[], progress:
     const totalPacks = packIds.length;
     let loadedCount = 0;
 
-    // Load packs in batches WITHOUT rate limiting for JSON (much faster)
+    // Load packs in batches
     for (let i = 0; i < packIds.length; i += JSON_BATCH_SIZE) {
       const batch = packIds.slice(i, i + JSON_BATCH_SIZE);
       
@@ -317,7 +240,7 @@ const loadCardsProgressively = async (onProgress?: (cards: CardData[], progress:
       loadedCount += batch.length;
       const progress = loadedCount / totalPacks;
 
-      // Transform cards loaded so far (this is where image paths are resolved)
+      // Transform cards loaded so far
       const transformedCards = await Promise.all(allVegapullCards.map(async card => {
         const packData = packMap.get(card.pack_id);
         if (!packData) {
@@ -340,7 +263,6 @@ const loadCardsProgressively = async (onProgress?: (cards: CardData[], progress:
       onProgress?.(transformedCards, progress);
       progressiveLoadingCallbacks.forEach(callback => callback(transformedCards, progress));
 
-      // No rate limiting delay for JSON loading - much faster!
       // Only add a minimal delay to prevent blocking the UI
       if (i + JSON_BATCH_SIZE < packIds.length) {
         await delay(10); // Just 10ms to allow UI updates

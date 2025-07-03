@@ -35,9 +35,6 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Copy card data
-      run: node scripts/copy-data.js
-
     - name: Build application
       run: npm run build
 

@@ -9,9 +9,8 @@ The application handles large datasets and complex UI interactions that can impa
 1. **Large card collections**: 2000+ cards with high-resolution images
 2. **Complex filtering**: Real-time search across multiple card attributes
 3. **Grid layout changes**: Responsive design with dynamic column counts
-4. **Image loading**: Each card loads an image with transitions
-5. **Deck building**: Real-time statistics calculations
-6. **Window resizing**: Frequent layout recalculations
+4. **Deck building**: Real-time statistics calculations
+5. **Window resizing**: Frequent layout recalculations
 
 ## Implemented Solutions
 
@@ -25,7 +24,6 @@ The application handles large datasets and complex UI interactions that can impa
 
 #### Event Handler Optimization
 - Used `useCallback` for all event handlers to prevent function recreation
-- Optimized image loading handlers with memoization
 - Debounced search input to prevent excessive filtering
 
 ### 2. Virtualized Grid Rendering
@@ -47,24 +45,7 @@ The application handles large datasets and complex UI interactions that can impa
 />
 ```
 
-### 3. Image Loading Optimization
-
-#### Lazy Loading with Intersection Observer
-```jsx
-<img 
-  loading="lazy"
-  onError={handleImageError}
-  onLoad={handleImageLoad}
-  style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
-/>
-```
-
-#### Optimized Image Handlers
-- Memoized error and load handlers
-- Prevents layout shifts during image loading
-- Fallback handling for missing images
-
-### 4. Resize Event Optimization
+### 3. Resize Event Optimization
 
 #### Throttled Resize Handler
 - Created `useResizeOptimization` hook with 50ms throttling
@@ -81,7 +62,7 @@ useResizeOptimization({
 });
 ```
 
-### 5. Data Loading Optimization
+### 4. Data Loading Optimization
 
 #### Chunked Data Loading
 - Card data is split into separate JSON files by set
@@ -93,7 +74,7 @@ useResizeOptimization({
 - Memoized filter results
 - Efficient string matching algorithms
 
-### 6. CSS Performance Optimizations
+### 5. CSS Performance Optimizations
 
 #### GPU Acceleration
 ```css
@@ -139,8 +120,7 @@ useResizeOptimization({
 3. **Optimize event handlers** with useCallback
 4. **Enable GPU acceleration** for smooth animations
 5. **Throttle resize events** to prevent excessive processing
-6. **Use lazy loading** for images and heavy content
-7. **Implement virtualization** for large lists
+6. **Implement virtualization** for large lists
 
 ### For Users
 
@@ -177,9 +157,8 @@ if (process.env.NODE_ENV === 'development') {
 
 ### High Memory Usage
 1. Check for memory leaks in React DevTools
-2. Monitor image loading and caching
-3. Verify data cleanup in useEffect hooks
-4. Check for unnecessary re-renders
+2. Verify data cleanup in useEffect hooks
+3. Check for unnecessary re-renders
 
 ### Slow Search Performance
 1. Verify debouncing is working
@@ -208,7 +187,6 @@ if (process.env.NODE_ENV === 'development') {
 - [ ] useMemo for expensive calculations
 - [ ] useCallback for event handlers
 - [ ] Virtualized grid for large collections
-- [ ] Lazy loading for images
 - [ ] Debounced search input
 - [ ] Throttled resize events
 - [ ] GPU acceleration enabled

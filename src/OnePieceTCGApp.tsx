@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { AppShell, CollectionTab, DeckBuilderTab, ManageCollectionModal, LoadingProgress } from './components';
+import { AppShell, CollectionTab, DeckBuilderTab, ManageCollectionModal } from './components';
 import { useCollection, useDeckBuilder, useResizeOptimization } from './hooks';
 import { MAX_COPIES_PER_CARD } from './utils/constants';
 import SearchAndFilters from './components/SearchAndFilters';
-import RateLimiterStatus from './components/RateLimiterStatus';
 
 export default function OnePieceTCGApp() {
   const [activeTab, setActiveTab] = useState<'collection' | 'deckbuilder'>('collection');
@@ -46,17 +45,9 @@ export default function OnePieceTCGApp() {
 
   return (
     <>
-      <LoadingProgress 
-        progress={collection.loadingProgress} 
-        isLoading={collection.isLoading}
-        isImageLoading={collection.isImageLoading}
-        imageProgress={collection.imageLoadingProgress}
-      />
       <AppShell
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        isLoading={collection.isLoading}
-        isImageLoading={collection.isImageLoading}
         collectionCount={collection.ownedCardsCount}
         deckCount={deckBuilder.decks.length}
         searchAndFilters={searchAndFilters}
@@ -106,9 +97,6 @@ export default function OnePieceTCGApp() {
         ownedCards={collection.ownedCardsCount}
         totalCopies={collection.totalCopies}
       />
-      
-      {/* Rate Limiter Status - only show during image loading */}
-      <RateLimiterStatus isVisible={collection.isImageLoading} />
     </AppShell>
     </>
   );

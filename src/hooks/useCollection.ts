@@ -10,7 +10,6 @@ import {
   type SetInfo
 } from '../services/cardDataService';
 import { StorageService } from '../services/storageService';
-import { imageRateLimiter } from '../services/rateLimiter';
 import { normalizeRarity } from '../utils/constants';
 
 export function useCollection() {
@@ -21,8 +20,6 @@ export function useCollection() {
   const [rarities, setRarities] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [isImageLoading, setIsImageLoading] = useState(false);
-  const [imageLoadingProgress, setImageLoadingProgress] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [colorFilter, setColorFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -92,12 +89,6 @@ export function useCollection() {
         setLoadingProgress(1);
         console.log('🎉 Setting isLoading to false - app ready!');
         setIsLoading(false); // Card data loading is complete - app is now ready to use
-        
-        // Start image preloading in the background (non-blocking)
-        console.log('🖼️ Starting image preloading in background...');
-        setTimeout(() => {
-          startImagePreloading(allCards);
-        }, 100); // Small delay to ensure UI is rendered first
       } catch (error) {
         // Handle error silently or implement proper error state management
         console.error('❌ Failed to load card data:', error);
@@ -107,62 +98,6 @@ export function useCollection() {
     
     loadData();
   }, []);
-
-  // Image preloading function - loads images sequentially with caching checks
-  const startImagePreloading = async (allCards: AppCard[]) => {
-    // Check if all images are already cached by the browser
-    let allCached = true;
-    for (const card of allCards) {
-      const img = new window.Image();
-      img.src = card.images.small;
-      if (!img.complete) {
-        allCached = false;
-        break;
-      }
-    }
-    if (allCached) {
-      setIsImageLoading(false);
-      setImageLoadingProgress(1);
-      console.log('✅ All images already cached by browser. Skipping preloading.');
-      return;
-    }
-    setIsImageLoading(true);
-    setImageLoadingProgress(0);
-    const totalImages = allCards.length;
-    let loadedImages = 0;
-    let skippedImages = 0;
-    const batchSize = 5; // Load 5 images at a time
-    const delayBetweenBatches = 100; // 100ms between batches
-    for (let i = 0; i < totalImages; i += batchSize) {
-      const batch = allCards.slice(i, i + batchSize);
-      const batchPromises = batch.map(async (card) => {
-        try {
-          await imageRateLimiter.acquire();
-          const img = new Image();
-          img.src = card.images.small;
-          await new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-            setTimeout(resolve, 3000);
-          });
-        } catch (_error) {
-          // Silently ignore image loading errors
-        }
-      });
-      await Promise.all(batchPromises);
-      loadedImages += batch.length;
-      setImageLoadingProgress(loadedImages / totalImages);
-      if (loadedImages % 50 === 0) {
-        console.log(`🖼️ Image loading progress: ${Math.round((loadedImages / totalImages) * 100)}% (${loadedImages}/${totalImages}, ${skippedImages} cached)`);
-      }
-      if (i + batchSize < totalImages) {
-        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
-      }
-    }
-    console.log(`✅ Image preloading complete! Loaded: ${loadedImages - skippedImages}, Cached: ${skippedImages}, Total: ${totalImages}`);
-    setIsImageLoading(false);
-    setImageLoadingProgress(1);
-  };
 
   useEffect(() => {
     let cancelled = false;
@@ -297,8 +232,6 @@ export function useCollection() {
     rarities,
     isLoading,
     loadingProgress,
-    isImageLoading,
-    imageLoadingProgress,
     searchTerm,
     colorFilter,
     typeFilter,

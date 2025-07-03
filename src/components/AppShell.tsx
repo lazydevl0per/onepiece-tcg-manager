@@ -4,8 +4,6 @@ import StorageStatus from './StorageStatus';
 interface AppShellProps {
   activeTab: 'collection' | 'deckbuilder';
   onTabChange: (tab: 'collection' | 'deckbuilder') => void;
-  isLoading: boolean;
-  isImageLoading?: boolean;
   collectionCount: number;
   deckCount: number;
   children: React.ReactNode;
