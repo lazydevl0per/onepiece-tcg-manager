@@ -1,46 +1,46 @@
-// Color mapping for One Piece TCG colors to CSS classes
+// Color mapping for One Piece TCG colors to CSS classes using One Piece theme colors
 export const colorMap: Record<string, string> = {
-  'Red': 'bg-red-500',
-  'Blue': 'bg-blue-500',
-  'Green': 'bg-green-500',
-  'Yellow': 'bg-yellow-500',
-  'Purple': 'bg-purple-500',
-  'Black': 'bg-gray-900',
-  'Colorless': 'bg-gray-400',
-  'Red/Green': 'bg-gradient-to-r from-red-500 to-green-500',
-  'Red/Blue': 'bg-gradient-to-r from-red-500 to-blue-500',
-  'Red/Yellow': 'bg-gradient-to-r from-red-500 to-yellow-500',
-  'Blue/Green': 'bg-gradient-to-r from-blue-500 to-green-500',
-  'Blue/Yellow': 'bg-gradient-to-r from-blue-500 to-yellow-500',
-  'Green/Yellow': 'bg-gradient-to-r from-green-500 to-yellow-500',
-  'Green/Purple': 'bg-gradient-to-r from-green-500 to-purple-500',
-  'Yellow/Purple': 'bg-gradient-to-r from-yellow-500 to-purple-500',
-  'Red/Blue/Green': 'bg-gradient-to-r from-red-500 via-blue-500 to-green-500',
-  'Red/Blue/Yellow': 'bg-gradient-to-r from-red-500 via-blue-500 to-yellow-500',
-  'Red/Green/Yellow': 'bg-gradient-to-r from-red-500 via-green-500 to-yellow-500',
-  'Blue/Green/Yellow': 'bg-gradient-to-r from-blue-500 via-green-500 to-yellow-500',
-  'Red/Blue/Green/Yellow': 'bg-gradient-to-r from-red-500 via-blue-500 via-green-500 to-yellow-500'
+  'Red': 'bg-[var(--op-straw-hat-red)]',
+  'Blue': 'bg-[var(--op-ocean-blue)]',
+  'Green': 'bg-[var(--op-forest-green)]',
+  'Yellow': 'bg-[var(--op-sunny-yellow)]',
+  'Purple': 'bg-[var(--op-purple-royal)]',
+  'Black': 'bg-[var(--op-neutral-black)]',
+  'Colorless': 'bg-[var(--op-neutral-silver)]',
+  'Red/Green': 'bg-gradient-to-r from-[var(--op-straw-hat-red)] to-[var(--op-forest-green)]',
+  'Red/Blue': 'bg-gradient-to-r from-[var(--op-straw-hat-red)] to-[var(--op-ocean-blue)]',
+  'Red/Yellow': 'bg-gradient-to-r from-[var(--op-straw-hat-red)] to-[var(--op-sunny-yellow)]',
+  'Blue/Green': 'bg-gradient-to-r from-[var(--op-ocean-blue)] to-[var(--op-forest-green)]',
+  'Blue/Yellow': 'bg-gradient-to-r from-[var(--op-ocean-blue)] to-[var(--op-sunny-yellow)]',
+  'Green/Yellow': 'bg-gradient-to-r from-[var(--op-forest-green)] to-[var(--op-sunny-yellow)]',
+  'Green/Purple': 'bg-gradient-to-r from-[var(--op-forest-green)] to-[var(--op-purple-royal)]',
+  'Yellow/Purple': 'bg-gradient-to-r from-[var(--op-sunny-yellow)] to-[var(--op-purple-royal)]',
+  'Red/Blue/Green': 'bg-gradient-to-r from-[var(--op-straw-hat-red)] via-[var(--op-ocean-blue)] to-[var(--op-forest-green)]',
+  'Red/Blue/Yellow': 'bg-gradient-to-r from-[var(--op-straw-hat-red)] via-[var(--op-ocean-blue)] to-[var(--op-sunny-yellow)]',
+  'Red/Green/Yellow': 'bg-gradient-to-r from-[var(--op-straw-hat-red)] via-[var(--op-forest-green)] to-[var(--op-sunny-yellow)]',
+  'Blue/Green/Yellow': 'bg-gradient-to-r from-[var(--op-ocean-blue)] via-[var(--op-forest-green)] to-[var(--op-sunny-yellow)]',
+  'Red/Blue/Green/Yellow': 'bg-gradient-to-r from-[var(--op-straw-hat-red)] via-[var(--op-ocean-blue)] via-[var(--op-forest-green)] to-[var(--op-sunny-yellow)]'
 };
 
-// Rarity colors using modern palette
+// Rarity colors using One Piece TCG theme colors
 export const rarityColors: Record<string, string> = {
-  'C': 'text-gray-400',
-  'UC': 'text-blue-300',
-  'R': 'text-blue-500',
-  'SR': 'text-yellow-400',
-  'SEC': 'text-yellow-600',
-  'L': 'text-red-500',
-  'P': 'text-yellow-500',
-  'ST': 'text-yellow-400',
-  'PR': 'text-yellow-500'
+  'C': 'text-[var(--op-neutral-silver)]',
+  'UC': 'text-[var(--op-blue-light)]',
+  'R': 'text-[var(--op-blue-medium)]',
+  'SR': 'text-[var(--op-gold-primary)]',
+  'SEC': 'text-[var(--op-gold-metallic)]',
+  'L': 'text-[var(--op-red-bright)]',
+  'P': 'text-[var(--op-gold-primary)]',
+  'ST': 'text-[var(--op-gold-primary)]',
+  'PR': 'text-[var(--op-gold-primary)]'
 };
 
-// Card type colors
+// Card type colors using One Piece TCG theme colors
 export const typeColors: Record<string, string> = {
-  'LEADER': 'bg-red-500/20 text-red-400 border-red-500/30',
-  'CHARACTER': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  'EVENT': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  'STAGE': 'bg-gray-600/20 text-gray-300 border-gray-600/30'
+  'LEADER': 'bg-[var(--op-red-deep-crimson)]/20 text-[var(--op-red-bright)] border-[var(--op-red-deep-crimson)]/30',
+  'CHARACTER': 'bg-[var(--op-blue-medium)]/20 text-[var(--op-blue-light)] border-[var(--op-blue-medium)]/30',
+  'EVENT': 'bg-[var(--op-gold-primary)]/20 text-[var(--op-gold-primary)] border-[var(--op-gold-primary)]/30',
+  'STAGE': 'bg-[var(--op-neutral-dark-gray)]/20 text-[var(--op-neutral-silver)] border-[var(--op-neutral-dark-gray)]/30'
 };
 
 // Utility functions for converting values to CSS classes

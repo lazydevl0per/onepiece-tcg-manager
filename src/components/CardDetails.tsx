@@ -44,26 +44,26 @@ export default function CardDetails({
     return `./data/english/images/${cardId}.webp`;
   };
 
-  // Rarity badge color map
+  // Rarity badge color map using One Piece TCG colors
   const rarityColors: Record<string, string> = {
-    'Leader': 'from-pink-400 to-yellow-400',
-    'Common': 'from-blue-400 to-purple-400',
-    'Uncommon': 'from-green-400 to-blue-400',
-    'Rare': 'from-yellow-400 to-orange-500',
-    'Super Rare': 'from-red-500 to-pink-500',
-    'Secret Rare': 'from-indigo-500 to-yellow-500',
-    'Promo': 'from-fuchsia-500 to-cyan-400',
+    'Leader': 'from-[var(--op-red-deep-crimson)] to-[var(--op-gold-primary)]',
+    'Common': 'from-[var(--op-neutral-silver)] to-[var(--op-blue-deep-navy)]',
+    'Uncommon': 'from-[var(--op-blue-light)] to-[var(--op-blue-medium)]',
+    'Rare': 'from-[var(--op-gold-primary)] to-[var(--op-gold-metallic)]',
+    'Super Rare': 'from-[var(--op-gold-primary)] to-[var(--op-gold-metallic)]',
+    'Secret Rare': 'from-[var(--op-gold-metallic)] to-[var(--op-gold-primary)]',
+    'Promo': 'from-[var(--op-purple-royal)] to-[var(--op-gold-primary)]',
   };
-  const rarityGradient = rarityColors[card.rarity || 'Common'] || 'from-blue-400 to-purple-400';
+  const rarityGradient = rarityColors[card.rarity || 'Common'] || 'from-[var(--op-neutral-silver)] to-[var(--op-blue-deep-navy)]';
 
-  // Type badge color
+  // Type badge color using One Piece TCG colors
   const typeColors: Record<string, string> = {
-    'Character': 'bg-pink-500',
-    'Leader': 'bg-yellow-500',
-    'Event': 'bg-blue-500',
-    'Stage': 'bg-green-500',
+    'Character': 'bg-[var(--op-blue-medium)]',
+    'Leader': 'bg-[var(--op-red-deep-crimson)]',
+    'Event': 'bg-[var(--op-gold-primary)]',
+    'Stage': 'bg-[var(--op-neutral-dark-gray)]',
   };
-  const typeColor = typeColors[card.type] || 'bg-gray-500';
+  const typeColor = typeColors[card.type] || 'bg-[var(--op-neutral-silver)]';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
