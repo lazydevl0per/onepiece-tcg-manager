@@ -64,7 +64,6 @@ export default function CollectionTab({
         <Card
           key={card.id + '-' + card.pack_id}
           card={card}
-          owned={card.owned}
           onUpdateOwned={onUpdateCardOwned}
           onAddToDeck={onAddCardToDeck}
           isInDeck={isCardInDeck ? isCardInDeck(card) : false}

@@ -8,6 +8,9 @@ interface CardProps {
   isInDeck?: boolean;
   deckQuantity?: number;
   MAX_COPIES_PER_CARD?: number;
+  canAddToDeck?: boolean;
+  addToDeckDisabled?: boolean;
+  addToDeckTitle?: string;
 }
 
 export default function Card({ 
@@ -16,7 +19,10 @@ export default function Card({
   onAddToDeck, 
   isInDeck = false, 
   deckQuantity = 0,
-  MAX_COPIES_PER_CARD = 4 
+  MAX_COPIES_PER_CARD = 4,
+  canAddToDeck = true,
+  addToDeckDisabled = false,
+  addToDeckTitle = 'Add to Deck'
 }: CardProps) {
   const handleOwnedChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newOwned = parseInt(event.target.value);
@@ -122,19 +128,22 @@ export default function Card({
           </div>
 
           {/* Deck Controls */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handleAddToDeck}
-              disabled={isInDeck}
-              className={`flex-1 px-3 py-1 text-sm rounded font-medium transition-colors ${
-                isInDeck
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
-            >
-              {isInDeck ? `In Deck (${deckQuantity})` : 'Add to Deck'}
-            </button>
-          </div>
+          {canAddToDeck && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleAddToDeck}
+                disabled={isInDeck || addToDeckDisabled}
+                title={addToDeckTitle}
+                className={`flex-1 px-3 py-1 text-sm rounded font-medium transition-colors ${
+                  isInDeck || addToDeckDisabled
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >
+                {isInDeck ? `In Deck (${deckQuantity})` : addToDeckTitle}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
