@@ -104,12 +104,14 @@ jobs:
         name: one-piece-tcg-manager-installers-windows
         path: installers/windows
     
-    - name: Patch latest.yml for GitHub asset naming (spaces to dots, only for referenced file)
+    - name: Patch latest.yml for GitHub asset naming (spaces and dashes to dots, only for referenced file)
       run: |
         # Extract the referenced installer filename from latest.yml
         installer_with_spaces=$(grep '^path:' installers/windows/latest.yml | head -n1 | cut -d' ' -f2-)
         # Convert spaces to dots
         installer_with_dots="${installer_with_spaces// /"."}"
+        # Convert dashes to dots
+        installer_with_dots="${installer_with_dots//-/"."}"
         # Patch both 'path:' and 'url:' fields in latest.yml
         sed -i "s|$installer_with_spaces|$installer_with_dots|g" installers/windows/latest.yml
         echo "Patched latest.yml: replaced '$installer_with_spaces' with '$installer_with_dots'"
