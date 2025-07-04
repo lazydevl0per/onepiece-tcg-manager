@@ -40,11 +40,11 @@ export default defineConfig({
     },
     plugins: [
       {
-        name: 'copy-data',
+        name: 'copy-json-data',
         writeBundle() {
           // Copy data folder to dist-electron after build
-          const sourceDir = 'data'
-          const targetDir = 'dist-electron/data'
+          const sourceDir = 'data/english/json'
+          const targetDir = 'dist-electron/data/english/json'
           
           if (existsSync(sourceDir)) {
             console.log('📁 Copying data folder to dist-electron...')
@@ -82,7 +82,29 @@ export default defineConfig({
         '@': resolve('src')
       }
     },
-    plugins: [react()],
+    plugins: [
+      react(),
+      {
+        name: 'copy-image-data',
+        writeBundle() {
+          // Copy data folder to dist-electron after build
+          const sourceDir = 'data/english/images'
+          const targetDir = 'dist/data/english/images'
+          
+          if (existsSync(sourceDir)) {
+            console.log('📁 Copying data folder to dist...')
+            try {
+              copyDir(sourceDir, targetDir)
+              console.log('✅ Data folder copied successfully!')
+            } catch (error) {
+              console.error('❌ Error copying data folder:', error)
+            }
+          } else {
+            console.log('⚠️  Data folder not found at:', sourceDir)
+          }
+        }
+      }
+    ],
     server: {
       port: 5173
     },
