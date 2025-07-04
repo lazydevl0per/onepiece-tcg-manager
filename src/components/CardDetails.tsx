@@ -1,4 +1,3 @@
-import React from 'react';
 import { AppCard } from '../services/cardDataService';
 
 interface CardDetailsProps {
@@ -30,11 +29,6 @@ export default function CardDetails({
 }: CardDetailsProps) {
   if (!isOpen) return null;
 
-  const handleOwnedChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newOwned = parseInt(event.target.value);
-    onUpdateOwned?.(card.id, newOwned);
-  };
-
   const handleAddToDeck = () => {
     onAddToDeck?.(card);
   };
@@ -44,167 +38,145 @@ export default function CardDetails({
     return `./data/english/images/${cardId}.webp`;
   };
 
-  // Rarity badge color map using One Piece TCG colors
-  const rarityColors: Record<string, string> = {
-    'Leader': 'from-[var(--op-red-deep-crimson)] to-[var(--op-gold-primary)]',
-    'Common': 'from-[var(--op-neutral-silver)] to-[var(--op-blue-deep-navy)]',
-    'Uncommon': 'from-[var(--op-blue-light)] to-[var(--op-blue-medium)]',
-    'Rare': 'from-[var(--op-gold-primary)] to-[var(--op-gold-metallic)]',
-    'Super Rare': 'from-[var(--op-gold-primary)] to-[var(--op-gold-metallic)]',
-    'Secret Rare': 'from-[var(--op-gold-metallic)] to-[var(--op-gold-primary)]',
-    'Promo': 'from-[var(--op-purple-royal)] to-[var(--op-gold-primary)]',
-  };
-  const rarityGradient = rarityColors[card.rarity || 'Common'] || 'from-[var(--op-neutral-silver)] to-[var(--op-blue-deep-navy)]';
-
-  // Type badge color using One Piece TCG colors
-  const typeColors: Record<string, string> = {
-    'Character': 'bg-[var(--op-blue-medium)]',
-    'Leader': 'bg-[var(--op-red-deep-crimson)]',
-    'Event': 'bg-[var(--op-gold-primary)]',
-    'Stage': 'bg-[var(--op-neutral-dark-gray)]',
-  };
-  const typeColor = typeColors[card.type] || 'bg-[var(--op-neutral-silver)]';
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden">
-        {/* Close button */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div className="relative w-full max-w-4xl bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-row" style={{height: 'auto', maxHeight: '90vh'}}>
+        {/* Floating Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-30 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 hover:bg-white transition-colors shadow-lg"
+          className="absolute top-4 right-4 z-50 w-8 h-8 bg-gray-800/90 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700 transition-colors shadow-lg"
+          style={{boxShadow: '0 2px 8px rgba(0,0,0,0.3)'}}
         >
           ✕
         </button>
 
-        <div className="flex flex-col lg:flex-row h-full">
-          {/* Card Image Section */}
-          <div className="lg:w-1/2 relative">
-            <div className="relative w-full h-96 lg:h-full">
-              {/* Card Image Background */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{
-                  backgroundImage: `url(${getImagePath(card.id)})`,
-                  filter: 'brightness(0.95) saturate(1.15)',
-                }}
-              />
-              
-              {/* Glassmorphism overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-white/10 to-transparent backdrop-blur-[6px]" />
+        {/* Card Image Section */}
+        <div className="w-1/2 min-w-[320px] max-w-[400px] flex items-center justify-center bg-gray-900">
+          <div className="relative w-full flex items-center justify-center p-4">
+            <img
+              src={getImagePath(card.id)}
+              alt={card.name}
+              className="max-h-[600px] max-w-full object-contain mx-auto rounded-xl shadow-lg"
+              style={{ background: '#fff' }}
+            />
+          </div>
+        </div>
 
-              {/* Rarity Badge */}
-              <div className={`absolute top-3 left-3 z-20 px-3 py-1 rounded-full text-xs font-bold text-white shadow-lg bg-gradient-to-r ${rarityGradient} border-2 border-white/40 drop-shadow-md`}>
-                {card.rarity}
-              </div>
-              
-              {/* Type Badge */}
-              <div className={`absolute top-3 right-3 z-20 px-2 py-1 rounded-full text-xs font-bold text-white shadow bg-opacity-90 ${typeColor} border-2 border-white/40`}>
-                {card.type}
-              </div>
-
-              {/* Card Name and Cost */}
-              <div className="absolute top-0 left-0 right-0 p-4 text-white z-20">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="font-extrabold text-xl leading-tight drop-shadow-lg tracking-wide font-['Zen Dots',_cursive]">
-                      {card.name}
-                    </h2>
-                    <p className="text-sm opacity-90 drop-shadow-md font-semibold">{card.set.name}</p>
-                  </div>
-                  <div className="text-right ml-2">
-                    <div className="text-2xl font-bold drop-shadow-lg bg-white/30 px-3 py-2 rounded-xl border border-white/40 inline-block">
-                      {card.cost || '-'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Details Section */}
+        <div className="w-full flex flex-col relative p-0" style={{minHeight: 'fit-content'}}>
+          {/* Fixed Header */}
+          <div className="p-6 pb-2 bg-gray-900 z-10 border-b border-gray-700" style={{borderTopRightRadius: '1rem'}}>
+            <h2 className="font-extrabold text-2xl leading-tight tracking-wide font-['Zen Dots',_cursive] text-white text-left">
+              {card.name}
+            </h2>
+            {card.family && (
+              <div className="text-base font-semibold text-gray-300 text-left mt-1">{card.family}</div>
+            )}
+            <div className="text-sm opacity-90 font-semibold text-gray-400 text-left mt-1">{card.set.name}</div>
           </div>
 
-          {/* Details Section */}
-          <div className="lg:w-1/2 p-6 overflow-y-auto">
-            <div className="space-y-6">
-              {/* Basic Stats */}
-              <div className="grid grid-cols-2 gap-4">
-                {card.attribute && (
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-sm font-medium text-gray-600">Attribute</div>
-                    <div className="text-lg font-semibold text-pink-700">{card.attribute.name}</div>
-                  </div>
-                )}
-                {card.power && (
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-sm font-medium text-gray-600">Power</div>
-                    <div className="text-lg font-semibold text-yellow-700">{card.power}</div>
-                  </div>
-                )}
-                {card.counter && (
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-sm font-medium text-gray-600">Counter</div>
-                    <div className="text-lg font-semibold text-blue-700">{card.counter}</div>
-                  </div>
-                )}
-                {card.color && (
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-sm font-medium text-gray-600">Color</div>
-                    <div className="text-lg font-semibold text-red-700">{card.color}</div>
-                  </div>
-                )}
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto px-6 py-4" style={{minHeight: 0}}>
+            {/* Basic Stats */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              {/* Cost or Life */}
+              {card.type === 'LEADER' ? (
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                  <div className="text-sm font-medium text-gray-400">Life</div>
+                  <div className="text-lg font-semibold text-pink-400">{card.cost}</div>
+                </div>
+              ) : (
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                  <div className="text-sm font-medium text-gray-400">Cost</div>
+                  <div className="text-lg font-semibold text-pink-400">{card.cost || '-'}</div>
+                </div>
+              )}
+              {/* Card Type */}
+              <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                <div className="text-sm font-medium text-gray-400">Type</div>
+                <div className="text-lg font-semibold text-indigo-400">{card.type}</div>
               </div>
-
-              {/* Family */}
-              {card.family && (
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-sm font-medium text-gray-600">Family</div>
-                  <div className="text-lg font-semibold text-gray-800">{card.family}</div>
+              {card.attribute && (
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                  <div className="text-sm font-medium text-gray-400">Attribute</div>
+                  <div className="text-lg font-semibold text-pink-400">{card.attribute.name}</div>
                 </div>
               )}
-
-              {/* Card Ability */}
-              {card.ability && (
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <div className="text-sm font-bold text-blue-800 mb-2">Ability</div>
-                  <div className="text-blue-700 leading-relaxed">{card.ability}</div>
+              {card.power && (
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                  <div className="text-sm font-medium text-gray-400">Power</div>
+                  <div className="text-lg font-semibold text-yellow-400">{card.power}</div>
                 </div>
               )}
-
-              {/* Trigger */}
-              {card.trigger && (
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                  <div className="text-sm font-bold text-yellow-800 mb-2">Trigger</div>
-                  <div className="text-yellow-700 leading-relaxed">{card.trigger}</div>
+              {card.counter && (
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                  <div className="text-sm font-medium text-gray-400">Counter</div>
+                  <div className="text-lg font-semibold text-blue-400">{card.counter}</div>
                 </div>
               )}
-
-              {/* Collection and Deck Controls */}
-              <div className="space-y-4 pt-4 border-t border-gray-200">
-                {/* Owned Quantity */}
-                <div className="flex items-center space-x-3">
-                  <label className="text-sm font-medium text-gray-700">Owned:</label>
-                  <select
-                    value={card.owned || 0}
-                    onChange={handleOwnedChange}
-                    className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white"
-                  >
-                    {Array.from({ length: MAX_COPIES_PER_CARD + 1 }, (_, i) => (
-                      <option key={i} value={i}>{i}</option>
-                    ))}
-                  </select>
+              {card.color && (
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                  <div className="text-sm font-medium text-gray-400">Color</div>
+                  <div className="text-lg font-semibold text-red-400">{card.color}</div>
                 </div>
-
-                {/* Add to Deck Button */}
-                {canAddToDeck && (
-                  <button
-                    onClick={handleAddToDeck}
-                    disabled={isInDeck || addToDeckDisabled}
-                    title={addToDeckTitle}
-                    className={`w-full px-4 py-3 text-sm rounded-md font-bold transition-all duration-200 shadow-md border-2 border-pink-300 bg-gradient-to-r from-pink-500 to-yellow-400 hover:from-yellow-400 hover:to-pink-500 text-white tracking-wide active:scale-95 active:shadow-lg disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300 disabled:cursor-not-allowed`}
-                  >
-                    {isInDeck ? `In Deck (${deckQuantity})` : addToDeckTitle}
-                  </button>
-                )}
-              </div>
+              )}
             </div>
+            {/* Card Ability */}
+            {card.ability && (
+              <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-700/50 mb-4">
+                <div className="text-sm font-bold text-blue-300 mb-2">Ability</div>
+                <div className="text-blue-200 leading-relaxed">{card.ability}</div>
+              </div>
+            )}
+
+            {/* Trigger */}
+            {card.trigger && (
+              <div className="bg-yellow-900/30 p-4 rounded-lg border border-yellow-700/50 mb-4">
+                <div className="text-sm font-bold text-yellow-300 mb-2">Trigger</div>
+                <div className="text-yellow-200 leading-relaxed">{card.trigger}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Fixed Add-to-Deck Controls at bottom of right pane, full width */}
+          <div className="w-full p-6 bg-gray-900/95 border-t border-gray-700 shadow-2xl flex flex-col items-end gap-3" style={{borderBottomRightRadius: '1rem', borderBottomLeftRadius: '1rem'}}>
+            {/* Owned Quantity Controls */}
+            <div className="flex items-center space-x-3">
+              <span className="text-sm font-medium text-gray-300">Owned:</span>
+              <button
+                className="w-8 h-8 rounded-full bg-slate-600 text-lg font-bold text-slate-300 flex items-center justify-center shadow hover:bg-slate-500 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed border border-slate-500"
+                onClick={() => onUpdateOwned && onUpdateOwned(card.id, Math.max(0, (card.owned || 0) - 1))}
+                disabled={!onUpdateOwned || (card.owned || 0) <= 0}
+                type="button"
+              >
+                -
+              </button>
+              <span className="text-lg font-semibold w-8 text-center text-white">{card.owned || 0}</span>
+              <button
+                className="w-8 h-8 rounded-full bg-slate-600 text-lg font-bold text-slate-300 flex items-center justify-center shadow hover:bg-slate-500 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed border border-slate-500"
+                onClick={() => onUpdateOwned && onUpdateOwned(card.id, Math.min(MAX_COPIES_PER_CARD, (card.owned || 0) + 1))}
+                disabled={!onUpdateOwned || (card.owned || 0) >= MAX_COPIES_PER_CARD}
+                type="button"
+              >
+                +
+              </button>
+            </div>
+            {/* Add to Deck Button */}
+            {canAddToDeck && (
+              <button
+                onClick={handleAddToDeck}
+                disabled={isInDeck || addToDeckDisabled}
+                title={addToDeckTitle}
+                className={`w-full px-3 py-2 text-xs rounded-lg font-bold transition-colors shadow-lg bg-yellow-500 hover:bg-yellow-600 text-slate-900 tracking-wide disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed`}
+                style={{minWidth: '120px'}}
+              >
+                {isInDeck ? `In Deck (${deckQuantity})` : addToDeckTitle}
+              </button>
+            )}
+            {/* Add to Deck Message (if any) */}
+            {!canAddToDeck && (
+              <div className="w-full text-xs text-center text-gray-400 mt-2">Select a deck to add this card.</div>
+            )}
           </div>
         </div>
       </div>

@@ -45,17 +45,20 @@ export default function Card({
     return `./data/english/images/${cardId}.webp`;
   };
 
-  // Rarity badge color map using One Piece TCG colors
-  const rarityColors: Record<string, string> = {
-    'Leader': 'from-[var(--op-red-deep-crimson)] to-[var(--op-gold-primary)]',
-    'Common': 'from-[var(--op-neutral-silver)] to-[var(--op-blue-deep-navy)]',
-    'Uncommon': 'from-[var(--op-blue-light)] to-[var(--op-blue-medium)]',
-    'Rare': 'from-[var(--op-gold-primary)] to-[var(--op-gold-metallic)]',
-    'Super Rare': 'from-[var(--op-gold-primary)] to-[var(--op-gold-metallic)]',
-    'Secret Rare': 'from-[var(--op-gold-metallic)] to-[var(--op-gold-primary)]',
-    'Promo': 'from-[var(--op-purple-royal)] to-[var(--op-gold-primary)]',
+  // MMORPG-style rarity color map
+  const mmorpgRarityColors: Record<string, string> = {
+    'Common': 'from-gray-400 to-gray-500', // gray
+    'Uncommon': 'from-green-500 to-green-400', // green
+    'Rare': 'from-blue-500 to-blue-400', // blue
+    'SuperRare': 'from-purple-600 to-purple-400', // purple (epic)
+    'Epic': 'from-purple-600 to-purple-400', // alias for epic
+    'SecretRare': 'from-yellow-500 to-yellow-400', // gold/orange (legendary)
+    'Legendary': 'from-yellow-500 to-yellow-400', // alias for legendary
+    'Promo': 'from-pink-500 to-pink-400', // pink (special)
+    'Leader': 'from-red-600 to-red-400', // red for leader
   };
-  const rarityGradient = rarityColors[card.rarity || 'Common'] || 'from-[var(--op-neutral-silver)] to-[var(--op-blue-deep-navy)]';
+  const rarityKey = (card.rarity || '').trim();
+  const rarityGradient = mmorpgRarityColors[rarityKey] || 'from-gray-400 to-gray-500';
 
   // Type badge color using One Piece TCG colors
   const typeColors: Record<string, string> = {
@@ -69,8 +72,8 @@ export default function Card({
   return (
     <>
       <div
-        className="relative w-full h-96 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 bg-white/20 border-2 border-white/30 hover:scale-105 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] hover:border-pink-400 group cursor-pointer"
-        style={{ boxShadow: '0 4px 32px 0 rgba(31,38,135,0.37)' }}
+        className="relative rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 bg-white/20 border-2 border-white/30 hover:scale-105 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] hover:border-pink-400 group cursor-pointer"
+        style={{ boxShadow: '0 4px 32px 0 rgba(31,38,135,0.37)', width: '320px', height: '448px' }}
         onClick={handleCardClick}
       >
         {/* Sparkle overlay for anime effect (only if not owned) */}
@@ -79,10 +82,11 @@ export default function Card({
         )}
 
         {/* Card Image Background with anime border */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat border-4 border-transparent group-hover:border-pink-300 rounded-2xl"
+        <div
+          className="absolute inset-0 bg-contain bg-center bg-no-repeat border-4 border-transparent group-hover:border-pink-300 rounded-2xl"
           style={{
             backgroundImage: `url(${getImagePath(card.id)})`,
+            backgroundColor: '#fff',
             filter: !(card.owned > 0) ? 'brightness(0.95) saturate(1.15) blur(6px)' : 'brightness(0.98) saturate(1.10)',
             transition: 'filter 0.3s',
           }}
@@ -93,18 +97,6 @@ export default function Card({
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-white/10 to-transparent backdrop-blur-[6px]" />
         )}
 
-        {/* Rarity Badge */}
-        <div className={`absolute top-3 left-3 z-20 px-3 py-1 rounded-full text-xs font-bold text-white shadow-lg bg-gradient-to-r ${rarityGradient} border-2 border-white/40 drop-shadow-md backdrop-blur-sm bg-opacity-90`}
-          style={{maxWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-          {card.rarity}
-        </div>
-        
-        {/* Type Badge */}
-        <div className={`absolute top-3 right-3 z-20 px-2 py-1 rounded-full text-xs font-bold text-white shadow bg-opacity-90 ${typeColor} border-2 border-white/40 backdrop-blur-sm`}
-          style={{maxWidth: '40%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-          {card.type}
-        </div>
-
         {/* Top Card Info */}
         <div className="absolute top-0 left-0 right-0 p-3 z-20 flex flex-col gap-1 pointer-events-none">
           <div className="flex justify-between items-start">
@@ -113,48 +105,87 @@ export default function Card({
                 {card.name}
               </h3>
               <p className="text-xs opacity-90 drop-shadow-md font-semibold bg-black/40 px-2 py-0.5 rounded text-white mt-1 max-w-full truncate">{card.set.name}</p>
-            </div>
-            <div className="text-right ml-2">
-              <div className="text-lg font-bold drop-shadow-lg bg-white/70 px-2 py-1 rounded-xl border border-white/40 inline-block text-gray-900">
-                {card.cost || '-'}
+              {/* Badges row: type first, then rarity */}
+              <div className="flex flex-row gap-2 items-center mt-1">
+                {(() => {
+                  const colorMap = {
+                    RED: 'bg-red-500 text-white',
+                    BLUE: 'bg-blue-500 text-white',
+                    GREEN: 'bg-green-500 text-white',
+                    PURPLE: 'bg-purple-500 text-white',
+                    BLACK: 'bg-gray-800 text-white',
+                    YELLOW: 'bg-yellow-400 text-gray-900',
+                  } as const;
+                  const colorKey = (card.color?.toUpperCase?.() || '') as keyof typeof colorMap;
+                  const colorClass = colorMap[colorKey] || 'bg-gray-400 text-white';
+                  return (
+                    <div className={`px-2 py-1 rounded-full text-xs font-bold shadow border border-white/40 inline-block ${colorClass}`} style={{maxWidth: '40%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                      {card.type.charAt(0).toUpperCase() + card.type.slice(1).toLowerCase()}
+                    </div>
+                  );
+                })()}
+                <div className={`px-3 py-1 rounded-full text-xs font-bold text-white shadow-lg bg-gradient-to-r ${rarityGradient} border-2 border-white/40 drop-shadow-md backdrop-blur-sm bg-opacity-90`} style={{maxWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                  {card.rarity}
+                </div>
               </div>
+            </div>
+            {/* Cost/Life Badge with card color scheme */}
+            <div className="text-right ml-2">
+              {(() => {
+                const colorMap = {
+                  RED: 'bg-red-500 text-white',
+                  BLUE: 'bg-blue-500 text-white',
+                  GREEN: 'bg-green-500 text-white',
+                  PURPLE: 'bg-purple-500 text-white',
+                  BLACK: 'bg-gray-800 text-white',
+                  YELLOW: 'bg-yellow-400 text-gray-900',
+                } as const;
+                const colorKey = (card.color?.toUpperCase?.() || '') as keyof typeof colorMap;
+                const colorClass = colorMap[colorKey] || 'bg-gray-400 text-white';
+                return (
+                  <div className={`text-lg font-bold drop-shadow-lg px-2 py-1 rounded-xl border border-white/40 inline-block ${colorClass}`}>
+                    {card.cost || '-'}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
 
         {/* Bottom Controls Panel - Improved clarity */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-white/30 z-20 rounded-b-2xl">
+        <div className="absolute left-3 right-3 bottom-3 bg-slate-800/95 z-20 rounded-2xl shadow-2xl flex flex-col" style={{backdropFilter: 'blur(2px)'}}>
           <div className="p-3">
-            {/* Quick Stats */}
-            <div className="flex justify-between items-center mb-3">
-              {card.power && (
-                <div className="text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded">
-                  <span className="font-medium">Power:</span> {card.power}
-                </div>
-              )}
-              {card.attribute && (
-                <div className="text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded">
-                  <span className="font-medium">Attr:</span> {card.attribute.name}
-                </div>
-              )}
-            </div>
+            {/* Quick Stats removed as requested */}
 
             {/* Collection and Deck Controls */}
             <div className="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0">
               {/* Owned Quantity */}
               <div className="flex items-center space-x-2 flex-1 min-w-0">
-                <label className="text-xs font-semibold text-gray-700 bg-white/60 px-2 py-1 rounded-lg shadow-sm" style={{minWidth: '52px'}}>Owned:</label>
-                <select
-                  value={card.owned || 0}
-                  onChange={handleOwnedChange}
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex-1 px-2 py-1 text-xs rounded-lg border border-pink-300 bg-white/70 shadow focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-150 backdrop-blur-sm"
-                  style={{minWidth: '48px'}}
+                <button
+                  className="w-7 h-7 rounded bg-red-500 hover:bg-red-600 text-white text-base font-bold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdateOwned && onUpdateOwned(card.id, Math.max(0, (card.owned || 0) - 1));
+                  }}
+                  disabled={!onUpdateOwned || (card.owned || 0) <= 0}
+                  type="button"
+                  tabIndex={-1}
                 >
-                  {Array.from({ length: MAX_COPIES_PER_CARD + 1 }, (_, i) => (
-                    <option key={i} value={i}>{i}</option>
-                  ))}
-                </select>
+                  <span className="text-white">-</span>
+                </button>
+                <span className="text-base font-semibold w-8 text-center text-white select-none">{card.owned || 0}</span>
+                <button
+                  className="w-7 h-7 rounded bg-green-500 hover:bg-green-600 text-white text-base font-bold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdateOwned && onUpdateOwned(card.id, Math.min(MAX_COPIES_PER_CARD, (card.owned || 0) + 1));
+                  }}
+                  disabled={!onUpdateOwned || (card.owned || 0) >= MAX_COPIES_PER_CARD}
+                  type="button"
+                  tabIndex={-1}
+                >
+                  <span className="text-white">+</span>
+                </button>
               </div>
 
               {/* Add to Deck Button */}
@@ -166,7 +197,7 @@ export default function Card({
                   }}
                   disabled={isInDeck || addToDeckDisabled}
                   title={addToDeckTitle}
-                  className={`flex-1 w-full md:w-auto px-3 py-2 text-xs rounded-lg font-bold transition-all duration-200 shadow-lg border-2 border-pink-400 bg-gradient-to-r from-pink-500/90 to-yellow-400/90 hover:from-yellow-400 hover:to-pink-500 text-white tracking-wide active:scale-95 active:shadow-xl disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed backdrop-blur-sm`}
+                  className={`flex-1 w-full md:w-auto px-3 py-2 text-xs rounded-lg font-bold transition-colors shadow-lg bg-yellow-500 hover:bg-yellow-600 text-slate-900 tracking-wide disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed`}
                   style={{minWidth: '120px'}}
                 >
                   {isInDeck ? `In Deck (${deckQuantity})` : addToDeckTitle}

@@ -7,8 +7,12 @@ import { createServer, Server } from 'http'
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+function getFilename() {
+  return fileURLToPath(import.meta.url)
+}
+function getDirname() {
+  return dirname(getFilename())
+}
 
 // Create a simple HTTP server to serve data files
 let dataServer: Server | null = null
@@ -37,7 +41,7 @@ function startDataServer(): void {
       // Construct full path to the data file
       // In development, use the project root, in production use resourcesPath
       const isDev = is.dev
-      const basePath = isDev ? join(__dirname, '..') : process.resourcesPath
+      const basePath = isDev ? join(getDirname(), '..') : process.resourcesPath
       const fullPath = join(basePath, filePath)
       
       if (!existsSync(fullPath)) {
@@ -72,7 +76,7 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, 'preload/index.js'),
+      preload: join(getDirname(), 'preload/index.js'),
       sandbox: false,
       nodeIntegration: false,
       contextIsolation: true
@@ -93,7 +97,7 @@ function createWindow(): void {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(__dirname, '../dist/index.html'))
+    mainWindow.loadFile(join(getDirname(), '../dist/index.html'))
   }
 }
 
