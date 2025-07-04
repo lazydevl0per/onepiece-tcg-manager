@@ -25,14 +25,6 @@ jobs:
       with:
         submodules: true
 
-    - name: Copy data submodule to dist/data (Windows)
-      shell: powershell
-      run: |
-        if (Test-Path dist/data) {
-          Remove-Item dist/data -Recurse -Force
-        }
-        Copy-Item -Path data -Destination dist/data -Recurse -Force
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
