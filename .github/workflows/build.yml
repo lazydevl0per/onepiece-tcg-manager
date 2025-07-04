@@ -17,12 +17,8 @@ permissions:
   packages: write
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-
+  build-windows:
+    runs-on: windows-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -58,18 +54,11 @@ jobs:
         }
 
     - name: Build Electron app
-      run: |
-        if [ "$RUNNER_OS" = "Windows" ]; then
-          npx electron-builder --win --publish=never
-        elif [ "$RUNNER_OS" = "macOS" ]; then
-          npx electron-builder --mac --publish=never
-        else
-          npx electron-builder --linux --publish=never
-        fi
+      run: npx electron-builder --win --publish=never
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: List release directory (Windows)
+    - name: List release directory
       shell: powershell
       run: |
         echo "Release directory contents:"
@@ -88,10 +77,128 @@ jobs:
     - name: Upload installer artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: one-piece-tcg-manager-installers
+        name: one-piece-tcg-manager-installers-windows
         path: |
           release/*.exe
+          release/*.zip
+        retention-days: 30
+        if-no-files-found: error
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+
+    - name: Test data loading
+      run: npm run test-data
+
+    - name: Verify data files are present
+      run: |
+        echo "Checking dist/data directory structure..."
+        if [ -d "dist/data/english/json" ]; then
+          jsonFiles=(dist/data/english/json/*.json)
+          echo "Found ${#jsonFiles[@]} JSON files in dist/data/english/json"
+          for file in "${jsonFiles[@]}"; do echo "  - $(basename "$file")"; done
+        else
+          echo "ERROR: dist/data/english/json directory not found!"
+          exit 1
+        fi
+
+    - name: Build Electron app
+      run: npx electron-builder --mac --publish=never
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: List release directory
+      run: |
+        echo "Release directory contents:"
+        if [ -d "release/" ]; then
+          ls -l "release/"
+        else
+          echo "Release directory not found"
+        fi
+        find release -type f \( -name "*.dmg" -o -name "*.zip" \) || echo "No executables found"
+
+    - name: Upload installer artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: one-piece-tcg-manager-installers-macos
+        path: |
           release/*.dmg
+          release/*.zip
+        retention-days: 30
+        if-no-files-found: error
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+
+    - name: Test data loading
+      run: npm run test-data
+
+    - name: Verify data files are present
+      run: |
+        echo "Checking dist/data directory structure..."
+        if [ -d "dist/data/english/json" ]; then
+          jsonFiles=(dist/data/english/json/*.json)
+          echo "Found ${#jsonFiles[@]} JSON files in dist/data/english/json"
+          for file in "${jsonFiles[@]}"; do echo "  - $(basename "$file")"; done
+        else
+          echo "ERROR: dist/data/english/json directory not found!"
+          exit 1
+        fi
+
+    - name: Build Electron app
+      run: npx electron-builder --linux --publish=never
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: List release directory
+      run: |
+        echo "Release directory contents:"
+        if [ -d "release/" ]; then
+          ls -l "release/"
+        else
+          echo "Release directory not found"
+        fi
+        find release -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.zip" \) || echo "No executables found"
+
+    - name: Upload installer artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: one-piece-tcg-manager-installers-linux
+        path: |
           release/*.AppImage
           release/*.deb
           release/*.zip
@@ -99,7 +206,7 @@ jobs:
         if-no-files-found: error
 
   release:
-    needs: build
+    needs: [build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     
@@ -114,11 +221,23 @@ jobs:
       with:
         submodules: true
 
-    - name: Download installer artifacts
+    - name: Download Windows installer artifacts
       uses: actions/download-artifact@v4
       with:
-        name: one-piece-tcg-manager-installers
-        path: installers
+        name: one-piece-tcg-manager-installers-windows
+        path: installers/windows
+
+    - name: Download macOS installer artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: one-piece-tcg-manager-installers-macos
+        path: installers/macos
+
+    - name: Download Linux installer artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: one-piece-tcg-manager-installers-linux
+        path: installers/linux
 
     - name: List downloaded installers
       run: |
@@ -128,7 +247,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        files: installers/*
+        files: installers/**/*
         draft: false
         prerelease: false
         generate_release_notes: true
