@@ -1,0 +1,2 @@
+# Ignore data folder from Vite processing
+data/

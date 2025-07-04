@@ -70,40 +70,12 @@
       "output": "release"
     },
     "files": [
-      "dist/**/*",
       "dist-electron/**/*",
-      "node_modules/**/*",
-      "resources/**/*"
+      "dist/**/*",
+      "node_modules/**/*", 
+      "resources/**/*",
+      "package.json"
     ],
-    "extraResources": [
-      {
-        "from": "dist/data",
-        "to": "data",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "mac": {
-      "category": "public.app-category.games",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        }
-      ],
-      "icon": "resources/icon.icns"
-    },
     "win": {
       "target": [
         {
@@ -120,24 +92,6 @@
         }
       ],
       "icon": "resources/icon.ico"
-    },
-    "linux": {
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "deb",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "resources/icon.png",
-      "category": "Game"
     },
     "nsis": {
       "oneClick": false,

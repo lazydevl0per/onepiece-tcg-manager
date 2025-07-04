@@ -39,12 +39,21 @@ function startDataServer(): void {
       }
 
       // Construct full path to the data file
-      // In development, use the project root, in production use resourcesPath
+      // In development, use the project root, in production use the data in dist-electron
       const isDev = is.dev
-      const basePath = isDev ? join(getDirname(), '..') : process.resourcesPath
+      let basePath: string
+      
+      if (isDev) {
+        basePath = join(getDirname(), '..')
+      } else {
+        // In production, data is in the same directory as main.js (dist-electron/data)
+        basePath = getDirname()
+      }
+      
       const fullPath = join(basePath, filePath)
       
       if (!existsSync(fullPath)) {
+        console.log('File not found:', fullPath)
         res.writeHead(404)
         res.end('File not found')
         return
@@ -59,13 +68,16 @@ function startDataServer(): void {
       
       res.writeHead(200)
       res.end(content)
-    } catch (_error) {
+    } catch (error) {
+      console.error('Server error:', error)
       res.writeHead(500)
       res.end('Internal server error')
     }
   })
 
-  dataServer.listen(port, () => {})
+  dataServer.listen(port, () => {
+    console.log(`Data server running on port ${port}`)
+  })
 }
 
 function createWindow(): void {
@@ -97,7 +109,12 @@ function createWindow(): void {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(getDirname(), '../dist/index.html'))
+    // Fixed: Load from the correct renderer build output directory
+    // electron-vite outputs renderer to dist/ by default
+    const htmlPath = join(getDirname(), '../dist/index.html')
+    console.log('Loading HTML from:', htmlPath)
+    console.log('HTML exists:', existsSync(htmlPath))
+    mainWindow.loadFile(htmlPath)
   }
 }
 
@@ -142,4 +159,4 @@ app.on('before-quit', () => {
 })
 
 // In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here. 
+// code. You can also put them in separate files and import them here.

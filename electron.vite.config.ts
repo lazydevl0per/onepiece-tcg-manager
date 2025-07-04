@@ -1,6 +1,28 @@
 import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs'
+import { join } from 'path'
+
+// Helper function to recursively copy directory
+function copyDir(src: string, dest: string) {
+  if (!existsSync(dest)) {
+    mkdirSync(dest, { recursive: true })
+  }
+  
+  const entries = readdirSync(src, { withFileTypes: true })
+  
+  for (const entry of entries) {
+    const srcPath = join(src, entry.name)
+    const destPath = join(dest, entry.name)
+    
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath)
+    } else {
+      copyFileSync(srcPath, destPath)
+    }
+  }
+}
 
 export default defineConfig({
   main: {
@@ -15,18 +37,40 @@ export default defineConfig({
           entryFileNames: 'main.js'
         }
       }
-    }
+    },
+    plugins: [
+      {
+        name: 'copy-data',
+        writeBundle() {
+          // Copy data folder to dist-electron after build
+          const sourceDir = 'data'
+          const targetDir = 'dist-electron/data'
+          
+          if (existsSync(sourceDir)) {
+            console.log('📁 Copying data folder to dist-electron...')
+            try {
+              copyDir(sourceDir, targetDir)
+              console.log('✅ Data folder copied successfully!')
+            } catch (error) {
+              console.error('❌ Error copying data folder:', error)
+            }
+          } else {
+            console.log('⚠️  Data folder not found at:', sourceDir)
+          }
+        }
+      }
+    ]
   },
   preload: {
     build: {
-      outDir: 'dist-electron',
+      outDir: 'dist-electron/preload',
       lib: {
         entry: 'electron/preload/index.ts'
       },
       rollupOptions: {
         external: ['electron'],
         output: {
-          entryFileNames: 'main.js'
+          entryFileNames: 'index.js'
         }
       }
     }
@@ -42,10 +86,9 @@ export default defineConfig({
     server: {
       port: 5173
     },
-    publicDir: 'public',
-    assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.json'],
+    publicDir: false,
     build: {
-      outDir: 'dist-electron',
+      outDir: "dist",
       rollupOptions: {
         input: 'index.html',
         output: {
@@ -55,9 +98,6 @@ export default defineConfig({
         },
       },
       chunkSizeWarningLimit: 1000,
-    },
-    define: {
-      __DATA_DIR__: JSON.stringify('/data')
     }
   }
-}) 
+})
