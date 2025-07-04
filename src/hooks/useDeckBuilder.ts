@@ -75,13 +75,14 @@ export function useDeckBuilder() {
   const addCardToDeck = (card: AppCard) => {
     if (!selectedDeck) return;
     const updatedDeck = { ...selectedDeck };
+    // Helper to get array of colors from a card
+    const getColors = (c: AppCard) => c.color.split('/').map(x => x.trim());
     if (card.type === 'LEADER') {
       // Check if any cards in the deck do not match the new leader's color identity
-      const leaderColors = card.color.split('/').map(c => c.trim());
+      const leaderColors = getColors(card);
       const mismatchedCards = updatedDeck.cards.filter(entry => {
-        // Allow colorless cards
-        if (entry.card.color === 'Colorless') return false;
-        const cardColors = entry.card.color.split('/').map(c => c.trim());
+        const cardColors = getColors(entry.card);
+        // Remove Colorless exception: all cards must match leader's colors
         return !cardColors.every(c => leaderColors.includes(c));
       });
       if (mismatchedCards.length > 0) {
@@ -97,13 +98,11 @@ export function useDeckBuilder() {
     } else {
       // Enforce color identity rule
       if (updatedDeck.leader) {
-        const leaderColors = updatedDeck.leader.color.split('/').map(c => c.trim());
-        if (card.color !== 'Colorless') {
-          const cardColors = card.color.split('/').map(c => c.trim());
-          if (!cardColors.every(c => leaderColors.includes(c))) {
-            alert(`This card's color (${card.color}) does not match your Leader's color identity (${updatedDeck.leader.color}).`);
-            return;
-          }
+        const leaderColors = getColors(updatedDeck.leader);
+        const cardColors = getColors(card);
+        if (!cardColors.every(c => leaderColors.includes(c))) {
+          alert(`This card's color (${card.color}) does not match your Leader's color identity (${updatedDeck.leader.color}).`);
+          return;
         }
       }
       // Check if card already exists in deck
@@ -244,9 +243,12 @@ export function useDeckBuilder() {
     const events = deck.cards.filter(c => c.card.type === 'EVENT').reduce((sum, c) => sum + c.quantity, 0);
     
     const colorBreakdown: Record<string, number> = {};
+    const getColors = (c: AppCard) => c.color.split('/').map(x => x.trim());
     allCards.forEach(card => {
       const count = card.id === deck.leader?.id ? 1 : deck.cards.find(c => c.card.id === card.id)?.quantity || 0;
-      colorBreakdown[card.color] = (colorBreakdown[card.color] || 0) + count;
+      getColors(card).forEach(color => {
+        colorBreakdown[color] = (colorBreakdown[color] || 0) + count;
+      });
     });
     
     return {
@@ -305,11 +307,12 @@ export function useDeckBuilder() {
         return `No more than 4 copies of any card allowed ("${entry.card.name}").`;
       }
     }
-    // 4. All cards must match leader's color(s) (except Colorless)
-    const leaderColors = deck.leader.color.split('/').map(c => c.trim());
-    for (const entry of deck.cards) {
-      if (entry.card.color !== 'Colorless') {
-        const cardColors = entry.card.color.split('/').map(c => c.trim());
+    // 4. All cards must match leader's color(s)
+    if (deck.leader) {
+      const getColors = (c: AppCard) => c.color.split('/').map(x => x.trim());
+      const leaderColors = getColors(deck.leader);
+      for (const entry of deck.cards) {
+        const cardColors = getColors(entry.card);
         if (!cardColors.every(c => leaderColors.includes(c))) {
           return `Card "${entry.card.name}" does not match the Leader's color identity (${deck.leader.color}).`;
         }

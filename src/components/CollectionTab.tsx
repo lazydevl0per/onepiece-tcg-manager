@@ -36,14 +36,15 @@ export default function CollectionTab({
       // Color identity check
       let colorIdentityInvalid = false;
       let colorIdentityMessage = '';
+      // Helper to get array of colors from a card
+      const getColors = (c: AppCard) => c.color.split('/').map(x => x.trim());
       if (
         selectedDeck &&
         selectedDeck.leader &&
-        card.type !== 'LEADER' &&
-        card.color !== 'Colorless'
+        card.type !== 'LEADER'
       ) {
-        const leaderColors = selectedDeck.leader.color.split('/').map(c => c.trim());
-        const cardColors = card.color.split('/').map(c => c.trim());
+        const leaderColors = getColors(selectedDeck.leader);
+        const cardColors = getColors(card);
         if (!cardColors.every(c => leaderColors.includes(c))) {
           colorIdentityInvalid = true;
           colorIdentityMessage = `This card's color (${card.color}) does not match your Leader's color identity (${selectedDeck.leader.color})`;
@@ -57,10 +58,9 @@ export default function CollectionTab({
         selectedDeck &&
         selectedDeck.cards.length > 0
       ) {
-        const leaderColors = card.color.split('/').map(c => c.trim());
+        const leaderColors = getColors(card);
         const mismatchedCards = selectedDeck.cards.filter(entry => {
-          if (entry.card.color === 'Colorless') return false;
-          const cardColors = entry.card.color.split('/').map(c => c.trim());
+          const cardColors = getColors(entry.card);
           return !cardColors.every(c => leaderColors.includes(c));
         });
         if (mismatchedCards.length > 0) {
@@ -108,6 +108,15 @@ export default function CollectionTab({
 
   return (
     <div>
+      {/* Deck color(s) indicator */}
+      {selectedDeck && selectedDeck.leader && (
+        <div className="mb-4 flex items-center space-x-2">
+          <span className="font-semibold">Deck Colors:</span>
+          {selectedDeck.leader.color.split('/').map(color => (
+            <span key={color} className="px-2 py-1 rounded text-white" style={{ background: 'var(--op-' + color.toLowerCase() + ')' }}>{color}</span>
+          ))}
+        </div>
+      )}
       {/* Cards Grid - Optimized for resize performance */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6 will-change-auto">
         {renderedCards}
