@@ -54,8 +54,16 @@ export default function OnePieceTCGApp() {
       >
       {activeTab === 'collection' ? (
         <CollectionTab
-          filteredCards={collection.filteredCards}
-          displayedCards={collection.displayedCards}
+          filteredCards={
+            deckBuilder.selectedDeck && deckBuilder.selectedDeck.leader
+              ? collection.filteredCards.filter(card => card.type !== 'LEADER')
+              : collection.filteredCards
+          }
+          displayedCards={
+            deckBuilder.selectedDeck && deckBuilder.selectedDeck.leader
+              ? collection.displayedCards.filter(card => card.type !== 'LEADER')
+              : collection.displayedCards
+          }
           hasMore={collection.hasMore}
           isLoadingMore={collection.isLoadingMore}
           loadingTriggerRef={collection.loadingTriggerRef}
