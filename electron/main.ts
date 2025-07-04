@@ -1,6 +1,8 @@
-import { app, BrowserWindow, shell, autoUpdater, dialog, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, dialog, ipcMain } from 'electron'
+import pkg from 'electron-updater'
+const { autoUpdater } = pkg
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
 import { createServer, Server } from 'http'
@@ -175,10 +177,12 @@ function setupAutoUpdater(): void {
   }
 
   try {
-    // Set the feed URL for the auto-updater
-    autoUpdater.setFeedURL({
-      url: UPDATE_SERVER_URL
-    })
+    // Configure electron-updater
+    autoUpdater.autoDownload = false; // Don't auto-download, let user choose
+    autoUpdater.autoInstallOnAppQuit = true;
+    
+    // Set update server (electron-updater will automatically detect GitHub releases)
+    // No need to set feedURL for GitHub releases, it's automatic based on package.json
 
     // Check for updates every 4 hours
     setInterval(() => {
@@ -197,21 +201,26 @@ function setupAutoUpdater(): void {
       updateStatus.error = null
     })
 
-    autoUpdater.on('update-available', () => {
-      console.log('Update available')
+    autoUpdater.on('update-available', (info) => {
+      console.log('Update available:', info.version)
       updateStatus.checking = false
       updateStatus.available = true
       updateStatus.error = null
+      
       dialog.showMessageBox({
         type: 'info',
         title: 'Update Available',
-        message: 'A new version is available. The update will be downloaded and installed automatically.',
-        buttons: ['OK']
+        message: `A new version (${info.version}) is available. Would you like to download it now?`,
+        buttons: ['Download', 'Later']
+      }).then((result) => {
+        if (result.response === 0) {
+          autoUpdater.downloadUpdate()
+        }
       })
     })
 
-    autoUpdater.on('update-not-available', () => {
-      console.log('Update not available')
+    autoUpdater.on('update-not-available', (info) => {
+      console.log('Update not available:', info.version)
       updateStatus.checking = false
       updateStatus.available = false
       updateStatus.error = null
@@ -221,20 +230,26 @@ function setupAutoUpdater(): void {
       console.error('Auto-updater error:', err)
       updateStatus.checking = false
       updateStatus.error = err.message
+      
       // Don't show error dialog for common issues like network problems
-      if (!err.message.includes('ENOTFOUND')) {
+      if (!err.message.includes('ENOTFOUND') && !err.message.includes('net::')) {
         dialog.showErrorBox('Update Error', `Failed to check for updates: ${err.message}`)
       }
     })
 
-    autoUpdater.on('update-downloaded', () => {
-      console.log('Update downloaded')
+    autoUpdater.on('download-progress', (progressObj) => {
+      console.log(`Download progress: ${progressObj.percent}%`)
+    })
+
+    autoUpdater.on('update-downloaded', (info) => {
+      console.log('Update downloaded:', info.version)
       updateStatus.downloaded = true
       updateStatus.error = null
+      
       dialog.showMessageBox({
         type: 'info',
         title: 'Update Ready',
-        message: 'Update downloaded. The application will restart to install the update.',
+        message: `Update ${info.version} has been downloaded. The application will restart to install the update.`,
         buttons: ['Restart Now', 'Later']
       }).then((result) => {
         if (result.response === 0) {

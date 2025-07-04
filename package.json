@@ -28,6 +28,7 @@
     "update:setup": "node scripts/update-release.js setup"
   },
   "dependencies": {
+    "electron-updater": "^6.6.2",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -100,7 +101,8 @@
       "provider": "github",
       "owner": "lazydevl0per",
       "repo": "onepiece-tcg-manager",
-      "releaseType": "release"
+      "releaseType": "release",
+      "private": false
     }
   }
 }

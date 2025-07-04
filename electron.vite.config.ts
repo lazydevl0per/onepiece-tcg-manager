@@ -32,7 +32,7 @@ export default defineConfig({
         entry: 'electron/main.ts'
       },
       rollupOptions: {
-        external: ['electron'],
+        external: ['electron', 'electron-updater'],
         output: {
           entryFileNames: 'main.js'
         }
