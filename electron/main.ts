@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, autoUpdater, dialog, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { fileURLToPath } from 'url'
@@ -118,12 +118,131 @@ function createWindow(): void {
   }
 }
 
+// Auto-updater configuration
+const UPDATE_SERVER_URL = 'https://github.com/lazydevl0per/onepiece-tcg-manager/releases/latest/download'
+
+// Update status tracking
+let updateStatus = {
+  checking: false,
+  available: false,
+  downloaded: false,
+  error: null as string | null
+}
+
+function setupAutoUpdater(): void {
+  // Only enable auto-updater in production builds
+  if (is.dev) {
+    console.log('Auto-updater disabled in development mode')
+    
+  }
+
+  // Set the feed URL for the auto-updater
+  autoUpdater.setFeedURL({
+    url: UPDATE_SERVER_URL
+  })
+
+  // Check for updates every 4 hours
+  setInterval(() => {
+    autoUpdater.checkForUpdates()
+  }, 4 * 60 * 60 * 1000)
+
+  // Check for updates on app start
+  autoUpdater.checkForUpdates()
+
+  // Auto-updater events
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for updates...')
+    updateStatus.checking = true
+    updateStatus.error = null
+  })
+
+  autoUpdater.on('update-available', () => {
+    console.log('Update available')
+    updateStatus.checking = false
+    updateStatus.available = true
+    updateStatus.error = null
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Update Available',
+      message: 'A new version is available. The update will be downloaded and installed automatically.',
+      buttons: ['OK']
+    })
+  })
+
+  autoUpdater.on('update-not-available', () => {
+    console.log('Update not available')
+    updateStatus.checking = false
+    updateStatus.available = false
+    updateStatus.error = null
+  })
+
+  autoUpdater.on('error', (err: Error) => {
+    console.error('Auto-updater error:', err)
+    updateStatus.checking = false
+    updateStatus.error = err.message
+    dialog.showErrorBox('Update Error', `Failed to check for updates: ${err.message}`)
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    console.log('Update downloaded')
+    updateStatus.downloaded = true
+    updateStatus.error = null
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Update Ready',
+      message: 'Update downloaded. The application will restart to install the update.',
+      buttons: ['Restart Now', 'Later']
+    }).then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall()
+      }
+    })
+  })
+}
+
+// IPC handlers for update checking
+function setupUpdateHandlers(): void {
+  ipcMain.handle('check-for-updates', async () => {
+    if (is.dev) {
+      return { success: false, message: 'Update checking is disabled in development mode' }
+    }
+    
+    try {
+      autoUpdater.checkForUpdates()
+      return { success: true, message: 'Checking for updates...' }
+    } catch (error) {
+      return { success: false, message: `Failed to check for updates: ${error}` }
+    }
+  })
+
+  ipcMain.handle('get-update-status', async () => {
+    return {
+      ...updateStatus,
+      isDev: is.dev
+    }
+  })
+
+  ipcMain.handle('quit-and-install', async () => {
+    if (updateStatus.downloaded) {
+      autoUpdater.quitAndInstall()
+      return { success: true }
+    }
+    return { success: false, message: 'No update is ready to install' }
+  })
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.onepiece.tcg.manager')
+
+  // Setup auto-updater
+  setupAutoUpdater()
+  
+  // Setup update handlers
+  setupUpdateHandlers()
 
   // Start data server for serving card data
   startDataServer()

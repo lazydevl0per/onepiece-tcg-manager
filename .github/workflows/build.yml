@@ -74,13 +74,14 @@ jobs:
           echo "No executables found"
         }
 
-    - name: Upload installer artifacts
+    - name: Upload installer and update metadata artifacts
       uses: actions/upload-artifact@v4
       with:
         name: one-piece-tcg-manager-installers-windows
         path: |
           release/*.exe
           release/*.zip
+          release/*.yml
         retention-days: 30
         if-no-files-found: error
 
@@ -97,23 +98,21 @@ jobs:
       with:
         submodules: true
 
-    - name: Download Windows installer artifacts
+    - name: Download Windows installer and update metadata artifacts
       uses: actions/download-artifact@v4
       with:
         name: one-piece-tcg-manager-installers-windows
         path: installers/windows
 
-    - name: List downloaded installers
+    - name: List downloaded installers and update metadata
       run: |
-        echo "Downloaded installers:"
-        find installers -type f -name "*.exe" -o -name "*.zip" || echo "No installers found"
+        echo "Downloaded installers and update metadata:"
+        find installers -type f -name "*.exe" -o -name "*.zip" -o -name "*.yml" || echo "No files found"
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        files: installers/windows/*
-        draft: false
-        prerelease: false
-        generate_release_notes: true
+        files: |
+          installers/windows/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

@@ -1,5 +1,6 @@
 import { BookOpen, Layers } from 'lucide-react';
 import StorageStatus from './StorageStatus';
+import { UpdateChecker } from './UpdateChecker';
 
 interface AppShellProps {
   activeTab: 'collection' | 'deckbuilder';
@@ -52,9 +53,10 @@ export default function AppShell({
             </div>
           </div>
         </div>
-        {/* Storage Status in Sidebar */}
-        <div className="mt-auto p-4">
+        {/* Storage Status and Update Checker in Sidebar */}
+        <div className="mt-auto p-4 space-y-4">
           <StorageStatus />
+          <UpdateChecker />
         </div>
       </div>
 

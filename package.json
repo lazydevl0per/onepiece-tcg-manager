@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "one-piece-tcg-manager",
-  "version": "1.0.0",
+  "version": "0.0.4",
   "description": "One Piece TCG Collection and Deck Builder",
   "author": {
     "name": "LazyDevl0per and E",
@@ -21,7 +21,11 @@
     "test-build": "node scripts/test-build.js",
     "test-data": "node scripts/test-data-loading.js",
     "test-data-server": "node scripts/test-data-server.js",
-    "deploy": "node scripts/deploy.js"
+    "deploy": "node scripts/deploy.js",
+    "update:version": "node scripts/update-release.js version",
+    "update:github": "node scripts/update-release.js github",
+    "update:release": "node scripts/update-release.js release",
+    "update:setup": "node scripts/update-release.js setup"
   },
   "dependencies": {
     "lucide-react": "^0.525.0",
@@ -93,8 +97,9 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "your-github-username",
-      "repo": "onepiece-tcg.online"
+      "owner": "lazydevl0per",
+      "repo": "onepiece-tcg-manager",
+      "releaseType": "release"
     }
   }
 }

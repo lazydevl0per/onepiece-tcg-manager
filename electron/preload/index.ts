@@ -1,4 +1,4 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
@@ -9,6 +9,11 @@ const api = {
   getChromeVersion: () => process.versions.chrome,
   getElectronVersion: () => process.versions.electron,
   isElectron: () => true,
+  
+  // Update checking APIs
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
+  quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
