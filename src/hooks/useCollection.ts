@@ -11,6 +11,7 @@ import {
 } from '../services/cardDataService';
 import { StorageService } from '../services/storageService';
 import { normalizeRarity } from '../utils/constants';
+import { useLazyLoading } from './useLazyLoading';
 
 export function useCollection() {
   const [cards, setCards] = useState<AppCard[]>([]);
@@ -27,6 +28,21 @@ export function useCollection() {
   const [setFilter, setSetFilter] = useState<string>('all');
   const [showOwnedOnly, setShowOwnedOnly] = useState(false);
   const [filteredCards, setFilteredCards] = useState<AppCard[]>([]);
+
+
+
+  // Generate a key for lazy loading that changes when filters change
+  const lazyLoadingKey = useMemo(() => {
+    return `${searchTerm}-${colorFilter}-${typeFilter}-${rarityFilter}-${setFilter}-${showOwnedOnly}`;
+  }, [searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
+
+  // Lazy loading for displayed cards
+  const lazyLoading = useLazyLoading({
+    allCards: filteredCards,
+    initialLoadCount: 50,
+    loadMoreCount: 50,
+    threshold: 200
+  });
 
   // Load card data and metadata on component mount
   useEffect(() => {
@@ -115,6 +131,11 @@ export function useCollection() {
     doFilter();
     return () => { cancelled = true; };
   }, [cards, searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
+
+  // Reset lazy loading when the key changes (indicating filter criteria changed)
+  useEffect(() => {
+    lazyLoading.reset();
+  }, [lazyLoadingKey]);
 
   // Optimize card update function with persistence
   const updateCardOwned = useCallback((cardId: string, owned: number) => {
@@ -259,6 +280,9 @@ export function useCollection() {
     
     // Computed values
     ownedCardsCount,
-    totalCopies
+    totalCopies,
+    
+    // Lazy loading
+    ...lazyLoading
   };
 } 

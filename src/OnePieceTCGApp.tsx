@@ -55,6 +55,10 @@ export default function OnePieceTCGApp() {
       {activeTab === 'collection' ? (
         <CollectionTab
           filteredCards={collection.filteredCards}
+          displayedCards={collection.displayedCards}
+          hasMore={collection.hasMore}
+          isLoadingMore={collection.isLoadingMore}
+          loadingTriggerRef={collection.loadingTriggerRef}
           onUpdateCardOwned={collection.updateCardOwned}
           onAddCardToDeck={deckBuilder.addCardToDeck}
           selectedDeck={deckBuilder.selectedDeck}

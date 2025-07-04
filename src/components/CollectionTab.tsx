@@ -5,6 +5,10 @@ import { useMemo } from 'react';
 
 interface CollectionTabProps {
   filteredCards: AppCard[];
+  displayedCards: AppCard[];
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  loadingTriggerRef: React.RefObject<HTMLDivElement | null>;
   onUpdateCardOwned: (cardId: string, owned: number) => void;
   onAddCardToDeck?: (card: AppCard) => void;
   selectedDeck: Deck | null;
@@ -15,6 +19,10 @@ interface CollectionTabProps {
 
 export default function CollectionTab({
   filteredCards,
+  displayedCards,
+  hasMore,
+  isLoadingMore,
+  loadingTriggerRef,
   onUpdateCardOwned,
   onAddCardToDeck,
   selectedDeck,
@@ -24,7 +32,7 @@ export default function CollectionTab({
 }: CollectionTabProps) {
   // Memoize card rendering to prevent unnecessary re-renders during resize
   const renderedCards = useMemo(() => 
-    filteredCards.map(card => {
+    displayedCards.map(card => {
       // Color identity check
       let colorIdentityInvalid = false;
       let colorIdentityMessage = '';
@@ -93,14 +101,38 @@ export default function CollectionTab({
           }
         />
       );
-    }), [filteredCards, onUpdateCardOwned, onAddCardToDeck, isCardInDeck, getCardQuantityInDeck, selectedDeck, MAX_COPIES_PER_CARD]);
+    }), [displayedCards, onUpdateCardOwned, onAddCardToDeck, isCardInDeck, getCardQuantityInDeck, selectedDeck, MAX_COPIES_PER_CARD]);
 
   return (
     <div>
       {/* Cards Grid - Optimized for resize performance */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 will-change-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6 will-change-auto">
         {renderedCards}
       </div>
+      
+      {/* Loading trigger for infinite scroll */}
+      {hasMore && (
+        <div 
+          ref={loadingTriggerRef}
+          className="flex justify-center items-center py-8"
+        >
+          {isLoadingMore ? (
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+              <span className="text-gray-600">Loading more cards...</span>
+            </div>
+          ) : (
+            <div className="h-4" /> // Invisible trigger element
+          )}
+        </div>
+      )}
+      
+      {/* End of results indicator */}
+      {!hasMore && filteredCards.length > 0 && (
+        <div className="text-center py-8 text-gray-500">
+          <p>You've reached the end of the results ({filteredCards.length} cards)</p>
+        </div>
+      )}
     </div>
   );
 } 

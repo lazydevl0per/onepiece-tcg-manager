@@ -72,8 +72,8 @@ export default function Card({
   return (
     <>
       <div
-        className="relative rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 bg-white/20 border-2 border-white/30 hover:scale-105 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] hover:border-pink-400 group cursor-pointer"
-        style={{ boxShadow: '0 4px 32px 0 rgba(31,38,135,0.37)', width: '320px', height: '448px' }}
+        className="relative rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 bg-white/20 border-2 border-white/30 hover:scale-105 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] hover:border-pink-400 group cursor-pointer w-full aspect-[5/7] max-w-md"
+        style={{ boxShadow: '0 4px 32px 0 rgba(31,38,135,0.37)' }}
         onClick={handleCardClick}
       >
         {/* Sparkle overlay for anime effect (only if not owned) */}
@@ -198,7 +198,7 @@ export default function Card({
                   disabled={isInDeck || addToDeckDisabled}
                   title={addToDeckTitle}
                   className={`flex-1 w-full md:w-auto px-3 py-2 text-xs rounded-lg font-bold transition-colors shadow-lg bg-yellow-500 hover:bg-yellow-600 text-slate-900 tracking-wide disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed`}
-                  style={{minWidth: '120px'}}
+                  style={{minWidth: '100px'}}
                 >
                   {isInDeck ? `In Deck (${deckQuantity})` : addToDeckTitle}
                 </button>
