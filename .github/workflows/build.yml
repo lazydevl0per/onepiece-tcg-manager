@@ -25,6 +25,14 @@ jobs:
       with:
         submodules: true
 
+    - name: Copy data submodule to dist/data (Windows)
+      shell: powershell
+      run: |
+        if (Test-Path dist/data) {
+          Remove-Item dist/data -Recurse -Force
+        }
+        Copy-Item -Path data -Destination dist/data -Recurse -Force
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -92,6 +100,12 @@ jobs:
       with:
         submodules: true
 
+    - name: Copy data submodule to dist/data (macOS)
+      run: |
+        rm -rf dist/data
+        mkdir -p dist/data
+        cp -r data/* dist/data/
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -151,6 +165,12 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: true
+
+    - name: Copy data submodule to dist/data (Linux)
+      run: |
+        rm -rf dist/data
+        mkdir -p dist/data
+        cp -r data/* dist/data/
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
