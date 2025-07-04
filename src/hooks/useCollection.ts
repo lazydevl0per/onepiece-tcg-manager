@@ -143,15 +143,24 @@ export function useCollection() {
       const updatedCards = prevCards.map(card => 
         card.id === cardId ? { ...card, owned } : card
       );
-      
       // Save to localStorage after state update
       // eslint-disable-next-line no-console
       console.log('Saving collection to storage:', updatedCards.filter(c => c.owned > 0));
       StorageService.saveCollection(updatedCards);
-      
+      // Synchronously update filteredCards for instant UI feedback
+      filterCards(
+        updatedCards,
+        searchTerm,
+        colorFilter,
+        typeFilter,
+        rarityFilter,
+        setFilter
+      ).then(result => {
+        setFilteredCards(result.filter(card => !showOwnedOnly || card.owned > 0));
+      });
       return updatedCards;
     });
-  }, []);
+  }, [searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
 
   // Memoize expensive calculations
   const ownedCardsCount = useMemo(() => cards.filter(c => c.owned > 0).length, [cards]);

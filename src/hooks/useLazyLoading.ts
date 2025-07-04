@@ -23,11 +23,11 @@ export function useLazyLoading({
 
   // Reset displayed cards when allCards actually changes (not just reference)
   useEffect(() => {
-    // Check if the cards array has actually changed by comparing IDs
-    const currentCardIds = allCards.map(card => card.id).join(',');
-    const lastCardIds = lastAllCardsRef.current.map(card => card.id).join(',');
+    // Check if the cards array has actually changed by comparing IDs and owned counts
+    const currentCardKey = allCards.map(card => `${card.id}:${card.owned}`).join(',');
+    const lastCardKey = lastAllCardsRef.current.map(card => `${card.id}:${card.owned}`).join(',');
     
-    if (currentCardIds !== lastCardIds) {
+    if (currentCardKey !== lastCardKey) {
       const initialCards = allCards.slice(0, initialLoadCount);
       setDisplayedCards(initialCards);
       setHasMore(allCards.length > initialLoadCount);
