@@ -190,18 +190,24 @@ export default function Card({
 
               {/* Add to Deck Button */}
               {canAddToDeck && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToDeck();
-                  }}
-                  disabled={isInDeck || addToDeckDisabled}
-                  title={addToDeckTitle}
-                  className={`flex-1 w-full md:w-auto px-3 py-2 text-xs rounded-lg font-bold transition-colors shadow-lg bg-yellow-500 hover:bg-yellow-600 text-slate-900 tracking-wide disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed`}
-                  style={{minWidth: '100px'}}
-                >
-                  {isInDeck ? `In Deck (${deckQuantity})` : addToDeckTitle}
-                </button>
+                <div style={{flexBasis: '120px', minWidth: '100px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  {card.owned > 0 ? (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToDeck();
+                      }}
+                      disabled={isInDeck || addToDeckDisabled}
+                      title={addToDeckTitle}
+                      className={`w-full px-3 py-2 text-xs rounded-lg font-bold transition-colors shadow-lg bg-yellow-500 hover:bg-yellow-600 text-slate-900 tracking-wide disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed`}
+                      style={{height: '40px'}}
+                    >
+                      {isInDeck ? `In Deck (${deckQuantity})` : addToDeckTitle}
+                    </button>
+                  ) : (
+                    <span style={{width: '100%', height: '40px', display: 'inline-block'}} />
+                  )}
+                </div>
               )}
             </div>
           </div>
