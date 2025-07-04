@@ -2,7 +2,7 @@
 
 A modern desktop application for managing your One Piece Trading Card Game collection and building decks.
 
-![image](https://github.com/user-attachments/assets/fad69a31-fae1-4931-a56c-d20399a5e2fe)
+![image](https://github.com/user-attachments/assets/166b78c3-ba26-4e43-890f-a4e2af6470a3)
 
 ## Features
 
