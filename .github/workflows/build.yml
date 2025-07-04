@@ -51,13 +51,13 @@ jobs:
     - name: Verify data files are present
       shell: powershell
       run: |
-        echo "Checking dist/data directory structure..."
-        if (Test-Path "dist/data/english/json") {
-          $jsonFiles = Get-ChildItem "dist/data/english/json" -Filter "*.json"
-          echo "Found $($jsonFiles.Count) JSON files in dist/data/english/json"
+        echo "Checking dist-electron/data directory structure..."
+        if (Test-Path "dist-electron/data/english/json") {
+          $jsonFiles = Get-ChildItem "dist-electron/data/english/json" -Filter "*.json"
+          echo "Found $($jsonFiles.Count) JSON files in dist-electron/data/english/json"
           $jsonFiles | ForEach-Object { echo "  - $($_.Name)" }
         } else {
-          echo "ERROR: dist/data/english/json directory not found!"
+          echo "ERROR: dist/data-electron/english/json directory not found!"
           exit 1
         }
 
