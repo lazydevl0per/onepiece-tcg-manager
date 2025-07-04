@@ -5,11 +5,15 @@ import { resolve } from 'path'
 export default defineConfig({
   main: {
     build: {
+      outDir: 'dist-electron',
       lib: {
         entry: 'electron/main.ts'
       },
       rollupOptions: {
-        external: ['electron']
+        external: ['electron'],
+        output: {
+          entryFileNames: 'main.js'
+        }
       }
     }
   },
