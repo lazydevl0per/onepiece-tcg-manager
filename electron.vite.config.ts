@@ -19,11 +19,15 @@ export default defineConfig({
   },
   preload: {
     build: {
+      outDir: 'dist-electron',
       lib: {
         entry: 'electron/preload/index.ts'
       },
       rollupOptions: {
-        external: ['electron']
+        external: ['electron'],
+        output: {
+          entryFileNames: 'main.js'
+        }
       }
     }
   },
@@ -41,6 +45,7 @@ export default defineConfig({
     publicDir: 'public',
     assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.json'],
     build: {
+      outDir: 'dist-electron',
       rollupOptions: {
         input: 'index.html',
         output: {
