@@ -26,6 +26,8 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
       if (result.success) {
         // Update status will be updated via the status check
         setTimeout(() => getUpdateStatus(), 1000)
+      } else {
+        console.log('Update check result:', result.message)
       }
     } catch (error) {
       console.error('Failed to check for updates:', error)
@@ -35,13 +37,15 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
   }
 
   const getUpdateStatus = async () => {
-    if (!window.api?.getUpdateStatus) return
+    if (!window.api?.getUpdateStatus) {
+      return
+    }
     
     try {
       const status = await window.api.getUpdateStatus()
       setUpdateStatus(status)
     } catch (error) {
-      console.error('Failed to get update status:', error)
+      console.error('UpdateChecker: Failed to get update status:', error)
     }
   }
 
@@ -67,42 +71,45 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
     return () => clearInterval(interval)
   }, [])
 
+  // Show only if we have status
   if (!updateStatus) {
     return null
   }
 
-  // Don't show update checker in development mode
-  if (updateStatus.isDev) {
+  const displayStatus = updateStatus
+
+  // Hide if no updates are available and no errors
+  if (!displayStatus.available && !displayStatus.checking && !displayStatus.downloaded && !displayStatus.error) {
     return null
   }
 
   const getStatusIcon = () => {
-    if (updateStatus.error) {
+    if (displayStatus.error) {
       return <AlertCircle className="w-4 h-4 text-red-500" />
     }
-    if (updateStatus.checking || isChecking) {
+    if (displayStatus.checking || isChecking) {
       return <RefreshCw className="w-4 h-4 text-blue-500 animate-spin" />
     }
-    if (updateStatus.downloaded) {
+    if (displayStatus.downloaded) {
       return <Download className="w-4 h-4 text-green-500" />
     }
-    if (updateStatus.available) {
+    if (displayStatus.available) {
       return <AlertCircle className="w-4 h-4 text-yellow-500" />
     }
     return <CheckCircle className="w-4 h-4 text-green-500" />
   }
 
   const getStatusText = () => {
-    if (updateStatus.error) {
+    if (displayStatus.error) {
       return 'Update check failed'
     }
-    if (updateStatus.checking || isChecking) {
+    if (displayStatus.checking || isChecking) {
       return 'Checking for updates...'
     }
-    if (updateStatus.downloaded) {
+    if (displayStatus.downloaded) {
       return 'Update ready to install'
     }
-    if (updateStatus.available) {
+    if (displayStatus.available) {
       return 'Update available'
     }
     return 'Up to date'
@@ -113,7 +120,11 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
       {getStatusIcon()}
       <span className="text-gray-600">{getStatusText()}</span>
       
-      {updateStatus.downloaded && (
+
+      
+
+      
+      {displayStatus.downloaded && (
         <button
           onClick={installUpdate}
           className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
@@ -122,7 +133,7 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
         </button>
       )}
       
-      {!updateStatus.checking && !isChecking && !updateStatus.error && (
+      {!displayStatus.checking && !isChecking && !displayStatus.error && (
         <button
           onClick={checkForUpdates}
           className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"

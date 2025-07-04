@@ -7,6 +7,22 @@ import { createServer, Server } from 'http'
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 
+// Custom environment detection
+function isDevelopment(): boolean {
+  // Check if we're in a packaged app
+  if (app.isPackaged) {
+    return false
+  }
+  
+  // In development mode, the app path is the project root
+  // In production, it would be the packaged app directory
+  const appPath = app.getAppPath()
+  
+  // If we're running from the project root (not packaged), we're in development
+  // This works for both electron-vite dev mode and when running from source
+  return !appPath.includes('node_modules') && !appPath.includes('app.asar')
+}
+
 function getFilename() {
   return fileURLToPath(import.meta.url)
 }
@@ -40,7 +56,7 @@ function startDataServer(): void {
 
       // Construct full path to the data file
       // In development, use the project root, in production use the data in dist-electron
-      const isDev = is.dev
+      const isDev = isDevelopment()
       let basePath: string
       
       if (isDev) {
@@ -106,7 +122,7 @@ function createWindow(): void {
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+  if (isDevelopment() && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     // Fixed: Load from the correct renderer build output directory
@@ -130,85 +146,149 @@ let updateStatus = {
 }
 
 function setupAutoUpdater(): void {
-  // Only enable auto-updater in production builds
-  if (is.dev) {
+  console.log('Auto-updater setup:', {
+    isDev: isDevelopment(),
+    isPackaged: app.isPackaged,
+    portableDir: process.env.PORTABLE_EXECUTABLE_DIR
+  })
+  
+  // Disable auto-updater in development mode
+  if (isDevelopment()) {
     console.log('Auto-updater disabled in development mode')
-    
+    updateStatus.error = 'Update checking not available in development mode'
+    return
   }
 
-  // Set the feed URL for the auto-updater
-  autoUpdater.setFeedURL({
-    url: UPDATE_SERVER_URL
-  })
+  // Check if we're running from an installed app (not portable)
+  const isPortable = process.env.PORTABLE_EXECUTABLE_DIR
+  if (isPortable) {
+    console.log('Auto-updater disabled for portable builds')
+    updateStatus.error = 'Update checking not available for portable builds'
+    return
+  }
 
-  // Check for updates every 4 hours
-  setInterval(() => {
-    autoUpdater.checkForUpdates()
-  }, 4 * 60 * 60 * 1000)
+  // Check if we're in a proper installed environment
+  if (!app.isPackaged) {
+    console.log('Auto-updater disabled for unpackaged builds')
+    updateStatus.error = 'Update checking requires a packaged application'
+    return
+  }
 
-  // Check for updates on app start
-  autoUpdater.checkForUpdates()
-
-  // Auto-updater events
-  autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for updates...')
-    updateStatus.checking = true
-    updateStatus.error = null
-  })
-
-  autoUpdater.on('update-available', () => {
-    console.log('Update available')
-    updateStatus.checking = false
-    updateStatus.available = true
-    updateStatus.error = null
-    dialog.showMessageBox({
-      type: 'info',
-      title: 'Update Available',
-      message: 'A new version is available. The update will be downloaded and installed automatically.',
-      buttons: ['OK']
+  try {
+    // Set the feed URL for the auto-updater
+    autoUpdater.setFeedURL({
+      url: UPDATE_SERVER_URL
     })
-  })
 
-  autoUpdater.on('update-not-available', () => {
-    console.log('Update not available')
-    updateStatus.checking = false
-    updateStatus.available = false
-    updateStatus.error = null
-  })
+    // Check for updates every 4 hours
+    setInterval(() => {
+      checkForUpdatesSafely()
+    }, 4 * 60 * 60 * 1000)
 
-  autoUpdater.on('error', (err: Error) => {
-    console.error('Auto-updater error:', err)
-    updateStatus.checking = false
-    updateStatus.error = err.message
-    dialog.showErrorBox('Update Error', `Failed to check for updates: ${err.message}`)
-  })
+    // Check for updates on app start (with delay to ensure app is ready)
+    setTimeout(() => {
+      checkForUpdatesSafely()
+    }, 5000)
 
-  autoUpdater.on('update-downloaded', () => {
-    console.log('Update downloaded')
-    updateStatus.downloaded = true
-    updateStatus.error = null
-    dialog.showMessageBox({
-      type: 'info',
-      title: 'Update Ready',
-      message: 'Update downloaded. The application will restart to install the update.',
-      buttons: ['Restart Now', 'Later']
-    }).then((result) => {
-      if (result.response === 0) {
-        autoUpdater.quitAndInstall()
+    // Auto-updater events
+    autoUpdater.on('checking-for-update', () => {
+      console.log('Checking for updates...')
+      updateStatus.checking = true
+      updateStatus.error = null
+    })
+
+    autoUpdater.on('update-available', () => {
+      console.log('Update available')
+      updateStatus.checking = false
+      updateStatus.available = true
+      updateStatus.error = null
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Update Available',
+        message: 'A new version is available. The update will be downloaded and installed automatically.',
+        buttons: ['OK']
+      })
+    })
+
+    autoUpdater.on('update-not-available', () => {
+      console.log('Update not available')
+      updateStatus.checking = false
+      updateStatus.available = false
+      updateStatus.error = null
+    })
+
+    autoUpdater.on('error', (err: Error) => {
+      console.error('Auto-updater error:', err)
+      updateStatus.checking = false
+      updateStatus.error = err.message
+      // Don't show error dialog for common issues like network problems
+      if (!err.message.includes('ENOTFOUND')) {
+        dialog.showErrorBox('Update Error', `Failed to check for updates: ${err.message}`)
       }
     })
-  })
+
+    autoUpdater.on('update-downloaded', () => {
+      console.log('Update downloaded')
+      updateStatus.downloaded = true
+      updateStatus.error = null
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Update Ready',
+        message: 'Update downloaded. The application will restart to install the update.',
+        buttons: ['Restart Now', 'Later']
+      }).then((result) => {
+        if (result.response === 0) {
+          autoUpdater.quitAndInstall()
+        }
+      })
+    })
+
+  } catch (error) {
+    console.error('Failed to setup auto-updater:', error)
+    updateStatus.error = 'Failed to initialize update checker'
+  }
+}
+
+// Safe wrapper for checkForUpdates to handle errors
+function checkForUpdatesSafely(): void {
+  try {
+    // Check if we're in a proper installed environment
+    if (isDevelopment()) {
+      console.log('Skipping update check in development mode')
+      updateStatus.checking = false
+      updateStatus.error = 'Update checking not available in development mode'
+      return
+    }
+    
+    // Check if we're in a packaged app
+    if (!app.isPackaged) {
+      console.log('Skipping update check for unpackaged builds')
+      updateStatus.checking = false
+      updateStatus.error = 'Update checking requires a packaged application'
+      return
+    }
+    
+    autoUpdater.checkForUpdates()
+  } catch (error) {
+    console.error('Error checking for updates:', error)
+    updateStatus.checking = false
+    updateStatus.error = error instanceof Error ? error.message : 'Unknown error'
+  }
 }
 
 // IPC handlers for update checking
 function setupUpdateHandlers(): void {
   ipcMain.handle('check-for-updates', async () => {
-    if (is.dev) {
+    if (isDevelopment()) {
       return { success: false, message: 'Update checking is disabled in development mode' }
     }
     
+    if (!app.isPackaged) {
+      return { success: false, message: 'Update checking requires a packaged application' }
+    }
+    
     try {
-      autoUpdater.checkForUpdates()
+      checkForUpdatesSafely()
       return { success: true, message: 'Checking for updates...' }
     } catch (error) {
       return { success: false, message: `Failed to check for updates: ${error}` }
@@ -216,10 +296,12 @@ function setupUpdateHandlers(): void {
   })
 
   ipcMain.handle('get-update-status', async () => {
-    return {
+    const status = {
       ...updateStatus,
-      isDev: is.dev
+      isDev: isDevelopment()
     }
+    
+    return status
   })
 
   ipcMain.handle('quit-and-install', async () => {
