@@ -92,149 +92,13 @@ jobs:
         retention-days: 30
         if-no-files-found: error
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: true
-
-    - name: Copy data submodule to dist/data (macOS)
-      run: |
-        rm -rf dist/data
-        mkdir -p dist/data
-        cp -r data/* dist/data/
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Build application
-      run: npm run build
-
-    - name: Test data loading
-      run: npm run test-data
-
-    - name: Verify data files are present
-      run: |
-        echo "Checking dist/data directory structure..."
-        if [ -d "dist/data/english/json" ]; then
-          jsonFiles=(dist/data/english/json/*.json)
-          echo "Found ${#jsonFiles[@]} JSON files in dist/data/english/json"
-          for file in "${jsonFiles[@]}"; do echo "  - $(basename "$file")"; done
-        else
-          echo "ERROR: dist/data/english/json directory not found!"
-          exit 1
-        fi
-
-    - name: Build Electron app
-      run: npx electron-builder --mac --publish=never
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: List release directory
-      run: |
-        echo "Release directory contents:"
-        if [ -d "release/" ]; then
-          ls -l "release/"
-        else
-          echo "Release directory not found"
-        fi
-        find release -type f \( -name "*.dmg" -o -name "*.zip" \) || echo "No executables found"
-
-    - name: Upload installer artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: one-piece-tcg-manager-installers-macos
-        path: |
-          release/*.dmg
-          release/*.zip
-        retention-days: 30
-        if-no-files-found: error
-
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: true
-
-    - name: Copy data submodule to dist/data (Linux)
-      run: |
-        rm -rf dist/data
-        mkdir -p dist/data
-        cp -r data/* dist/data/
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Build application
-      run: npm run build
-
-    - name: Test data loading
-      run: npm run test-data
-
-    - name: Verify data files are present
-      run: |
-        echo "Checking dist/data directory structure..."
-        if [ -d "dist/data/english/json" ]; then
-          jsonFiles=(dist/data/english/json/*.json)
-          echo "Found ${#jsonFiles[@]} JSON files in dist/data/english/json"
-          for file in "${jsonFiles[@]}"; do echo "  - $(basename "$file")"; done
-        else
-          echo "ERROR: dist/data/english/json directory not found!"
-          exit 1
-        fi
-
-    - name: Build Electron app
-      run: npx electron-builder --linux --publish=never
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: List release directory
-      run: |
-        echo "Release directory contents:"
-        if [ -d "release/" ]; then
-          ls -l "release/"
-        else
-          echo "Release directory not found"
-        fi
-        find release -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.zip" \) || echo "No executables found"
-
-    - name: Upload installer artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: one-piece-tcg-manager-installers-linux
-        path: |
-          release/*.AppImage
-          release/*.deb
-          release/*.zip
-        retention-days: 30
-        if-no-files-found: error
-
   release:
-    needs: [build-windows, build-macos, build-linux]
+    needs: [build-windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-    
-    # Add specific permissions for the release job
     permissions:
       contents: write
       packages: write
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -247,27 +111,15 @@ jobs:
         name: one-piece-tcg-manager-installers-windows
         path: installers/windows
 
-    - name: Download macOS installer artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: one-piece-tcg-manager-installers-macos
-        path: installers/macos
-
-    - name: Download Linux installer artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: one-piece-tcg-manager-installers-linux
-        path: installers/linux
-
     - name: List downloaded installers
       run: |
         echo "Downloaded installers:"
-        find installers -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.zip" || echo "No installers found"
+        find installers -type f -name "*.exe" -o -name "*.zip" || echo "No installers found"
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        files: installers/**/*
+        files: installers/windows/*
         draft: false
         prerelease: false
         generate_release_notes: true
