@@ -18,7 +18,10 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
     - name: Checkout code
@@ -55,7 +58,14 @@ jobs:
         }
 
     - name: Build Electron app
-      run: npx electron-builder --publish=never
+      run: |
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          npx electron-builder --win --publish=never
+        elif [ "$RUNNER_OS" = "macOS" ]; then
+          npx electron-builder --mac --publish=never
+        else
+          npx electron-builder --linux --publish=never
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
