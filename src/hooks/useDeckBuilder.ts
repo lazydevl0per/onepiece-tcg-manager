@@ -74,10 +74,7 @@ export function useDeckBuilder() {
 
   const addCardToDeck = (card: AppCard) => {
     if (!selectedDeck) return;
-    
     const updatedDeck = { ...selectedDeck };
-    
-    // Check if it's a leader card
     if (card.type === 'LEADER') {
       // Check if any cards in the deck do not match the new leader's color identity
       const leaderColors = card.color.split('/').map(c => c.trim());
@@ -101,32 +98,32 @@ export function useDeckBuilder() {
       // Enforce color identity rule
       if (updatedDeck.leader) {
         const leaderColors = updatedDeck.leader.color.split('/').map(c => c.trim());
-        // Allow colorless cards (if any), which are usually marked as 'Colorless'
-        if (card.color !== 'Colorless' && !leaderColors.includes(card.color)) {
-          alert(`This card's color (${card.color}) does not match your Leader's color identity (${updatedDeck.leader.color}).`);
-          return;
+        if (card.color !== 'Colorless') {
+          const cardColors = card.color.split('/').map(c => c.trim());
+          if (!cardColors.every(c => leaderColors.includes(c))) {
+            alert(`This card's color (${card.color}) does not match your Leader's color identity (${updatedDeck.leader.color}).`);
+            return;
+          }
         }
       }
-      // Check deck size limit
-      const currentTotal = getTotalCards(updatedDeck);
-      if (currentTotal >= DECK_SIZE_LIMIT) {
-        alert(`Deck is full (${DECK_SIZE_LIMIT} cards maximum)`);
-        return;
-      }
-      
       // Check if card already exists in deck
       const existingCard = updatedDeck.cards.find(c => c.card.id === card.id);
       if (existingCard) {
-        if (existingCard.quantity >= MAX_COPIES_PER_CARD) {
-          alert(`Maximum ${MAX_COPIES_PER_CARD} copies of this card allowed`);
+        if (existingCard.quantity >= 4) {
+          alert('Maximum 4 copies of this card allowed in a deck');
           return;
         }
         existingCard.quantity += 1;
       } else {
         updatedDeck.cards.push({ card, quantity: 1 });
       }
+      // Check deck size limit (must be exactly 50 after addition)
+      const mainDeckCount = updatedDeck.cards.reduce((sum, c) => sum + c.quantity, 0);
+      if (mainDeckCount > 50) {
+        alert('Deck cannot have more than 50 cards (excluding Leader)');
+        return;
+      }
     }
-    
     updatedDeck.updatedAt = new Date();
     const updatedDecks = decks.map(d => d.id === updatedDeck.id ? updatedDeck : d);
     setDecks(updatedDecks);
@@ -136,20 +133,23 @@ export function useDeckBuilder() {
 
   const updateCardQuantity = (cardId: string, quantity: number) => {
     if (!selectedDeck) return;
-    
     const updatedDeck = { ...selectedDeck };
     const cardEntry = updatedDeck.cards.find(c => c.card.id === cardId);
-    
     if (cardEntry) {
       if (quantity <= 0) {
         updatedDeck.cards = updatedDeck.cards.filter(c => c.card.id !== cardId);
-      } else if (quantity > MAX_COPIES_PER_CARD) {
-        alert(`Maximum ${MAX_COPIES_PER_CARD} copies of this card allowed`);
+      } else if (quantity > 4) {
+        alert('Maximum 4 copies of this card allowed in a deck');
         return;
       } else {
         cardEntry.quantity = quantity;
       }
-      
+      // Check deck size limit (must be exactly 50 after update)
+      const mainDeckCount = updatedDeck.cards.reduce((sum, c) => sum + c.quantity, 0);
+      if (mainDeckCount > 50) {
+        alert('Deck cannot have more than 50 cards (excluding Leader)');
+        return;
+      }
       updatedDeck.updatedAt = new Date();
       const updatedDecks = decks.map(d => d.id === updatedDeck.id ? updatedDeck : d);
       setDecks(updatedDecks);
@@ -261,15 +261,25 @@ export function useDeckBuilder() {
   // Check if a card is in the selected deck
   const isCardInDeck = (card: AppCard) => {
     if (!selectedDeck) return false;
-    if (selectedDeck.leader?.id === card.id) return true;
-    return selectedDeck.cards.some(c => c.card.id === card.id);
+    if (selectedDeck.leader?.id === card.id) {
+      console.debug(`[isCardInDeck] Card is Leader:`, card.id, card.name, true);
+      return true;
+    }
+    const inDeck = selectedDeck.cards.some(c => c.card.id === card.id);
+    console.debug(`[isCardInDeck]`, card.id, card.name, inDeck);
+    return inDeck;
   };
 
   const getCardQuantityInDeck = (card: AppCard) => {
     if (!selectedDeck) return 0;
-    if (selectedDeck.leader?.id === card.id) return 1;
+    if (selectedDeck.leader?.id === card.id) {
+      console.debug(`[getCardQuantityInDeck] Card is Leader:`, card.id, card.name, 1);
+      return 1;
+    }
     const cardEntry = selectedDeck.cards.find(c => c.card.id === card.id);
-    return cardEntry ? cardEntry.quantity : 0;
+    const qty = cardEntry ? cardEntry.quantity : 0;
+    console.debug(`[getCardQuantityInDeck]`, card.id, card.name, qty);
+    return qty;
   };
 
   // Wrapper for setSelectedDeck that also saves to localStorage
@@ -277,6 +287,37 @@ export function useDeckBuilder() {
     setSelectedDeck(deck);
     StorageService.saveDecks(decks, deck?.id || null);
   };
+
+  // Helper: Validate deck legality according to One Piece Card Game rules
+  function validateDeck(deck: Deck): string | null {
+    // 1. Must have a leader
+    if (!deck.leader) {
+      return 'Deck must have a Leader card.';
+    }
+    // 2. Deck must have exactly 50 cards (excluding Leader)
+    const mainDeckCount = deck.cards.reduce((sum, c) => sum + c.quantity, 0);
+    if (mainDeckCount !== 50) {
+      return `Deck must have exactly 50 cards (currently ${mainDeckCount}).`;
+    }
+    // 3. No more than 4 copies of any card (by card number)
+    for (const entry of deck.cards) {
+      if (entry.quantity > 4) {
+        return `No more than 4 copies of any card allowed ("${entry.card.name}").`;
+      }
+    }
+    // 4. All cards must match leader's color(s) (except Colorless)
+    const leaderColors = deck.leader.color.split('/').map(c => c.trim());
+    for (const entry of deck.cards) {
+      if (entry.card.color !== 'Colorless') {
+        const cardColors = entry.card.color.split('/').map(c => c.trim());
+        if (!cardColors.every(c => leaderColors.includes(c))) {
+          return `Card "${entry.card.name}" does not match the Leader's color identity (${deck.leader.color}).`;
+        }
+      }
+    }
+    // 5. Only one Leader card (already enforced by structure)
+    return null; // Legal
+  }
 
   return {
     // State
@@ -302,6 +343,7 @@ export function useDeckBuilder() {
     getTotalCards,
     getDeckStatistics,
     isCardInDeck,
-    getCardQuantityInDeck
+    getCardQuantityInDeck,
+    validateDeck
   };
 } 

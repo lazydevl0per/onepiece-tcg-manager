@@ -178,9 +178,9 @@ export default function Card({
                   className="w-7 h-7 rounded bg-green-500 hover:bg-green-600 text-white text-base font-bold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onUpdateOwned && onUpdateOwned(card.id, Math.min(MAX_COPIES_PER_CARD, (card.owned || 0) + 1));
+                    onUpdateOwned && onUpdateOwned(card.id, (card.owned || 0) + 1);
                   }}
-                  disabled={!onUpdateOwned || (card.owned || 0) >= MAX_COPIES_PER_CARD}
+                  disabled={!onUpdateOwned}
                   type="button"
                   tabIndex={-1}
                 >

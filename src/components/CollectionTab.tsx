@@ -74,7 +74,7 @@ export default function CollectionTab({
           card={card}
           onUpdateOwned={onUpdateCardOwned}
           onAddToDeck={onAddCardToDeck}
-          isInDeck={isCardInDeck ? isCardInDeck(card) : false}
+          isInDeck={getCardQuantityInDeck ? getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD : false}
           deckQuantity={getCardQuantityInDeck ? getCardQuantityInDeck(card) : 0}
           canAddToDeck={!!selectedDeck}
           addToDeckDisabled={
@@ -82,8 +82,8 @@ export default function CollectionTab({
             card.owned === 0 ||
             (!!(card.type === 'LEADER' && selectedDeck && selectedDeck.leader)) ||
             leaderColorIdentityInvalid ||
-            (isCardInDeck && getCardQuantityInDeck &&
-             isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD)
+            (getCardQuantityInDeck && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD) ||
+            (getCardQuantityInDeck && getCardQuantityInDeck(card) >= card.owned)
           }
           addToDeckTitle={
             colorIdentityInvalid
@@ -94,9 +94,12 @@ export default function CollectionTab({
               ? 'A deck can only have one leader card'
               : leaderColorIdentityInvalid
               ? leaderColorIdentityMessage
-              : isCardInDeck && getCardQuantityInDeck &&
-                isCardInDeck(card) && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD
-              ? `Maximum ${MAX_COPIES_PER_CARD} copies already in deck`
+              : getCardQuantityInDeck && getCardQuantityInDeck(card) >= MAX_COPIES_PER_CARD
+              ? `In Deck (${getCardQuantityInDeck(card)})`
+              : getCardQuantityInDeck && getCardQuantityInDeck(card) >= card.owned
+              ? `Add to deck (${getCardQuantityInDeck(card)})`
+              : getCardQuantityInDeck
+              ? `Add to deck (${getCardQuantityInDeck(card)})`
               : 'Add to deck'
           }
         />
