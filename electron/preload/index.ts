@@ -1,6 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
+console.log('Preload script loaded!')
+
 // Custom APIs for renderer
 const api = {
   // Add any custom APIs here
@@ -12,8 +14,25 @@ const api = {
   
   // Update checking APIs
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-  getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
+  getUpdateStatus: () => {
+    console.log('Preload: getUpdateStatus called')
+    return ipcRenderer.invoke('get-update-status')
+  },
   quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
+  downloadUpdate: () => ipcRenderer.invoke('download-update'),
+  triggerUpdateCheck: () => ipcRenderer.invoke('trigger-update-check'),
+  
+  // Download progress listener
+  onDownloadProgress: (callback: (progress: number) => void) => {
+    ipcRenderer.on('update-download-progress', (_, progress: number) => {
+      callback(progress)
+    })
+  },
+  
+  // Remove download progress listener
+  removeDownloadProgressListener: () => {
+    ipcRenderer.removeAllListeners('update-download-progress')
+  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -21,12 +40,15 @@ const api = {
 // just add to the DOM global.
 if (process.contextIsolated) {
   try {
+    console.log('Preload: Exposing APIs via contextBridge')
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+    console.log('Preload: APIs exposed successfully')
   } catch (error) {
-    console.error(error)
+    console.error('Preload: Failed to expose APIs:', error)
   }
 } else {
+  console.log('Preload: Exposing APIs directly to window')
   // @ts-expect-error (define in dts)
   window.electron = electronAPI
   // @ts-expect-error (define in dts)
