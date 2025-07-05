@@ -3,6 +3,7 @@ import { Plus, Download, Edit3, X, Trash2, Save } from 'lucide-react';
 import { type AppCard } from '../services/cardDataService';
 import { type Deck, type DeckStatistics } from '../hooks/useDeckBuilder';
 import { DECK_SIZE_LIMIT, getCardColorClass } from '../utils/constants';
+import CostDistributionChart from './CostDistributionChart';
 
 interface DeckBuilderTabProps {
   decks: Deck[];
@@ -228,6 +229,12 @@ export default function DeckBuilderTab({
                       </div>
                     </div>
                   )}
+                  
+                  {/* Cost Distribution Chart */}
+                  <CostDistributionChart 
+                    costDistribution={stats.costDistribution} 
+                    maxCards={DECK_SIZE_LIMIT} 
+                  />
                 </div>
               );
             })()}

@@ -19,6 +19,7 @@ export interface DeckStatistics {
   characters: number;
   events: number;
   colorBreakdown: Record<string, number>;
+  costDistribution: Record<number, number>;
 }
 
 export function useDeckBuilder() {
@@ -251,12 +252,26 @@ export function useDeckBuilder() {
       });
     });
     
+    // Calculate cost distribution (excluding leaders)
+    const costDistribution: Record<number, number> = {};
+    // Initialize all costs from 0 to 10
+    for (let i = 0; i <= 10; i++) {
+      costDistribution[i] = 0;
+    }
+    
+    // Count cards by cost (excluding leaders)
+    deck.cards.forEach(({ card, quantity }) => {
+      const cost = card.cost || 0;
+      costDistribution[cost] = (costDistribution[cost] || 0) + quantity;
+    });
+    
     return {
       totalCards,
       averageCost,
       characters,
       events,
-      colorBreakdown
+      colorBreakdown,
+      costDistribution
     };
   };
 
