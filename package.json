@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "one-piece-tcg-manager",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "One Piece TCG Collection and Deck Builder",
   "author": {
     "name": "LazyDevl0per and E",
