@@ -40,6 +40,15 @@ export default function OnePieceTCGApp() {
       types={collection.types}
       rarities={collection.rarities}
       sets={collection.sets}
+      // Advanced filter props
+      advancedTextFilter={collection.advancedTextFilter}
+      onAdvancedTextFilterChange={collection.setAdvancedTextFilter}
+      costFilter={collection.costFilter}
+      onCostFilterChange={collection.setCostFilter}
+      powerFilter={collection.powerFilter}
+      onPowerFilterChange={collection.setPowerFilter}
+      counterFilter={collection.counterFilter}
+      onCounterFilterChange={collection.setCounterFilter}
     />
   ) : undefined;
 

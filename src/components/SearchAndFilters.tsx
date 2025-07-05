@@ -1,4 +1,5 @@
-import { Search, Plus, Eye, EyeOff } from 'lucide-react';
+import { Search, Plus, Eye, EyeOff, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
 import { type SetInfo } from '../services/cardDataService';
 import { normalizeRarity, formatRarity } from '../utils/constants';
 
@@ -23,6 +24,15 @@ interface SearchAndFiltersProps {
   types: string[];
   rarities: string[];
   sets: SetInfo[];
+  // Advanced filter props
+  advancedTextFilter: string;
+  onAdvancedTextFilterChange: (text: string) => void;
+  costFilter: string;
+  onCostFilterChange: (cost: string) => void;
+  powerFilter: string;
+  onPowerFilterChange: (power: string) => void;
+  counterFilter: string;
+  onCounterFilterChange: (counter: string) => void;
 }
 
 // Helper to format type for display
@@ -48,12 +58,23 @@ export default function SearchAndFilters({
   colors,
   types,
   rarities,
-  sets
+  sets,
+  // Advanced filter props
+  advancedTextFilter,
+  onAdvancedTextFilterChange,
+  costFilter,
+  onCostFilterChange,
+  powerFilter,
+  onPowerFilterChange,
+  counterFilter,
+  onCounterFilterChange
 }: SearchAndFiltersProps) {
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
   return (
     <div className="bg-slate-700/40 backdrop-blur-sm rounded-xl p-4 border border-slate-600/50">
-      {/* Search and Filters Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 mb-3">
+      {/* Simple Search and Filters Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3 mb-3">
         <div className="lg:col-span-2">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
@@ -110,7 +131,99 @@ export default function SearchAndFilters({
             <option key={set.id} value={set.id}>{set.code} - {set.name}</option>
           ))}
         </select>
+
+        {/* Advanced Filters Toggle - now truly inline */}
+        <button
+          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          className="flex items-center gap-2 px-4 py-2 bg-slate-600/20 hover:bg-slate-600/30 text-slate-300 rounded-lg transition-colors text-sm border border-slate-500/30 w-full h-full justify-center"
+          style={{}}
+        >
+          <Filter size={16} />
+          Advanced Filters
+          {showAdvancedFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
       </div>
+
+      {/* Advanced Filters Row */}
+      {showAdvancedFilters && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3 p-3 bg-slate-600/20 rounded-lg border border-slate-500/20">
+          <div>
+            <label className="block text-slate-300 text-xs font-medium mb-1">Text Search</label>
+            <input
+              type="text"
+              placeholder="Search in name, ability, etc..."
+              value={advancedTextFilter}
+              onChange={(e) => onAdvancedTextFilterChange(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-slate-300 text-xs font-medium mb-1">Cost</label>
+            <select
+              value={costFilter}
+              onChange={(e) => onCostFilterChange(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="all">Any Cost</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10+">10+</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-slate-300 text-xs font-medium mb-1">Power</label>
+            <select
+              value={powerFilter}
+              onChange={(e) => onPowerFilterChange(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="all">Any Power</option>
+              <option value="1000">1000</option>
+              <option value="2000">2000</option>
+              <option value="3000">3000</option>
+              <option value="4000">4000</option>
+              <option value="5000">5000</option>
+              <option value="6000">6000</option>
+              <option value="7000">7000</option>
+              <option value="8000">8000</option>
+              <option value="9000">9000</option>
+              <option value="10000">10000</option>
+              <option value="10000+">10000+</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-slate-300 text-xs font-medium mb-1">Counter</label>
+            <select
+              value={counterFilter}
+              onChange={(e) => onCounterFilterChange(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-700 text-slate-50 border border-slate-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="all">Any Counter</option>
+              <option value="1000">1000</option>
+              <option value="2000">2000</option>
+              <option value="3000">3000</option>
+              <option value="4000">4000</option>
+              <option value="5000">5000</option>
+              <option value="6000">6000</option>
+              <option value="7000">7000</option>
+              <option value="8000">8000</option>
+              <option value="9000">9000</option>
+              <option value="10000">10000</option>
+              <option value="10000+">10000+</option>
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* Stats and Actions Row */}
       <div className="flex justify-between items-center">

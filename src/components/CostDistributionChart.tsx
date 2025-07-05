@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface CostDistributionChartProps {
   costDistribution: Record<number, number>;
   maxCards: number;

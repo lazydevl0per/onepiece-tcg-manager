@@ -29,12 +29,16 @@ export function useCollection() {
   const [showOwnedOnly, setShowOwnedOnly] = useState(false);
   const [filteredCards, setFilteredCards] = useState<AppCard[]>([]);
 
-
+  // Advanced filter states
+  const [advancedTextFilter, setAdvancedTextFilter] = useState<string>('');
+  const [costFilter, setCostFilter] = useState<string>('all');
+  const [powerFilter, setPowerFilter] = useState<string>('all');
+  const [counterFilter, setCounterFilter] = useState<string>('all');
 
   // Generate a key for lazy loading that changes when filters change
   const lazyLoadingKey = useMemo(() => {
-    return `${searchTerm}-${colorFilter}-${typeFilter}-${rarityFilter}-${setFilter}-${showOwnedOnly}`;
-  }, [searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
+    return `${searchTerm}-${colorFilter}-${typeFilter}-${rarityFilter}-${setFilter}-${showOwnedOnly}-${advancedTextFilter}-${costFilter}-${powerFilter}-${counterFilter}`;
+  }, [searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly, advancedTextFilter, costFilter, powerFilter, counterFilter]);
 
   // Lazy loading for displayed cards
   const lazyLoading = useLazyLoading({
@@ -124,13 +128,17 @@ export function useCollection() {
         colorFilter,
         typeFilter,
         rarityFilter,
-        setFilter
+        setFilter,
+        advancedTextFilter,
+        costFilter,
+        powerFilter,
+        counterFilter
       );
       if (!cancelled) setFilteredCards(result.filter(card => !showOwnedOnly || card.owned > 0));
     };
     doFilter();
     return () => { cancelled = true; };
-  }, [cards, searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
+  }, [cards, searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly, advancedTextFilter, costFilter, powerFilter, counterFilter]);
 
   // Reset lazy loading when the key changes (indicating filter criteria changed)
   useEffect(() => {
@@ -154,13 +162,17 @@ export function useCollection() {
         colorFilter,
         typeFilter,
         rarityFilter,
-        setFilter
+        setFilter,
+        advancedTextFilter,
+        costFilter,
+        powerFilter,
+        counterFilter
       ).then(result => {
         setFilteredCards(result.filter(card => !showOwnedOnly || card.owned > 0));
       });
       return updatedCards;
     });
-  }, [searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly]);
+  }, [searchTerm, colorFilter, typeFilter, rarityFilter, setFilter, showOwnedOnly, advancedTextFilter, costFilter, powerFilter, counterFilter]);
 
   // Memoize expensive calculations
   const ownedCardsCount = useMemo(() => cards.filter(c => c.owned > 0).length, [cards]);
@@ -270,6 +282,12 @@ export function useCollection() {
     showOwnedOnly,
     filteredCards,
     
+    // Advanced filter states
+    advancedTextFilter,
+    costFilter,
+    powerFilter,
+    counterFilter,
+    
     // Actions - use the setter functions directly since they're stable
     setSearchTerm,
     setColorFilter,
@@ -278,6 +296,12 @@ export function useCollection() {
     setSetFilter,
     setShowOwnedOnly,
     updateCardOwned,
+    
+    // Advanced filter actions
+    setAdvancedTextFilter,
+    setCostFilter,
+    setPowerFilter,
+    setCounterFilter,
     
     // Collection management
     clearAllCollections,

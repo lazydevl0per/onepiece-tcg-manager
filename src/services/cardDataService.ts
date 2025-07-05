@@ -410,17 +410,47 @@ export const filterCards = async (
   colorFilter: string = 'all',
   typeFilter: string = 'all',
   rarityFilter: string = 'all',
-  setFilter: string = 'all'
+  setFilter: string = 'all',
+  advancedTextFilter: string = '',
+  costFilter: string = 'all',
+  powerFilter: string = 'all',
+  counterFilter: string = 'all'
 ): Promise<AppCard[]> => {
   return cards.filter(card => {
+    // Basic search filter
     const matchesSearch = !searchTerm || 
       card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       card.id.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Advanced text filter (searches in name, ability, trigger, etc.)
+    const matchesAdvancedText = !advancedTextFilter || 
+      card.name.toLowerCase().includes(advancedTextFilter.toLowerCase()) ||
+      (card.ability && card.ability.toLowerCase().includes(advancedTextFilter.toLowerCase())) ||
+      (card.trigger && card.trigger.toLowerCase().includes(advancedTextFilter.toLowerCase())) ||
+      (card.family && card.family.toLowerCase().includes(advancedTextFilter.toLowerCase()));
+    
+    // Cost filter
+    const matchesCost = costFilter === 'all' || 
+      (costFilter === '10+' && card.cost >= 10) ||
+      card.cost === parseInt(costFilter);
+    
+    // Power filter
+    const matchesPower = powerFilter === 'all' || 
+      (powerFilter === '10000+' && card.power && card.power >= 10000) ||
+      (card.power && card.power === parseInt(powerFilter));
+    
+    // Counter filter
+    const matchesCounter = counterFilter === 'all' || 
+      (counterFilter === '10000+' && card.counter && parseInt(card.counter) >= 10000) ||
+      (card.counter && parseInt(card.counter) === parseInt(counterFilter));
+    
+    // Basic filters
     const matchesColor = colorFilter === 'all' || card.color.split('/').map(c => c.toLowerCase()).includes(colorFilter.toLowerCase());
     const matchesType = typeFilter === 'all' || card.type === typeFilter;
     const matchesRarity = rarityFilter === 'all' || normalizeRarity(card.rarity) === normalizeRarity(rarityFilter);
     const matchesSet = setFilter === 'all' || card.pack_id === setFilter;
-    return matchesSearch && matchesColor && matchesType && matchesRarity && matchesSet;
+    
+    return matchesSearch && matchesAdvancedText && matchesCost && matchesPower && matchesCounter && matchesColor && matchesType && matchesRarity && matchesSet;
   });
 };
 
