@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { CheckCircle, Download, AlertCircle, RefreshCw } from 'lucide-react'
 
 interface UpdateStatus {
@@ -18,6 +18,7 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null)
   const [isChecking, setIsChecking] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
+  const pollingRef = useRef<NodeJS.Timeout | null>(null)
 
   const checkForUpdates = async () => {
     if (!window.api?.checkForUpdates) return
@@ -98,8 +99,18 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
       if (!result.success) {
         console.error('Failed to download update:', result.message)
       } else {
-        // Always refresh status after download attempt
-        setTimeout(() => getUpdateStatus(), 500)
+        // Start polling for status updates during download
+        pollingRef.current = setInterval(async () => {
+          await getUpdateStatus()
+        }, 1000)
+        
+        // Clear polling after 5 minutes as a safety measure
+        setTimeout(() => {
+          if (pollingRef.current) {
+            clearInterval(pollingRef.current)
+            pollingRef.current = null
+          }
+        }, 5 * 60 * 1000)
       }
     } catch (error) {
       console.error('Failed to download update:', error)
@@ -113,6 +124,33 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [downloadProgress])
+
+  // Listen for update downloaded event
+  useEffect(() => {
+    if (window.api?.onUpdateDownloaded) {
+      window.api.onUpdateDownloaded((info: { version: string }) => {
+        console.log('Update downloaded event received:', info)
+        // Immediately refresh status when update is downloaded
+        getUpdateStatus()
+        // Stop polling when download is complete
+        if (pollingRef.current) {
+          clearInterval(pollingRef.current)
+          pollingRef.current = null
+        }
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Stop polling when download is complete or there's an error
+  useEffect(() => {
+    if (updateStatus?.downloaded || updateStatus?.error) {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current)
+        pollingRef.current = null
+      }
+    }
+  }, [updateStatus?.downloaded, updateStatus?.error])
 
   useEffect(() => {
     console.log('UpdateChecker: Component mounted, getting initial status...')
@@ -175,6 +213,11 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
       clearTimeout(startupCheckTimeout)
       clearInterval(interval)
       clearInterval(startupInterval)
+      // Clean up polling
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current)
+        pollingRef.current = null
+      }
       // Clean up download progress listener
       if (window.api?.removeDownloadProgressListener) {
         window.api.removeDownloadProgressListener()

@@ -24,6 +24,7 @@ export interface IAPI {
   downloadUpdate: () => Promise<{ success: boolean; message?: string }>
   triggerUpdateCheck: () => Promise<{ success: boolean; message?: string }>
   onDownloadProgress: (callback: (progress: number) => void) => void
+  onUpdateDownloaded: (callback: (info: { version: string }) => void) => void
   removeDownloadProgressListener: () => void
 }
 

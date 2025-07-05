@@ -289,7 +289,13 @@ function setupAutoUpdater(): void {
       updateStatus.downloaded = true
       updateStatus.downloadProgress = 100
       updateStatus.error = null
-      // Removed native dialog - UpdateChecker component will handle UI
+      // Send update-downloaded event to renderer
+      const windows = BrowserWindow.getAllWindows()
+      windows.forEach(window => {
+        if (!window.isDestroyed()) {
+          window.webContents.send('update-downloaded', { version: info.version })
+        }
+      })
     })
 
   } catch (error) {

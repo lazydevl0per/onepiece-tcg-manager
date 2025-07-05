@@ -29,9 +29,17 @@ const api = {
     })
   },
   
+  // Update downloaded listener
+  onUpdateDownloaded: (callback: (info: { version: string }) => void) => {
+    ipcRenderer.on('update-downloaded', (_, info: { version: string }) => {
+      callback(info)
+    })
+  },
+  
   // Remove download progress listener
   removeDownloadProgressListener: () => {
     ipcRenderer.removeAllListeners('update-download-progress')
+    ipcRenderer.removeAllListeners('update-downloaded')
   }
 }
 
