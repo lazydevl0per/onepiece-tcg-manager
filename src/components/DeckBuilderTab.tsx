@@ -1,7 +1,8 @@
-import { Plus, Edit3, Trash2, Download, Save, X } from 'lucide-react';
-import { getCardColorClass, DECK_SIZE_LIMIT } from '../utils/constants';
-import { type Deck, type DeckStatistics } from '../hooks/useDeckBuilder';
+import React from 'react';
+import { Plus, Download, Edit3, X, Trash2, Save } from 'lucide-react';
 import { type AppCard } from '../services/cardDataService';
+import { type Deck, type DeckStatistics } from '../hooks/useDeckBuilder';
+import { DECK_SIZE_LIMIT, getCardColorClass } from '../utils/constants';
 
 interface DeckBuilderTabProps {
   decks: Deck[];
@@ -22,6 +23,20 @@ interface DeckBuilderTabProps {
   getTotalCards: (deck: Deck) => number;
   getDeckStatistics: (deck: Deck) => DeckStatistics;
 }
+
+// Helper function to get color class for individual colors
+const getIndividualColorClass = (color: string): string => {
+  const colorMap: Record<string, string> = {
+    'Red': 'bg-red-500',
+    'Blue': 'bg-blue-500', 
+    'Green': 'bg-green-500',
+    'Yellow': 'bg-yellow-400',
+    'Purple': 'bg-purple-500',
+    'Black': 'bg-gray-800',
+    'Colorless': 'bg-gray-400'
+  };
+  return colorMap[color] || 'bg-gray-400';
+};
 
 export default function DeckBuilderTab({
   decks,
@@ -206,7 +221,7 @@ export default function DeckBuilderTab({
                       <div className="flex flex-wrap gap-2">
                         {Object.entries(stats.colorBreakdown).map(([color, count]) => (
                           <div key={color} className="flex items-center gap-1">
-                            <div className={`w-3 h-3 rounded-full ${getCardColorClass(color)}`}></div>
+                            <div className={`w-3 h-3 rounded-full ${getIndividualColorClass(color)}`}></div>
                             <span className="text-xs text-slate-50">{color}: {count as number}</span>
                           </div>
                         ))}

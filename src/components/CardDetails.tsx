@@ -1,4 +1,5 @@
 import { AppCard } from '../services/cardDataService';
+import { getCardColorClass } from '../utils/constants';
 
 interface CardDetailsProps {
   card: AppCard;
@@ -117,7 +118,9 @@ export default function CardDetails({
               {card.color && (
                 <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
                   <div className="text-sm font-medium text-gray-400">Color</div>
-                  <div className="text-lg font-semibold text-red-400">{card.color}</div>
+                  <div className={`text-lg font-semibold px-2 py-1 rounded ${getCardColorClass(card.color)} text-white inline-block`}>
+                    {card.color}
+                  </div>
                 </div>
               )}
             </div>

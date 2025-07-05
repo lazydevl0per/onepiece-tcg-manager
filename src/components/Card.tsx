@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppCard } from '../services/cardDataService';
 import CardDetails from './CardDetails';
+import { getCardColorClass } from '../utils/constants';
 
 interface CardProps {
   card: AppCard;
@@ -69,6 +70,9 @@ export default function Card({
   };
   const typeColor = typeColors[card.type] || 'bg-[var(--op-neutral-silver)]';
 
+  // Get color class for the card using the constants function
+  const cardColorClass = getCardColorClass(card.color);
+
   return (
     <>
       <div
@@ -107,23 +111,9 @@ export default function Card({
               <p className="text-xs opacity-90 drop-shadow-md font-semibold bg-black/40 px-2 py-0.5 rounded text-white mt-1 max-w-full truncate">{card.set.name}</p>
               {/* Badges row: type first, then rarity */}
               <div className="flex flex-row gap-2 items-center mt-1">
-                {(() => {
-                  const colorMap = {
-                    RED: 'bg-red-500 text-white',
-                    BLUE: 'bg-blue-500 text-white',
-                    GREEN: 'bg-green-500 text-white',
-                    PURPLE: 'bg-purple-500 text-white',
-                    BLACK: 'bg-gray-800 text-white',
-                    YELLOW: 'bg-yellow-400 text-gray-900',
-                  } as const;
-                  const colorKey = (card.color?.toUpperCase?.() || '') as keyof typeof colorMap;
-                  const colorClass = colorMap[colorKey] || 'bg-gray-400 text-white';
-                  return (
-                    <div className={`px-2 py-1 rounded-full text-xs font-bold shadow border border-white/40 inline-block ${colorClass}`} style={{maxWidth: '40%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                      {card.type.charAt(0).toUpperCase() + card.type.slice(1).toLowerCase()}
-                    </div>
-                  );
-                })()}
+                <div className={`px-2 py-1 rounded-full text-xs font-bold shadow border border-white/40 inline-block ${cardColorClass} text-white`} style={{maxWidth: '40%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                  {card.type.charAt(0).toUpperCase() + card.type.slice(1).toLowerCase()}
+                </div>
                 <div className={`px-3 py-1 rounded-full text-xs font-bold text-white shadow-lg bg-gradient-to-r ${rarityGradient} border-2 border-white/40 drop-shadow-md backdrop-blur-sm bg-opacity-90`} style={{maxWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
                   {card.rarity}
                 </div>
@@ -131,23 +121,9 @@ export default function Card({
             </div>
             {/* Cost/Life Badge with card color scheme */}
             <div className="text-right ml-2">
-              {(() => {
-                const colorMap = {
-                  RED: 'bg-red-500 text-white',
-                  BLUE: 'bg-blue-500 text-white',
-                  GREEN: 'bg-green-500 text-white',
-                  PURPLE: 'bg-purple-500 text-white',
-                  BLACK: 'bg-gray-800 text-white',
-                  YELLOW: 'bg-yellow-400 text-gray-900',
-                } as const;
-                const colorKey = (card.color?.toUpperCase?.() || '') as keyof typeof colorMap;
-                const colorClass = colorMap[colorKey] || 'bg-gray-400 text-white';
-                return (
-                  <div className={`text-lg font-bold drop-shadow-lg px-2 py-1 rounded-xl border border-white/40 inline-block ${colorClass}`}>
-                    {card.cost || '-'}
-                  </div>
-                );
-              })()}
+              <div className={`text-lg font-bold drop-shadow-lg px-2 py-1 rounded-xl border border-white/40 inline-block ${cardColorClass} text-white`}>
+                {card.cost || '-'}
+              </div>
             </div>
           </div>
         </div>

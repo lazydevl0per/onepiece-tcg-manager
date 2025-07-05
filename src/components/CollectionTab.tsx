@@ -2,6 +2,7 @@ import { type AppCard } from '../services/cardDataService';
 import { type Deck } from '../hooks/useDeckBuilder';
 import Card from './Card';
 import { useMemo } from 'react';
+import { getCardColorClass } from '../utils/constants';
 
 interface CollectionTabProps {
   filteredCards: AppCard[];
@@ -112,9 +113,9 @@ export default function CollectionTab({
       {selectedDeck && selectedDeck.leader && (
         <div className="mb-4 flex items-center space-x-2">
           <span className="font-semibold">Deck Colors:</span>
-          {selectedDeck.leader.color.split('/').map(color => (
-            <span key={color} className="px-2 py-1 rounded text-white" style={{ background: 'var(--op-' + color.toLowerCase() + ')' }}>{color}</span>
-          ))}
+          <span className={`px-3 py-1 rounded text-white font-semibold ${getCardColorClass(selectedDeck.leader.color)}`}>
+            {selectedDeck.leader.color}
+          </span>
         </div>
       )}
       {/* Cards Grid - Optimized for resize performance */}
