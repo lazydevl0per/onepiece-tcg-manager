@@ -383,7 +383,10 @@ const getUniqueRarities = async (): Promise<string[]> => {
 };
 
 const getStaticColors = (): string[] => {
-  return ['RED', 'GREEN', 'BLUE', 'PURPLE', 'BLACK', 'YELLOW'];
+  return [
+    'RED', 'GREEN', 'BLUE', 'PURPLE', 'BLACK', 'YELLOW',
+    'Red/Green', 'Red/Blue', 'Red/Yellow', 'Red/Purple', 'Red/Black', 'Green/Blue', 'Green/Yellow'
+  ];
 };
 
 const getStaticTypes = (): string[] => {

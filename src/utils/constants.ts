@@ -10,16 +10,10 @@ export const colorMap: Record<string, string> = {
   'Red/Green': 'bg-gradient-to-r from-red-600 from-50% to-green-600 to-50% shadow-lg',
   'Red/Blue': 'bg-gradient-to-r from-red-600 from-50% to-blue-600 to-50% shadow-lg',
   'Red/Yellow': 'bg-gradient-to-r from-red-600 from-50% to-yellow-500 to-50% shadow-lg',
-  'Blue/Green': 'bg-gradient-to-r from-blue-600 from-50% to-green-600 to-50% shadow-lg',
-  'Blue/Yellow': 'bg-gradient-to-r from-blue-600 from-50% to-yellow-500 to-50% shadow-lg',
-  'Green/Yellow': 'bg-gradient-to-r from-green-600 from-50% to-yellow-500 to-50% shadow-lg',
-  'Green/Purple': 'bg-gradient-to-r from-green-600 from-50% to-purple-600 to-50% shadow-lg',
-  'Yellow/Purple': 'bg-gradient-to-r from-yellow-500 from-50% to-purple-600 to-50% shadow-lg',
-  'Red/Blue/Green': 'bg-gradient-to-r from-red-600 from-0% via-blue-600 via-50% to-green-600 to-100% shadow-lg',
-  'Red/Blue/Yellow': 'bg-gradient-to-r from-red-600 from-0% via-blue-600 via-50% to-yellow-500 to-100% shadow-lg',
-  'Red/Green/Yellow': 'bg-gradient-to-r from-red-600 from-0% via-green-600 via-50% to-yellow-500 to-100% shadow-lg',
-  'Blue/Green/Yellow': 'bg-gradient-to-r from-blue-600 from-0% via-green-600 via-50% to-yellow-500 to-100% shadow-lg',
-  'Red/Blue/Green/Yellow': 'bg-gradient-to-r from-red-600 from-0% via-blue-600 via-33% via-green-600 via-66% to-yellow-500 to-100% shadow-lg'
+  'Red/Purple': 'bg-gradient-to-r from-red-600 from-50% to-purple-600 to-50% shadow-lg',
+  'Red/Black': 'bg-gradient-to-r from-red-600 from-50% to-gray-800 to-50% shadow-lg',
+  'Green/Blue': 'bg-gradient-to-r from-green-600 from-50% to-blue-600 to-50% shadow-lg',
+  'Green/Yellow': 'bg-gradient-to-r from-green-600 from-50% to-yellow-500 to-50% shadow-lg'
 };
 
 // Rarity colors using One Piece TCG theme colors
