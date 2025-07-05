@@ -130,15 +130,13 @@ export default function Card({
 
         {/* Bottom Controls Panel - Improved clarity */}
         <div className="absolute left-3 right-3 bottom-3 bg-slate-800/95 z-20 rounded-2xl shadow-2xl flex flex-col" style={{backdropFilter: 'blur(2px)'}}>
-          <div className="p-3">
-            {/* Quick Stats removed as requested */}
-
+          <div className="p-2 sm:p-3">
             {/* Collection and Deck Controls */}
-            <div className="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0">
+            <div className="flex flex-row items-center justify-between gap-2">
               {/* Owned Quantity */}
-              <div className="flex items-center space-x-2 flex-1 min-w-0">
+              <div className="flex items-center justify-center gap-2 flex-1 min-w-0">
                 <button
-                  className="w-7 h-7 rounded bg-red-500 hover:bg-red-600 text-white text-base font-bold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="w-8 h-8 aspect-square rounded-full bg-red-500 hover:bg-red-600 text-white text-base font-bold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     onUpdateOwned && onUpdateOwned(card.id, Math.max(0, (card.owned || 0) - 1));
@@ -151,7 +149,7 @@ export default function Card({
                 </button>
                 <span className="text-base font-semibold w-8 text-center text-white select-none">{card.owned || 0}</span>
                 <button
-                  className="w-7 h-7 rounded bg-green-500 hover:bg-green-600 text-white text-base font-bold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="w-8 h-8 aspect-square rounded-full bg-green-500 hover:bg-green-600 text-white text-base font-bold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     onUpdateOwned && onUpdateOwned(card.id, (card.owned || 0) + 1);
@@ -164,9 +162,9 @@ export default function Card({
                 </button>
               </div>
 
-              {/* Add to Deck Button */}
+              {/* Add to Deck Button - Hidden on small and medium screens, visible on md and up */}
               {canAddToDeck && (
-                <div style={{flexBasis: '120px', minWidth: '100px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <div className="hidden md:flex flex-1 min-w-[100px] max-w-[140px] items-center justify-center">
                   {card.owned > 0 ? (
                     <button
                       onClick={(e) => {
@@ -175,13 +173,12 @@ export default function Card({
                       }}
                       disabled={isInDeck || addToDeckDisabled}
                       title={addToDeckTitle}
-                      className={`w-full px-3 py-2 text-xs rounded-lg font-bold transition-colors shadow-lg bg-yellow-500 hover:bg-yellow-600 text-slate-900 tracking-wide disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed`}
-                      style={{height: '40px'}}
+                      className="w-full px-3 py-2 text-xs rounded-lg font-bold transition-colors shadow-lg bg-yellow-500 hover:bg-yellow-600 text-slate-900 tracking-wide disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed"
                     >
                       {isInDeck ? `In Deck (${deckQuantity})` : addToDeckTitle}
                     </button>
                   ) : (
-                    <span style={{width: '100%', height: '40px', display: 'inline-block'}} />
+                    <div className="w-full h-8 bg-transparent" />
                   )}
                 </div>
               )}
