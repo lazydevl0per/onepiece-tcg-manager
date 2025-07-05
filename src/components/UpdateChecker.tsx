@@ -97,11 +97,22 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
       const result = await window.api.downloadUpdate()
       if (!result.success) {
         console.error('Failed to download update:', result.message)
+      } else {
+        // Always refresh status after download attempt
+        setTimeout(() => getUpdateStatus(), 500)
       }
     } catch (error) {
       console.error('Failed to download update:', error)
     }
   }
+
+  // Listen for download progress and refresh status at 100%
+  useEffect(() => {
+    if (downloadProgress >= 100) {
+      getUpdateStatus()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [downloadProgress])
 
   useEffect(() => {
     console.log('UpdateChecker: Component mounted, getting initial status...')
@@ -216,11 +227,11 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
     if (displayStatus.checking || isChecking) {
       return 'Checking for updates...'
     }
+    if (downloadProgress > 0 && downloadProgress < 100) {
+      return `Downloading update... ${Math.round(downloadProgress)}%`
+    }
     if (displayStatus.downloaded) {
       return 'Update ready to install'
-    }
-    if (displayStatus.available && downloadProgress > 0 && downloadProgress < 100) {
-      return `Downloading update... ${Math.round(downloadProgress)}%`
     }
     if (displayStatus.available) {
       return 'Update available'
@@ -245,17 +256,21 @@ export const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = '' }) 
         </button>
       )}
       
-      {displayStatus.available && !displayStatus.downloaded && (
+      {(downloadProgress > 0 && downloadProgress < 100) && (
+        <button
+          disabled
+          className="px-2 py-1 text-xs rounded bg-gray-400 text-white cursor-not-allowed"
+        >
+          Downloading...
+        </button>
+      )}
+      
+      {displayStatus.available && !displayStatus.downloaded && !(downloadProgress > 0 && downloadProgress < 100) && (
         <button
           onClick={downloadUpdate}
-          disabled={downloadProgress > 0 && downloadProgress < 100}
-          className={`px-2 py-1 text-xs rounded transition-colors ${
-            downloadProgress > 0 && downloadProgress < 100
-              ? 'bg-gray-400 text-white cursor-not-allowed'
-              : 'bg-yellow-500 text-white hover:bg-yellow-600'
-          }`}
+          className="px-2 py-1 text-xs rounded transition-colors bg-yellow-500 text-white hover:bg-yellow-600"
         >
-          {downloadProgress > 0 && downloadProgress < 100 ? 'Downloading...' : 'Download'}
+          Download
         </button>
       )}
       
